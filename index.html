@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Emotional Color Translator</title>
+    <link rel="stylesheet" href="styles.css?v=20260614-auth2">
+    <script>
+      if (/[?&](email|username|password)=/i.test(window.location.search)) {
+        history.replaceState(null, '', `${window.location.pathname}${window.location.hash}`);
+      }
+    </script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="workspace" aria-label="Emotional color translator">
+        <aside class="sidebar">
+          <div class="brand">
+            <div class="brand-mark" aria-hidden="true"></div>
+            <div>
+              <h1>Emotional Color Translator</h1>
+              <p>Translate feelings and words into explained color paths.</p>
+            </div>
+          </div>
+
+          <div id="dataSourceStatus" class="data-source-status" role="status" aria-live="polite">
+            <span class="source-dot" aria-hidden="true"></span>
+            <span>Loading data source</span>
+          </div>
+
+          <section id="authPanel" class="auth-panel" aria-label="Account authentication">
+            <div id="authStatus" class="auth-status">Checking account status</div>
+            <form id="authForm" class="auth-form" action="." method="post" onsubmit="return false;">
+              <input id="authEmail" name="email" type="email" autocomplete="email" placeholder="Email" required>
+              <input id="authUsername" name="username" type="text" autocomplete="username" placeholder="Display name">
+              <input id="authPassword" name="password" type="password" autocomplete="current-password" placeholder="Password" minlength="10" required>
+              <div class="auth-actions">
+                <button id="authSignInButton" type="submit">Sign in</button>
+                <button id="authCreateButton" type="button">Create account</button>
+              </div>
+            </form>
+            <button id="authLogoutButton" class="auth-logout" type="button" hidden>Sign out</button>
+            <div id="authMessage" class="auth-message" aria-live="polite"></div>
+            <div id="authAccountTools" class="auth-account-tools"></div>
+          </section>
+
+          <label class="search-label" for="searchInput">Search</label>
+          <div class="search-row">
+            <input id="searchInput" type="search" autocomplete="off" placeholder="joy, on edge, love, cold morning">
+            <button id="clearButton" type="button" title="Clear search" aria-label="Clear search">&times;</button>
+          </div>
+
+          <label class="filter-switch" for="emotionFilterToggle">
+            <input id="emotionFilterToggle" type="checkbox">
+            <span class="switch-track" aria-hidden="true"><span></span></span>
+            <span>
+              <strong>Emotion paths only</strong>
+              <small>Filter the graph to feelings and their color landings.</small>
+            </span>
+          </label>
+
+          <label class="filter-switch" for="baseSettingToggle">
+            <input id="baseSettingToggle" type="checkbox" checked>
+            <span class="switch-track" aria-hidden="true"><span></span></span>
+            <span>
+              <strong>Base setting</strong>
+              <small>Show the evidence-backed route before evocative interpretation.</small>
+            </span>
+          </label>
+
+          <section class="category-filter" aria-label="Graph category filters">
+            <div class="category-filter-title">Show</div>
+            <div class="category-filter-row">
+              <button class="category-button is-active" type="button" data-category-filter="families" aria-pressed="true">Families</button>
+              <button class="category-button is-active" type="button" data-category-filter="bridges" aria-pressed="true">Bridges</button>
+              <button class="category-button is-active" type="button" data-category-filter="aliases" aria-pressed="true">Aliases</button>
+              <button class="category-button is-active" type="button" data-category-filter="synonyms" aria-pressed="true">Synonyms</button>
+              <button class="category-button is-active" type="button" data-category-filter="conditions" aria-pressed="true">Conditions</button>
+            </div>
+          </section>
+
+          <section id="contextPanel" class="context-panel" aria-live="polite"></section>
+
+          <div class="mode-tabs" role="tablist" aria-label="Views">
+            <div class="tab-group">
+              <div class="tab-group-title">Color map</div>
+              <div class="tab-row">
+                <button class="tab is-active" type="button" data-view="families">Families</button>
+                <button class="tab" type="button" data-view="bridges">Bridges</button>
+                <button class="tab" type="button" data-view="aliases">Aliases</button>
+                <button class="tab" type="button" data-view="synonyms">Synonyms</button>
+              </div>
+            </div>
+            <div class="tab-group">
+              <div class="tab-group-title">Word bank</div>
+              <div class="tab-row">
+                <button class="tab" type="button" data-view="common">Common words</button>
+                <button class="tab" type="button" data-view="emotions">Emotions</button>
+                <button class="tab" type="button" data-view="neutral">Neutral words</button>
+                <button class="tab" type="button" data-view="associations">Associations</button>
+                <button class="tab" type="button" data-view="shade-graph">Shade graph</button>
+                <button class="tab" type="button" data-view="natural-atlas">Natural atlas</button>
+              </div>
+            </div>
+            <div class="tab-group">
+              <div class="tab-group-title">Theme system</div>
+              <div class="tab-row">
+                <button class="tab" type="button" data-view="theme-categories">Theme categories</button>
+                <button class="tab" type="button" data-view="theme-filters">Theme filters</button>
+                <button class="tab" type="button" data-view="my-concepts">My concepts</button>
+                <button class="tab" type="button" data-view="personal-profile">Personal profile</button>
+                <button class="tab" type="button" data-view="shared-graph">Shared graph</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="listPanel" class="list-panel" aria-live="polite"></div>
+        </aside>
+
+        <section class="detail-panel">
+          <div class="toolbar">
+            <div>
+              <p class="eyebrow">Translation graph</p>
+              <h2 id="detailTitle">Loading dataset</h2>
+            </div>
+            <div class="toolbar-actions">
+              <button id="graphModeButton" type="button" title="Toggle graph theory view" aria-label="Toggle graph theory view" aria-pressed="false">
+                <span aria-hidden="true">&#9711;</span>
+              </button>
+              <button id="axisViewButton" type="button" title="Axis view: free" aria-label="Axis view: free" aria-pressed="false">
+                <span aria-hidden="true">3D</span>
+              </button>
+              <button id="fitButton" type="button" title="Fit graph" aria-label="Fit graph">
+                <span aria-hidden="true">&#8982;</span>
+              </button>
+              <button id="detailToggleButton" type="button" title="Hide information panel" aria-label="Hide information panel" aria-pressed="false">
+                <span aria-hidden="true">&#9432;</span>
+              </button>
+              <button id="copyButton" type="button" title="Copy selected node" aria-label="Copy selected node">
+                <span aria-hidden="true">&#10697;</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="content-grid">
+            <section class="graph-stage" aria-label="Synonym graph visualization">
+              <canvas id="graphCanvas" width="1400" height="860"></canvas>
+              <div id="threeGraph" class="three-graph" aria-hidden="true"></div>
+              <div id="graphHint" class="graph-hint">Squares are families, pills are bridge colors, diamonds are exact shade phrases. Drag nodes to rearrange the web.</div>
+            </section>
+
+            <div id="resizeHandle" class="resize-handle" role="separator" aria-label="Resize graph and information panels" title="Drag to resize panels. Double-click to reset."></div>
+
+            <section class="node-detail" aria-label="Selected color details">
+              <div id="selectedSwatch" class="selected-swatch" aria-hidden="true"></div>
+              <div id="selectedContent"></div>
+            </section>
+          </div>
+
+          <div id="stats" class="stats" aria-label="Dataset statistics"></div>
+        </section>
+      </section>
+    </main>
+
+    <script src="scripts/vendor/three.min.js"></script>
+    <script src="config.js?v=20260614-deploy1"></script>
+    <script src="app.js?v=20260614-deploy1"></script>
+  </body>
+</html>

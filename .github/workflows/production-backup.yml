@@ -1,0 +1,24 @@
+name: Production Database Backup
+
+on:
+  schedule:
+    - cron: '17 7 * * *'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create encrypted-transport PostgreSQL dump
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: |
+          test -n "$DATABASE_URL"
+          mkdir backups
+          pg_dump "$DATABASE_URL" --no-owner --no-privileges --file "backups/alignment-$(date -u +%Y-%m-%dT%H-%M-%SZ).sql"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: production-database-backup-${{ github.run_id }}
+          path: backups/*.sql
+          retention-days: 30

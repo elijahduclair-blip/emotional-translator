@@ -1,0 +1,234 @@
+{
+  "tool_name": "Theory of Alignment Emotional Color Translator",
+  "version": "2.0.0",
+  "format": "ai_reference_tool_contract",
+  "purpose": "Give an AI a disciplined way to interpret words, feelings, themes, and personal context through the user's color-climate web.",
+  "use_by_default": {
+    "rule": "Treat the user's language as potentially part of the Theory of Alignment / color-climate vocabulary unless the user is clearly outside that context.",
+    "stance": "Read meaning through relation, route, climate, and pressure before assigning isolated labels.",
+    "boundary": "This is interpretive language architecture, not diagnosis, proof of essence, or universal truth."
+  },
+  "core_formula": {
+    "shared_read": "input -> supported route -> color family or mixture -> environment condition -> emotional climate",
+    "theme_read": "source + filter -> theme",
+    "composition_read": "theme A + theme B -> composed climate",
+    "personal_read": "shared route + personal context -> personal climate shift",
+    "falsifiability": "If a read cannot name the route, filter, or evidence that produced it, mark it weak or unresolved."
+  },
+  "recommended_input_types": [
+    "emotion",
+    "emotional phrase",
+    "common word",
+    "neutral word",
+    "theme",
+    "theme composition",
+    "natural source word",
+    "personal context term",
+    "hex color",
+    "rgb color"
+  ],
+  "required_reasoning_order": [
+    "Normalize the user's input without flattening their phrasing.",
+    "Check whether the input is a direct color, emotion, common word, neutral bridge, theme, natural source, or personal-context term.",
+    "Find the strongest supported route before offering evocative interpretation.",
+    "If multiple routes are supported, describe them as coexisting climates or mixed shade components.",
+    "If a theme is present, explain what filter produced the visible theme.",
+    "If personal context is present, label it as a private overlay and keep the shared route visible.",
+    "Assign connection strength: strong, medium, weak, or unresolved.",
+    "State the boundary so the read does not become a permanent identity claim."
+  ],
+  "output_schema": {
+    "input": "The user's original word or phrase.",
+    "input_type": "emotion | phrase | common_word | neutral_word | theme | composition | natural_source | personal_context | color_value | unresolved",
+    "shared_route": ["ordered route labels, if supported"],
+    "color_landing": {
+      "families": ["base or mixed color families"],
+      "shade": "optional hex or descriptive shade",
+      "xyz": {
+        "x": "cool negative to warm positive",
+        "y": "dark negative to light positive",
+        "z": "muted negative to vivid positive"
+      }
+    },
+    "environment_condition": "The color family as a condition, such as heat, depth, regulation, fog, grounding, reflection, or exposure.",
+    "theme_read": {
+      "source": "the thing being read",
+      "filter": "the condition shaping visibility",
+      "theme": "the visible relational pattern"
+    },
+    "composition_read": {
+      "theme_a": "first supported theme",
+      "theme_b": "second supported theme",
+      "composed_climate": "what changes when both are in the same frame",
+      "what_changed": {
+        "color_shift": "how the climate changes",
+        "emotional_shift": "how feeling changes",
+        "meaning_shift": "how interpretation changes"
+      }
+    },
+    "personal_read": {
+      "matched_context": "profile term or phrase, if available",
+      "climate_shift": "how personal context changes display only",
+      "boundary": "personal overlay, not universal truth"
+    },
+    "emotional_logic": "Plain explanation of why this route feels the way it does.",
+    "connection_strength": "strong | medium | weak | unresolved",
+    "boundary": "A concise sentence stating what the read is not allowed to claim."
+  },
+  "color_climate_families": {
+    "obsidian_shadow": {
+      "families": ["black", "blue-black", "gray-black"],
+      "conditions": ["absorption", "concealment", "unknown pressure", "shadow"],
+      "emotional_routes": ["fear", "grief", "seriousness", "protection", "reinvention"]
+    },
+    "ember_amber": {
+      "families": ["red", "orange", "red-orange", "yellow-orange"],
+      "conditions": ["heat", "activation", "urgency", "motion", "release"],
+      "emotional_routes": ["anger", "passion", "danger", "excitement", "pressure"]
+    },
+    "rose_intimacy": {
+      "families": ["pink", "pink-red", "pink-orange"],
+      "conditions": ["soft contact", "tenderness", "attachment"],
+      "emotional_routes": ["affection", "longing", "care", "vulnerability", "connection"]
+    },
+    "midnight_ocean": {
+      "families": ["blue", "blue-gray", "blue-purple"],
+      "conditions": ["depth", "distance", "atmosphere", "reflection"],
+      "emotional_routes": ["sadness", "calm", "serenity", "longing", "clarity"]
+    },
+    "green_regulation": {
+      "families": ["green", "green-gray", "green-yellow"],
+      "conditions": ["regulation", "growth", "living balance", "recovery"],
+      "emotional_routes": ["calm", "hope", "trust", "endurance", "envy"]
+    },
+    "silver_mist": {
+      "families": ["gray", "gray-white", "white"],
+      "conditions": ["fog", "ambiguity", "partial signal", "reflection", "openness"],
+      "emotional_routes": ["uncertainty", "numbness", "peace", "revision", "possibility"]
+    },
+    "earth_archive": {
+      "families": ["brown", "brown-gray", "yellow-brown", "red-brown"],
+      "conditions": ["ground", "body", "material memory", "archive"],
+      "emotional_routes": ["comfort", "fatigue", "nostalgia", "steadiness", "weight"]
+    }
+  },
+  "shade_axes": {
+    "center_rule": "The center of every axis is 0.",
+    "x": {
+      "label": "Warmth",
+      "negative": "cool",
+      "positive": "warm",
+      "meaning": "Temperature direction of the color-climate."
+    },
+    "y": {
+      "label": "Light depth",
+      "negative": "dark",
+      "positive": "light",
+      "meaning": "How much shadow, exposure, brightness, or openness the shade carries."
+    },
+    "z": {
+      "label": "Saturation / clarity",
+      "negative": "muted",
+      "positive": "vivid",
+      "meaning": "How foggy, softened, intense, or clear the shade is."
+    },
+    "view_rule": "The same 3D location can form different visible patterns when viewed through X, Y, or Z. The point does not change; the perspective changes."
+  },
+  "theme_categories": {
+    "Religion": "Sacred and cultural meaning systems.",
+    "Season": "Time, weather, cycle, and environmental mood.",
+    "History": "Memory, institution, pressure, rupture, survival, and inheritance.",
+    "Science": "Process, mechanism, evidence, structure, and revision.",
+    "Arts": "Form, perception, symbol, performance, and composition.",
+    "Foundation": "Experience, perception, emotion, adaptation, and behavior as the human engine.",
+    "Pattern": "Repetition, structure, connection, relation, context, similarity, and difference as the meaning engine.",
+    "Translation": "Signal, symbol, representation, color, shade, climate, meaning, and interpretation.",
+    "Movement": "Change, response, pressure, growth, stability, regulation, adjustment, and transition.",
+    "Identity": "Preference, tendency, habit, trait, character, personality, and individuality."
+  },
+  "theme_composition_examples": {
+    "religion": "sacred structure / devotion / ritual climate",
+    "religion + history": "memory, institution, conflict, preservation, inheritance",
+    "christianity + winter": "vigil, birth, darkness, warmth, ritual light",
+    "islam + geometry": "devotion, order, pattern, sacred abstraction",
+    "judaism + history": "covenant, exile, archive, endurance, return",
+    "season + religion": "ritual calendar / sacred time"
+  },
+  "natural_shade_atlas": {
+    "principle": "noun = source; adjective or condition = state; combination = relational meaning.",
+    "source_groups": [
+      "Sky / weather",
+      "Water / ice",
+      "Earth / stone",
+      "Plants",
+      "Fire / light",
+      "Body / material",
+      "Season / time"
+    ],
+    "use": "Natural source words can reveal source-condition routes such as ocean -> blue depth, soil -> brown grounding, snow -> white/gray quiet, rose -> pink tenderness, or ember -> orange/red activation.",
+    "boundary": "Natural source routes are translator context unless separately supported as strict color synonyms."
+  },
+  "personal_profile_overlay": {
+    "privacy": "Local-only and private by default.",
+    "entry_types": ["anchor", "pressure", "relationship", "season", "memory", "place", "boundary"],
+    "rule": "Show a Personal read only when the search matches profile context.",
+    "boundary": "The profile shifts display for one person; it does not rewrite the shared graph or claim permanent identity."
+  },
+  "shared_graph_governance": {
+    "authority": "Approved active PostgreSQL nodes and edges are the single source of truth.",
+    "workflow": ["proposed", "reviewed", "approved or rejected"],
+    "structured_evidence": ["source", "evidence type", "confidence", "boundary", "author", "date", "review status", "counterexample"],
+    "history": "Approved create, edit, and delete operations retain before and after snapshots and can be undone once.",
+    "ai_boundary": "An AI may suggest or submit a proposal, but must not describe proposed or reviewed information as approved shared truth."
+  },
+  "connection_strength_rules": {
+    "strong": "The same route appears across graph paths, theme logic, emotion routes, or environment conditions.",
+    "medium": "The route has one clear supported path but limited cross-field reinforcement.",
+    "weak": "The route is plausible but mostly interpretive or thin.",
+    "unresolved": "No defensible route, filter, or personal context exists yet."
+  },
+  "hard_boundaries": [
+    "Do not treat emotion routes as diagnoses.",
+    "Do not treat theme routes as claims that a person permanently is that theme.",
+    "Do not force neutral words into color meanings.",
+    "Do not confuse myth, religion, history, science, or arts bridges with strict color synonyms.",
+    "Do not erase ambiguity; ambiguity is a valid climate.",
+    "Respect religious themes as sacred/cultural frameworks, not truth/falsity claims."
+  ],
+  "example_outputs": {
+    "scared but hopeful": {
+      "input_type": "emotional phrase",
+      "shared_route": ["scared -> shadow/vigilance", "hopeful -> green/yellow possibility"],
+      "color_landing": {
+        "families": ["black", "blue", "green", "yellow"],
+        "shade": "mixed coexisting climate"
+      },
+      "emotional_logic": "Fear and hope remain separate but adjacent climates: vigilance beside opening.",
+      "connection_strength": "strong",
+      "boundary": "This describes a blended feeling route, not a fixed identity."
+    },
+    "religion + history": {
+      "input_type": "composition",
+      "composition_read": {
+        "theme_a": "Religion",
+        "theme_b": "History",
+        "composed_climate": "sacred memory / institution / preservation / inherited pressure"
+      },
+      "connection_strength": "strong",
+      "boundary": "This is a theme composition, not a judgment about any religion."
+    },
+    "because": {
+      "input_type": "neutral_word",
+      "shared_route": [],
+      "connection_strength": "unresolved",
+      "boundary": "No color-climate route should be forced without added context."
+    }
+  },
+  "reference_files": {
+    "full_app_dataset": "data/color-synonyms.json",
+    "human_reference": "docs/chatgpt-color-web-reference.md",
+    "system_state": "docs/current-system-state.md",
+    "white_light_note": "docs/white-light-filter-theme.md",
+    "bridge_note": "docs/alignment-cross-domain-bridges.md"
+  }
+}

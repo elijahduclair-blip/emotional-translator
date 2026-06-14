@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: eli-emotional-translator-api
+    runtime: node
+    plan: free
+    region: virginia
+    rootDir: backend
+    buildCommand: npm ci
+    preDeployCommand: npm run migrate && npm run seed
+    startCommand: npm start
+    healthCheckPath: /api/health
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: CORS_ORIGINS
+        value: https://*.github.io,http://127.0.0.1:4174,http://localhost:4174

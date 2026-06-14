@@ -1,0 +1,14 @@
+.env
+backend/.env
+backend/node_modules/
+backend/backups/
+node_modules/
+person-0.json
+api/
+publish-github-pages/
+*.png
+*.jpeg
+*.jpg
+*.zip
+*.log
+Untitled-1.txt
