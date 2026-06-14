@@ -1,0 +1,183 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Theory of Alignment Emotional Color Translator",
+    "description": "Read-only access to approved color-climate translations, compact graph context, and framework rules.",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://eli-emotional-translator-api.onrender.com"
+    }
+  ],
+  "paths": {
+    "/api/v1/ai/reference": {
+      "get": {
+        "operationId": "getAlignmentReference",
+        "summary": "Get the Theory of Alignment interpretation rules",
+        "description": "Call when the conversation needs the framework formulas, shade axes, anchor climates, or interpretation boundaries.",
+        "x-openai-isConsequential": false,
+        "responses": {
+          "200": {
+            "description": "Framework rules and boundaries",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlignmentReference"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ai/translate": {
+      "post": {
+        "operationId": "translateColorClimate",
+        "summary": "Translate a word, feeling, phrase, or concept into its approved color-climate route",
+        "description": "Use this before interpreting emotional language. Preserve unresolved results instead of inventing a route.",
+        "x-openai-isConsequential": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "maxLength": 500,
+                    "description": "The user's original word or phrase, preserved without flattening its meaning."
+                  }
+                },
+                "required": ["text"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Supported translation route or an explicit unresolved result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Translation"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/api/v1/ai/context": {
+      "get": {
+        "operationId": "findAlignmentContext",
+        "summary": "Find compact approved graph context for a word, theme, emotion, or color climate",
+        "description": "Use when a translation needs supporting nodes, relationships, evidence, theme context, or comparison with neighboring concepts.",
+        "x-openai-isConsequential": false,
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "description": "A short concept, word, theme, emotion, or color-climate phrase.",
+            "schema": {
+              "type": "string",
+              "maxLength": 180
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of matching nodes, from 1 to 20.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 20,
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Compact matching nodes and approved relationships",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContextResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AlignmentReference": {
+        "type": "object",
+        "description": "The stable interpretation contract.",
+        "additionalProperties": true
+      },
+      "Translation": {
+        "type": "object",
+        "properties": {
+          "input": { "type": "string" },
+          "matchedTerms": { "type": "array", "items": { "type": "string" } },
+          "landing": { "type": ["string", "null"] },
+          "family": { "type": ["string", "null"] },
+          "families": { "type": "array", "items": { "type": "string" } },
+          "color": { "type": ["string", "null"] },
+          "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+          "paths": { "type": "integer" },
+          "blended": { "type": "boolean" },
+          "components": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+          "unresolved": { "type": "boolean" },
+          "interpretationRule": { "type": "string" },
+          "boundary": { "type": "string" }
+        },
+        "required": ["input", "confidence", "paths", "unresolved", "interpretationRule", "boundary"]
+      },
+      "ContextResult": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string" },
+          "matches": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+          "relationships": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+          "matchCount": { "type": "integer" },
+          "connectionStrength": { "type": "string", "enum": ["strong", "weak", "unresolved"] },
+          "boundary": { "type": "string" }
+        },
+        "required": ["query", "matches", "relationships", "matchCount", "connectionStrength", "boundary"]
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": { "type": "string" }
+        },
+        "required": ["error"]
+      }
+    },
+    "responses": {
+      "BadRequest": {
+        "description": "The request was missing required input or exceeded its limit.",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    }
+  }
+}

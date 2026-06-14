@@ -28,7 +28,7 @@ function inputTerms(text) {
   return [...terms].filter(Boolean);
 }
 
-async function translate(text, includeDetails = false) {
+export async function translate(text, includeDetails = false) {
   const normalized = normalize(text);
   if (!normalized) return { input: text, landing: null, family: null, color: null, confidence: 'low', paths: 0, unresolved: true };
 

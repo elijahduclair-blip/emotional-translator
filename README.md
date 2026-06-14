@@ -19,6 +19,26 @@ Use **Theme system -> Research inbox** to search curated public reference source
 
 Research queries are sent only to the public sources selected in the form. Account details and personal-profile entries are not included. Results are evidence leads rather than strict synonyms, diagnoses, or permanent identity claims.
 
+## Use With A Custom GPT
+
+The production API includes a separate read-only ChatGPT tool surface. It exposes framework rules, translation, and compact approved graph context while excluding profiles, research drafts, proposals, credentials, and administrative operations.
+
+- Action schema: `docs/chatgpt-action-openapi.json`
+- GPT instruction block: `docs/custom-gpt-instructions.md`
+- Public privacy policy: `privacy.html`
+
+In the Custom GPT editor, add an Action, choose no authentication, and import the public schema URL:
+
+```text
+https://elijahduclair-blip.github.io/emotional-translator/docs/chatgpt-action-openapi.json
+```
+
+Then place the contents of `docs/custom-gpt-instructions.md` into the GPT's Instructions field and use this privacy-policy URL:
+
+```text
+https://elijahduclair-blip.github.io/emotional-translator/privacy.html
+```
+
 ## Authentication
 
 The public atlas, graph, and translator remain readable without an account. Shared graph proposals, approval records, history, undo, and user profile endpoints require a signed account token.

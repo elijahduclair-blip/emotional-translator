@@ -11,6 +11,7 @@ import usersRouter from './routes/users.js';
 import translateRouter from './routes/translate.js';
 import authRouter from './routes/auth.js';
 import researchRouter from './routes/research.js';
+import aiRouter from './routes/ai.js';
 
 dotenv.config();
 
@@ -55,6 +56,7 @@ app.use('/api/v1', commonWordsRouter);
 app.use('/api/v1', usersRouter);
 app.use('/api/v1', translateRouter);
 app.use('/api/v1', researchRouter);
+app.use('/api/v1', aiRouter);
 
 // 404
 app.use((req, res) => {
@@ -73,6 +75,7 @@ app.listen(PORT, () => {
   console.log(`   ? Database backups (npm run backup)`);
   console.log(`   ? Signed account authentication (/api/v1/auth)`);
   console.log(`   ? Governed research inbox (/api/v1/research)`);
+  console.log(`   ? Read-only ChatGPT tool contract (/api/v1/ai)`);
 });
 
 // Graceful shutdown
