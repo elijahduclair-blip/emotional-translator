@@ -8,7 +8,7 @@ The public system uses three services:
 
 ## 1. GitHub
 
-Create a public repository named `emotional-translator`, then push this repository's `main` branch.
+Create the public repository `elijahduclair-blip/emotional-translator`, then push this repository's `main` branch.
 
 In the GitHub repository:
 
@@ -41,5 +41,7 @@ If Render assigns a different service hostname, update the production URL in `co
 ## 4. Final Verification
 
 Open the GitHub Pages URL. The sidebar should show the production database connection and ask to create the first administrator account. Use a new password that has never appeared in a URL or local screenshot.
+
+Expected frontend URL: `https://elijahduclair-blip.github.io/emotional-translator/`
 
 The production backup workflow runs daily and retains each private GitHub artifact for 30 days after the `PRODUCTION_DATABASE_URL` repository secret is configured.

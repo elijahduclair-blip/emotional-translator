@@ -18,4 +18,4 @@ services:
       - key: AUTH_SECRET
         generateValue: true
       - key: CORS_ORIGINS
-        value: https://*.github.io,http://127.0.0.1:4174,http://localhost:4174
+        value: https://elijahduclair-blip.github.io,http://127.0.0.1:4174,http://localhost:4174

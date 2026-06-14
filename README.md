@@ -2,6 +2,8 @@
 
 Static web app for exploring the color synonym dataset in `data/color-synonyms.json`.
 
+Production frontend: `https://elijahduclair-blip.github.io/emotional-translator/`
+
 Search now runs through a path-first translator:
 
 - Personal Shape input context
