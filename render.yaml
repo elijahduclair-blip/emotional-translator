@@ -6,8 +6,7 @@ services:
     region: virginia
     rootDir: backend
     buildCommand: npm ci
-    preDeployCommand: npm run migrate && npm run seed
-    startCommand: npm start
+    startCommand: npm run deploy:start
     healthCheckPath: /api/health
     autoDeployTrigger: checksPass
     envVars:

@@ -23,7 +23,7 @@ The Pages workflow publishes only `index.html`, `styles.css`, `app.js`, `config.
 
 Create a Neon project named `emotional-translator`, then copy its pooled PostgreSQL connection string. Keep it private.
 
-The first Render deployment runs the database migration and seed automatically. It creates the approved graph from `data/color-synonyms.json`; it does not copy the exposed local password or local-only personal profile.
+Each Render service start runs the idempotent database migration and seed before opening the API. This works on Render's free tier and creates or refreshes the approved graph from `data/color-synonyms.json`; it does not copy the exposed local password or local-only personal profile.
 
 ## 3. Render API
 
