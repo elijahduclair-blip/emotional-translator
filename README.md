@@ -15,6 +15,10 @@ The frontend uses a hybrid data loader. It keeps `data/color-synonyms.json` as t
 
 Use **Theme system -> Shared graph** to govern PostgreSQL graph changes. Changes are proposals first, then separately reviewed and approved or rejected. Approved create, edit, and delete operations retain version history and can be undone. Relationships require structured evidence: source, evidence type, confidence, boundary, author, date, review status, and a falsification condition. PostgreSQL `nodes` and `edges` are the authority; theme, emotion, and common-word endpoints are derived from them. Baseline reseeding updates known records without deleting direct database entries.
 
+Use **Theme system -> Research inbox** to search curated public reference sources without letting internet material rewrite the graph. The first sources are Wikipedia for orientation and Crossref for scholarly metadata. A saved result must include a boundary, confidence, and counterexample. It enters as `proposed`, requires administrator review, and can only create a separate graph proposal after approval. The graph still changes only through the existing graph-governance workflow.
+
+Research queries are sent only to the public sources selected in the form. Account details and personal-profile entries are not included. Results are evidence leads rather than strict synonyms, diagnoses, or permanent identity claims.
+
 ## Authentication
 
 The public atlas, graph, and translator remain readable without an account. Shared graph proposals, approval records, history, undo, and user profile endpoints require a signed account token.

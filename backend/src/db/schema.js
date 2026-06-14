@@ -165,6 +165,35 @@ export async function createSchema() {
       );
     `);
 
+    // Research inbox: external evidence candidates, never graph truth by themselves
+    await query(`
+      CREATE TABLE IF NOT EXISTS research_items (
+        id TEXT PRIMARY KEY,
+        query TEXT NOT NULL,
+        title TEXT NOT NULL,
+        source_name TEXT NOT NULL,
+        source_type TEXT NOT NULL,
+        source_url TEXT NOT NULL,
+        excerpt TEXT,
+        published_at TIMESTAMP,
+        retrieved_at TIMESTAMP NOT NULL DEFAULT NOW(),
+        suggestions JSONB NOT NULL DEFAULT '{}'::jsonb,
+        emotional_logic TEXT,
+        boundary TEXT NOT NULL,
+        counterexample TEXT NOT NULL,
+        confidence TEXT NOT NULL DEFAULT 'low',
+        status TEXT NOT NULL DEFAULT 'proposed',
+        proposed_by TEXT NOT NULL REFERENCES users(id),
+        reviewer TEXT REFERENCES users(id),
+        review_note TEXT,
+        graph_proposal_id TEXT REFERENCES graph_proposals(id),
+        created_at TIMESTAMP DEFAULT NOW(),
+        reviewed_at TIMESTAMP
+      );
+      CREATE INDEX IF NOT EXISTS idx_research_items_status ON research_items(status, created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_research_items_proposed_by ON research_items(proposed_by, created_at DESC);
+    `);
+
     console.log('? Schema created successfully');
   } catch (error) {
     console.error('? Schema creation failed:', error);

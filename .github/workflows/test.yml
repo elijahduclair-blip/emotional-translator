@@ -21,4 +21,4 @@ jobs:
           cache: npm
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
-      - run: node --test test/auth-unit.test.js
+      - run: node --test test/auth-unit.test.js test/research-unit.test.js

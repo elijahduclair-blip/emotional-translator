@@ -152,6 +152,16 @@ const state = {
     loading: false,
     loaded: false
   },
+  research: {
+    results: [],
+    suggestions: null,
+    items: [],
+    query: '',
+    warnings: [],
+    loading: false,
+    loaded: false,
+    message: null
+  },
   auth: {
     configured: false,
     checked: false,
@@ -414,6 +424,7 @@ function bindEvents() {
       state.view = tab.dataset.view;
       renderTabs();
       renderList();
+      if (state.view === 'research' && state.auth.user && !state.research.loaded) loadResearchItems();
     });
   });
 
@@ -1748,6 +1759,11 @@ function renderAxisViewButton() {
 }
 
 function renderList() {
+  if (state.view === 'research') {
+    renderResearchInbox();
+    return;
+  }
+
   if (state.view === 'shared-graph') {
     renderSharedGraphEditor();
     return;
@@ -1829,6 +1845,233 @@ function renderList() {
       render();
     });
   });
+}
+
+function renderResearchInbox() {
+  const signedIn = Boolean(state.auth.user);
+  const isAdmin = state.auth.user?.role === 'admin';
+  const message = state.research.message;
+  const query = state.research.query || state.query || '';
+  const suggestions = state.research.suggestions;
+  els.list.innerHTML = `
+    <section class="research-inbox">
+      <div class="theme-filter-summary">
+        <strong>Research inbox</strong>
+        <span>Search public reference sources, preserve evidence, and submit connections for human review.</span>
+      </div>
+      <div class="shared-graph-review">
+        <strong>Evidence does not become truth automatically.</strong>
+        <span>Saved results enter as proposed research. Approval can create a separate graph proposal, which still requires graph review.</span>
+      </div>
+      ${message ? `<div class="graph-entry-message is-${escapeHtml(message.type)}">${escapeHtml(message.text)}</div>` : ''}
+      ${!signedIn ? '<div class="graph-entry-message is-error">Sign in to search sources or save research evidence.</div>' : ''}
+      <form class="research-search-form" data-research-search>
+        <label class="form-wide">
+          <span>Concept or question</span>
+          <input name="query" type="search" maxlength="180" value="${escapeHtml(query)}" placeholder="winter ritual, color and emotion, religious calendar" required>
+        </label>
+        <fieldset>
+          <legend>Sources</legend>
+          <label><input name="sources" type="checkbox" value="wikipedia" checked> Wikipedia</label>
+          <label><input name="sources" type="checkbox" value="crossref" checked> Crossref scholarly records</label>
+        </fieldset>
+        <p class="meta">Your search phrase is sent to the public sources you select. Account details and personal-profile entries are not sent.</p>
+        <button class="primary-command" type="submit" ${signedIn && !state.research.loading ? '' : 'disabled'}>${state.research.loading ? 'Searching...' : 'Search sources'}</button>
+      </form>
+      ${state.research.warnings.length ? `<div class="graph-entry-message is-error">${state.research.warnings.map(escapeHtml).join(' | ')}</div>` : ''}
+      ${suggestions ? renderResearchSuggestions(suggestions) : ''}
+      <section class="research-results" aria-label="Research search results">
+        ${state.research.results.length
+          ? state.research.results.map((item, index) => renderResearchResult(item, index)).join('')
+          : '<p class="meta">Search results will appear here. Nothing is added until you save a result with a boundary and counterexample.</p>'}
+      </section>
+      <section class="governance-section">
+        <div class="governance-head">
+          <strong>${isAdmin ? 'All research proposals' : 'My research proposals'}</strong>
+          <button type="button" data-refresh-research ${signedIn ? '' : 'disabled'}>Refresh</button>
+        </div>
+        ${state.research.items.length
+          ? state.research.items.map(item => renderResearchRecord(item, isAdmin)).join('')
+          : '<p class="meta">No saved research proposals yet.</p>'}
+      </section>
+    </section>`;
+
+  els.list.querySelector('[data-research-search]')?.addEventListener('submit', searchResearch);
+  els.list.querySelectorAll('[data-save-research]').forEach(form => form.addEventListener('submit', saveResearchResult));
+  els.list.querySelector('[data-refresh-research]')?.addEventListener('click', loadResearchItems);
+  els.list.querySelectorAll('[data-research-decision]').forEach(button => button.addEventListener('click', () => reviewResearchItem(button.dataset.researchId, button.dataset.researchDecision)));
+  els.list.querySelectorAll('[data-research-graph-proposal]').forEach(button => button.addEventListener('click', () => createResearchGraphProposal(button.dataset.researchGraphProposal)));
+}
+
+function renderResearchSuggestions(suggestions) {
+  const matches = suggestions.graphMatches || [];
+  return `
+    <div class="research-suggestions">
+      <div class="governance-head"><strong>Possible graph context</strong><span class="status-pill">${escapeHtml(suggestions.strength || 'unresolved')}</span></div>
+      ${matches.length ? `<div class="research-chips">${matches.map(match => `<span>${escapeHtml(match.label)} · ${escapeHtml(match.type)}${match.family ? ` · ${escapeHtml(match.family)}` : ''}</span>`).join('')}</div>` : '<p class="meta">No lexical graph leads found.</p>'}
+      <p class="meta">${escapeHtml(suggestions.boundary || '')}</p>
+    </div>`;
+}
+
+function renderResearchResult(item, index) {
+  return `
+    <form class="research-record research-result" data-save-research="${index}">
+      <div class="governance-head">
+        <strong>${escapeHtml(item.title)}</strong>
+        <span>${escapeHtml(item.sourceName)} · ${escapeHtml(item.sourceType)}</span>
+      </div>
+      <p>${escapeHtml(item.excerpt || 'No abstract or excerpt supplied by this source.')}</p>
+      <a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">Open source</a>
+      <div class="research-evidence-form">
+        <label class="form-wide"><span>Emotional or relational logic</span><textarea name="emotionalLogic" rows="2" placeholder="What structured relation might this evidence help explain?"></textarea></label>
+        <label class="form-wide"><span>Boundary</span><textarea name="boundary" rows="2" required>${escapeHtml(item.boundary || 'Research context, not a strict synonym or universal emotional claim.')}</textarea></label>
+        <label class="form-wide"><span>Counterexample / falsification condition</span><textarea name="counterexample" rows="2" required placeholder="What would show that this connection does not hold?"></textarea></label>
+        <label><span>Confidence</span><select name="confidence"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></label>
+        <button class="primary-command" type="submit">Save as proposed evidence</button>
+      </div>
+    </form>`;
+}
+
+function renderResearchRecord(item, isAdmin) {
+  const suggestions = item.suggestions?.graphMatches || [];
+  const awaitingReview = ['proposed', 'needs_revision'].includes(item.status);
+  return `
+    <article class="research-record">
+      <div class="governance-head">
+        <strong>${escapeHtml(item.title)}</strong>
+        <span class="status-pill is-${escapeHtml(item.status)}">${escapeHtml(item.status.replaceAll('_', ' '))}</span>
+      </div>
+      <small>${escapeHtml(item.source_name)} · ${escapeHtml(item.proposed_by_name || 'unknown')} · ${escapeHtml(formatDateTime(item.created_at))}</small>
+      <p>${escapeHtml(item.excerpt || 'No excerpt.')}</p>
+      <a href="${escapeHtml(item.source_url)}" target="_blank" rel="noopener noreferrer">Open evidence source</a>
+      ${item.emotional_logic ? `<p><strong>Logic:</strong> ${escapeHtml(item.emotional_logic)}</p>` : ''}
+      <p><strong>Boundary:</strong> ${escapeHtml(item.boundary)}</p>
+      <p><strong>Counterexample:</strong> ${escapeHtml(item.counterexample)}</p>
+      ${suggestions.length ? `<div class="research-chips">${suggestions.map(match => `<span>${escapeHtml(match.label)}</span>`).join('')}</div>` : ''}
+      ${item.review_note ? `<p><strong>Review:</strong> ${escapeHtml(item.review_note)}</p>` : ''}
+      ${isAdmin && awaitingReview ? `<div class="governance-actions">
+        <button type="button" data-research-id="${escapeHtml(item.id)}" data-research-decision="approved">Approve evidence</button>
+        <button type="button" data-research-id="${escapeHtml(item.id)}" data-research-decision="needs_revision">Needs revision</button>
+        <button type="button" data-research-id="${escapeHtml(item.id)}" data-research-decision="rejected">Reject</button>
+      </div>` : ''}
+      ${isAdmin && item.status === 'approved' && !item.graph_proposal_id ? `<button class="primary-command" type="button" data-research-graph-proposal="${escapeHtml(item.id)}">Create graph proposal</button>` : ''}
+      ${item.graph_proposal_id ? `<small>Graph proposal: ${escapeHtml(item.graph_proposal_id)}</small>` : ''}
+    </article>`;
+}
+
+async function searchResearch(event) {
+  event.preventDefault();
+  if (!state.auth.user) return;
+  const form = new FormData(event.currentTarget);
+  const query = String(form.get('query') || '').trim();
+  const sources = form.getAll('sources');
+  if (!sources.length) {
+    state.research.message = { type: 'error', text: 'Choose at least one research source.' };
+    return renderResearchInbox();
+  }
+  state.research.loading = true;
+  state.research.message = null;
+  state.research.query = query;
+  renderResearchInbox();
+  try {
+    const params = new URLSearchParams({ q: query, sources: sources.join(',') });
+    const response = await fetch(`${API_BASE_URL}/v1/research/search?${params}`, { headers: authHeaders(), cache: 'no-store' });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || `Research search failed: ${response.status}`);
+    state.research.results = result.results || [];
+    state.research.suggestions = result.suggestions || null;
+    state.research.warnings = result.warnings || [];
+    state.research.message = { type: 'success', text: `${state.research.results.length} evidence leads found${result.cached ? ' from the short-term cache' : ''}.` };
+  } catch (error) {
+    state.research.message = { type: 'error', text: error.message };
+  } finally {
+    state.research.loading = false;
+    renderResearchInbox();
+  }
+}
+
+async function saveResearchResult(event) {
+  event.preventDefault();
+  const index = Number(event.currentTarget.dataset.saveResearch);
+  const candidate = state.research.results[index];
+  if (!candidate) return;
+  const values = new FormData(event.currentTarget);
+  try {
+    const response = await fetch(`${API_BASE_URL}/v1/research/items`, {
+      method: 'POST',
+      headers: authHeaders(true),
+      body: JSON.stringify({
+        query: state.research.query,
+        title: candidate.title,
+        sourceName: candidate.sourceName,
+        sourceType: candidate.sourceType,
+        sourceUrl: candidate.url,
+        excerpt: candidate.excerpt,
+        publishedAt: candidate.publishedAt,
+        suggestions: { ...(state.research.suggestions || {}), externalId: candidate.externalId, retrievedAt: candidate.retrievedAt },
+        emotionalLogic: values.get('emotionalLogic'),
+        boundary: values.get('boundary'),
+        counterexample: values.get('counterexample'),
+        confidence: values.get('confidence')
+      })
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || `Research item could not be saved: ${response.status}`);
+    state.research.message = { type: 'success', text: 'Evidence saved as proposed. It is waiting for review.' };
+    await loadResearchItems(false);
+  } catch (error) {
+    state.research.message = { type: 'error', text: error.message };
+    renderResearchInbox();
+  }
+}
+
+async function loadResearchItems(showLoading = true) {
+  if (!state.auth.user) return;
+  if (showLoading) {
+    state.research.loading = true;
+    renderResearchInbox();
+  }
+  try {
+    const response = await fetch(`${API_BASE_URL}/v1/research/items`, { headers: authHeaders(), cache: 'no-store' });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || `Research inbox could not load: ${response.status}`);
+    state.research.items = result.items || [];
+    state.research.loaded = true;
+  } catch (error) {
+    state.research.message = { type: 'error', text: error.message };
+  } finally {
+    state.research.loading = false;
+    if (state.view === 'research') renderResearchInbox();
+  }
+}
+
+async function reviewResearchItem(id, decision) {
+  const reviewNote = window.prompt(`Review note for ${decision.replaceAll('_', ' ')}:`);
+  if (!reviewNote?.trim()) return;
+  await researchMutation(`${API_BASE_URL}/v1/research/items/${id}/review`, 'PATCH', { decision, reviewNote }, `Evidence marked ${decision.replaceAll('_', ' ')}.`);
+}
+
+async function createResearchGraphProposal(id) {
+  const item = state.research.items.find(entry => entry.id === id);
+  if (!item) return;
+  const label = window.prompt('Graph label for this proposal:', item.query);
+  if (!label?.trim()) return;
+  const suggestedFamily = item.suggestions?.graphMatches?.find(match => match.family)?.family || '';
+  const family = window.prompt('Color family or mixture (optional):', suggestedFamily);
+  await researchMutation(`${API_BASE_URL}/v1/research/items/${id}/graph-proposal`, 'POST', { label, family: family?.trim() || null }, 'A separate graph proposal was created. The graph has not changed yet.');
+}
+
+async function researchMutation(url, method, body, successText) {
+  try {
+    const response = await fetch(url, { method, headers: authHeaders(true), body: JSON.stringify(body) });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || `Research request failed: ${response.status}`);
+    state.research.message = { type: 'success', text: successText };
+    await loadResearchItems(false);
+  } catch (error) {
+    state.research.message = { type: 'error', text: error.message };
+    renderResearchInbox();
+  }
 }
 
 function renderSharedGraphEditor(message = null) {
