@@ -12,6 +12,7 @@ import translateRouter from './routes/translate.js';
 import authRouter from './routes/auth.js';
 import researchRouter from './routes/research.js';
 import aiRouter from './routes/ai.js';
+import foundationRouter from './routes/foundation.js';
 
 dotenv.config();
 
@@ -43,6 +44,18 @@ app.use((req, res, next) => {
 });
 
 // Health check
+app.get('/api', (req, res) => {
+  res.json({
+    status: 'ok',
+    message: 'Emotional Translator API online',
+    routes: {
+      health: '/api/health',
+      foundation: '/api/v1/foundation/analyze',
+      translate: '/api/v1/translate'
+    }
+  });
+});
+
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
 });
@@ -57,6 +70,7 @@ app.use('/api/v1', usersRouter);
 app.use('/api/v1', translateRouter);
 app.use('/api/v1', researchRouter);
 app.use('/api/v1', aiRouter);
+app.use('/api/v1', foundationRouter);
 
 // 404
 app.use((req, res) => {
@@ -72,6 +86,7 @@ app.listen(PORT, () => {
   console.log(`?? Phase 2 features enabled:`);
   console.log(`   ? Graph governance (/api/v1/graph/proposals)`);
   console.log(`   ? AI translator (/api/v1/translate)`);
+  console.log(`   ? Foundation analysis (/api/v1/foundation/analyze)`);
   console.log(`   ? Database backups (npm run backup)`);
   console.log(`   ? Signed account authentication (/api/v1/auth)`);
   console.log(`   ? Governed research inbox (/api/v1/research)`);
