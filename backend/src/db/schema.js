@@ -171,6 +171,7 @@ export async function createSchema() {
         id TEXT PRIMARY KEY,
         query TEXT NOT NULL,
         title TEXT NOT NULL,
+        kind TEXT NOT NULL DEFAULT 'general',
         source_name TEXT NOT NULL,
         source_type TEXT NOT NULL,
         source_url TEXT NOT NULL,
@@ -178,6 +179,7 @@ export async function createSchema() {
         published_at TIMESTAMP,
         retrieved_at TIMESTAMP NOT NULL DEFAULT NOW(),
         suggestions JSONB NOT NULL DEFAULT '{}'::jsonb,
+        history_metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
         emotional_logic TEXT,
         boundary TEXT NOT NULL,
         counterexample TEXT NOT NULL,
@@ -192,6 +194,36 @@ export async function createSchema() {
       );
       CREATE INDEX IF NOT EXISTS idx_research_items_status ON research_items(status, created_at DESC);
       CREATE INDEX IF NOT EXISTS idx_research_items_proposed_by ON research_items(proposed_by, created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_research_items_kind ON research_items(kind, status, created_at DESC);
+    `);
+    await query(`ALTER TABLE research_items ADD COLUMN IF NOT EXISTS kind TEXT NOT NULL DEFAULT 'general';`);
+    await query(`ALTER TABLE research_items ADD COLUMN IF NOT EXISTS history_metadata JSONB NOT NULL DEFAULT '{}'::jsonb;`);
+
+    // Foundation sessions: saved structure-only word analysis for Base44 and other frontends
+    await query(`
+      CREATE TABLE IF NOT EXISTS foundation_sessions (
+        id TEXT PRIMARY KEY,
+        title TEXT NOT NULL,
+        input_text TEXT NOT NULL,
+        analysis_options JSONB NOT NULL DEFAULT '{}'::jsonb,
+        stats JSONB NOT NULL DEFAULT '{}'::jsonb,
+        word_counts JSONB NOT NULL DEFAULT '[]'::jsonb,
+        co_occurrences JSONB NOT NULL DEFAULT '[]'::jsonb,
+        pareto JSONB NOT NULL DEFAULT '[]'::jsonb,
+        patterns JSONB NOT NULL DEFAULT '[]'::jsonb,
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      ALTER TABLE foundation_sessions ADD COLUMN IF NOT EXISTS title TEXT NOT NULL DEFAULT 'Untitled session';
+      ALTER TABLE foundation_sessions ADD COLUMN IF NOT EXISTS input_text TEXT NOT NULL DEFAULT '';
+      ALTER TABLE foundation_sessions ADD COLUMN IF NOT EXISTS analysis_options JSONB NOT NULL DEFAULT '{}'::jsonb;
+      ALTER TABLE foundation_sessions ADD COLUMN IF NOT EXISTS stats JSONB NOT NULL DEFAULT '{}'::jsonb;
+      ALTER TABLE foundation_sessions ADD COLUMN IF NOT EXISTS word_counts JSONB NOT NULL DEFAULT '[]'::jsonb;
+      ALTER TABLE foundation_sessions ADD COLUMN IF NOT EXISTS co_occurrences JSONB NOT NULL DEFAULT '[]'::jsonb;
+      ALTER TABLE foundation_sessions ADD COLUMN IF NOT EXISTS pareto JSONB NOT NULL DEFAULT '[]'::jsonb;
+      ALTER TABLE foundation_sessions ADD COLUMN IF NOT EXISTS patterns JSONB NOT NULL DEFAULT '[]'::jsonb;
+      ALTER TABLE foundation_sessions ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();
+      CREATE INDEX IF NOT EXISTS idx_foundation_sessions_created_at ON foundation_sessions(created_at DESC);
     `);
 
     console.log('? Schema created successfully');
