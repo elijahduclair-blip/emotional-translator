@@ -192,12 +192,14 @@ export async function createSchema() {
         created_at TIMESTAMP DEFAULT NOW(),
         reviewed_at TIMESTAMP
       );
+    `);
+    await query(`ALTER TABLE research_items ADD COLUMN IF NOT EXISTS kind TEXT NOT NULL DEFAULT 'general';`);
+    await query(`ALTER TABLE research_items ADD COLUMN IF NOT EXISTS history_metadata JSONB NOT NULL DEFAULT '{}'::jsonb;`);
+    await query(`
       CREATE INDEX IF NOT EXISTS idx_research_items_status ON research_items(status, created_at DESC);
       CREATE INDEX IF NOT EXISTS idx_research_items_proposed_by ON research_items(proposed_by, created_at DESC);
       CREATE INDEX IF NOT EXISTS idx_research_items_kind ON research_items(kind, status, created_at DESC);
     `);
-    await query(`ALTER TABLE research_items ADD COLUMN IF NOT EXISTS kind TEXT NOT NULL DEFAULT 'general';`);
-    await query(`ALTER TABLE research_items ADD COLUMN IF NOT EXISTS history_metadata JSONB NOT NULL DEFAULT '{}'::jsonb;`);
 
     // Foundation sessions: saved structure-only word analysis for Base44 and other frontends
     await query(`
