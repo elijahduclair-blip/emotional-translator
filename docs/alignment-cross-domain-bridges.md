@@ -37,8 +37,7 @@ The rivers describe how the system moves. The anchor families describe recurring
 | River | Myth bridge | History bridge | Science bridge | Arts bridge | Emotional logic |
 | --- | --- | --- | --- | --- | --- |
 | Climate River | Weather gods, threshold rooms, blessing and storm | Seasonal rites, calendars, shelters, disaster memory | Atmosphere, weather systems, pressure fronts, cycles | Landscape, lighting, soundscape, spatial mood | Feeling behaves like an environment a person moves through, not a fixed label. |
-| Relationship River | Mask, vow, mirror, betrayal, companion, beloved | Kinship, friendship, alliance, courtship, conflict, repair | Attachment, signaling, feedback loops, boundary regulation | Theater, duet, portrait, dialogue, choreography | Intimacy is real because it includes masks, tension, imperfection, and repair. |
-| Identity/Pressure River | Trial, exile, descent, forge, return, shapeshifter | Migration, reinvention, revolution, recovery, public record | Adaptation, stress response, metamorphosis, compression | Character arc, revision, costume change, motif transformation | Identity forms through pressure and movement without becoming only its wound. |
+| Relationship River | Mask, vow, mirror, betrayal, companion, beloved | Kinship, friendship, alliance, courtship, conflict, repair | Attachment, signaling, feedback loops, boundary regulation | Theater, duet, portrait, dialogue, choreography | Meaning changes when another node is involved. A node is read through what relation makes stronger, weaker, visible, hidden, softened, or strained. |
 
 ## Field Examples
 

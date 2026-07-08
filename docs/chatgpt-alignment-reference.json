@@ -1,19 +1,35 @@
 {
   "tool_name": "Theory of Alignment Emotional Color Translator",
-  "version": "2.0.0",
+  "version": "2.2.0",
   "format": "ai_reference_tool_contract",
-  "purpose": "Give an AI a disciplined way to interpret words, feelings, themes, and personal context through the user's color-climate web.",
+  "purpose": "Give an AI a disciplined way to interpret words, feelings, themes, and personal context through the user's condition engine and color-climate web, where nodes store experience and routes connect experiences.",
+  "system_measurement_rule": "This system measures influence, not meaning.",
   "use_by_default": {
     "rule": "Treat the user's language as potentially part of the Theory of Alignment / color-climate vocabulary unless the user is clearly outside that context.",
-    "stance": "Read meaning through relation, route, climate, and pressure before assigning isolated labels.",
+    "stance": "Read meaning through stored experience, stored route, condition source, activation, gradient, climate, and pressure before assigning isolated labels.",
     "boundary": "This is interpretive language architecture, not diagnosis, proof of essence, or universal truth."
   },
   "core_formula": {
+    "condition_engine": "node + stored route + condition source -> activation",
+    "measurable_unit": "activationWeight = the first real graph unit; the measurable amount of present influence pressing a stored route toward visible activation",
+    "meaning_read": "activation + context + gradient travel -> meaning",
+    "pattern_read": "repeated activation / meaning -> pattern",
+    "water_read": "entered words + reuse pressure -> node weight -> route pull",
     "shared_read": "input -> supported route -> color family or mixture -> environment condition -> emotional climate",
     "theme_read": "source + filter -> theme",
+    "schema_pack_read": "shared graph -> active schema pack -> local cluster reasoning",
     "composition_read": "theme A + theme B -> composed climate",
+    "pattern_extraction": "selection set -> extracted attributes -> observable pattern -> inferred tendency -> boundary checked climate",
     "personal_read": "shared route + personal context -> personal climate shift",
     "falsifiability": "If a read cannot name the route, filter, or evidence that produced it, mark it weak or unresolved."
+  },
+  "node_context_model": {
+    "purpose": "Nodes should stay lightweight: type plus description, with route evidence carrying why the connection is valid and condition sources carrying why the route matters now.",
+    "shared_graph_rule": "The graph is shared; the language changes the read.",
+    "schema_pack_rule": "Schema packs are readable overlays for the same graph, not separate graph truths.",
+    "route_evidence_rule": "Evidence belongs on routes/edges. Use route evidence to explain why a connection is valid, use node descriptions to explain what stored experience the node is holding, and use condition sources to explain why it activated now.",
+    "reading_rule": "Prefer node type, node description, route evidence, and active condition sources before adding interpretation.",
+    "boundary": "Node context supports trust and explanation; it does not replace graph edges, evidence workflow, or ecosystem conditions."
   },
   "recommended_input_types": [
     "emotion",
@@ -22,6 +38,7 @@
     "neutral word",
     "theme",
     "theme composition",
+    "selection set",
     "natural source word",
     "personal context term",
     "hex color",
@@ -40,14 +57,18 @@
   "output_schema": {
     "input": "The user's original word or phrase.",
     "input_type": "emotion | phrase | common_word | neutral_word | theme | composition | natural_source | personal_context | color_value | unresolved",
+    "active_schema_pack": "color | theme",
+    "cluster_schema_mode": "node-centered | theme-centered",
+    "condition_sources": ["active sources affecting the read now"],
+    "activation_weight_rule": "Prefer route-level activationWeight before offering meaning language.",
     "shared_route": ["ordered route labels, if supported"],
     "color_landing": {
       "families": ["base or mixed color families"],
       "shade": "optional hex or descriptive shade",
       "xyz": {
-        "x": "cool negative to warm positive",
-        "y": "dark negative to light positive",
-        "z": "muted negative to vivid positive"
+        "x": "regulation and cooling negative to activation and warming positive",
+        "y": "depth and density negative to exposure and openness positive",
+        "z": "diffusion and ambiguity negative to clarity and signal positive"
       }
     },
     "environment_condition": "The color family as a condition, such as heat, depth, regulation, fog, grounding, reflection, or exposure.",
@@ -72,8 +93,19 @@
       "boundary": "personal overlay, not universal truth"
     },
     "emotional_logic": "Plain explanation of why this route feels the way it does.",
+    "schema_reasoning": "Why the currently selected schema pack is the right readable lens for this local cluster.",
+    "active_meaning_summary": "What emerges from the active routes and gradients under current context.",
     "connection_strength": "strong | medium | weak | unresolved",
     "boundary": "A concise sentence stating what the read is not allowed to claim."
+  },
+  "graph_rules": {
+    "node": "Node = stored experience.",
+    "route": "Route = a path that connects experiences.",
+    "condition": "Condition source = anything that changes which experiences matter now.",
+    "activationWeight": "activationWeight = the first real graph unit; it measures how much present influence is pressing a stored route toward visible activation.",
+    "water": "W.A.T.E.R carries new experience through the graph: Words Altered Together Entering Reuse.",
+    "gradient": "Gradient = the difference in accumulated experience between nearby nodes, routes, or local fields.",
+    "meaning": "Meaning emerges from traversing active routes and those gradients."
   },
   "color_climate_families": {
     "obsidian_shadow": {
@@ -115,44 +147,35 @@
   "shade_axes": {
     "center_rule": "The center of every axis is 0.",
     "x": {
-      "label": "Warmth",
-      "negative": "cool",
-      "positive": "warm",
-      "meaning": "Temperature direction of the color-climate."
+      "label": "Activation / regulation",
+      "negative": "regulation / cooling",
+      "positive": "activation / warming",
+      "meaning": "Whether the color-climate behaves more like living regulation or rising activation."
     },
     "y": {
-      "label": "Light depth",
-      "negative": "dark",
-      "positive": "light",
-      "meaning": "How much shadow, exposure, brightness, or openness the shade carries."
+      "label": "Abstract / differentiated",
+      "negative": "abstract / undifferentiated / potential",
+      "positive": "differentiated / manifest / visible",
+      "meaning": "How much a condition has emerged from undifferentiated potential into recognizable, visible structure."
     },
     "z": {
-      "label": "Saturation / clarity",
-      "negative": "muted",
-      "positive": "vivid",
-      "meaning": "How foggy, softened, intense, or clear the shade is."
+      "label": "Clarity / diffusion",
+      "negative": "diffusion / ambiguity",
+      "positive": "clarity / signal",
+      "meaning": "How foggy, unresolved, crisp, or signal-rich the condition is."
     },
     "view_rule": "The same 3D location can form different visible patterns when viewed through X, Y, or Z. The point does not change; the perspective changes."
   },
   "theme_categories": {
-    "Religion": "Sacred and cultural meaning systems.",
-    "Season": "Time, weather, cycle, and environmental mood.",
-    "History": "Memory, institution, pressure, rupture, survival, and inheritance.",
-    "Science": "Process, mechanism, evidence, structure, and revision.",
-    "Arts": "Form, perception, symbol, performance, and composition.",
-    "Foundation": "Experience, perception, emotion, adaptation, and behavior as the human engine.",
-    "Pattern": "Repetition, structure, connection, relation, context, similarity, and difference as the meaning engine.",
-    "Translation": "Signal, symbol, representation, color, shade, climate, meaning, and interpretation.",
-    "Movement": "Change, response, pressure, growth, stability, regulation, adjustment, and transition.",
-    "Identity": "Preference, tendency, habit, trait, character, personality, and individuality."
+    "Religion": "Sacred and cultural meaning systems acting as condition sources.",
+    "Arts": "Form, perception, symbol, performance, and composition acting as condition sources."
   },
   "theme_composition_examples": {
     "religion": "sacred structure / devotion / ritual climate",
-    "religion + history": "memory, institution, conflict, preservation, inheritance",
-    "christianity + winter": "vigil, birth, darkness, warmth, ritual light",
-    "islam + geometry": "devotion, order, pattern, sacred abstraction",
-    "judaism + history": "covenant, exile, archive, endurance, return",
-    "season + religion": "ritual calendar / sacred time"
+    "arts": "form / perception / symbol / visibility climate",
+    "religion + arts": "sacred image / ritual expression / embodied symbol",
+    "religion + color": "condition-selected sacred emphasis within the canonical color backbone",
+    "arts + color": "visibility, form, medium, and expression weighting nearby color routes"
   },
   "natural_shade_atlas": {
     "principle": "noun = source; adjective or condition = state; combination = relational meaning.",
@@ -171,7 +194,7 @@
   "personal_profile_overlay": {
     "privacy": "Local-only and private by default.",
     "entry_types": ["anchor", "pressure", "relationship", "season", "memory", "place", "boundary"],
-    "rule": "Show a Personal read only when the search matches profile context.",
+    "rule": "Show a Personal read only when the search matches profile context and treat it as a condition source rather than shared truth.",
     "boundary": "The profile shifts display for one person; it does not rewrite the shared graph or claim permanent identity."
   },
   "shared_graph_governance": {
@@ -182,7 +205,7 @@
     "ai_boundary": "An AI may suggest or submit a proposal, but must not describe proposed or reviewed information as approved shared truth."
   },
   "connection_strength_rules": {
-    "strong": "The same route appears across graph paths, theme logic, emotion routes, or environment conditions.",
+    "strong": "The same route appears across graph paths, theme logic, emotion routes, environment conditions, or repeated condition-source activation.",
     "medium": "The route has one clear supported path but limited cross-field reinforcement.",
     "weak": "The route is plausible but mostly interpretive or thin.",
     "unresolved": "No defensible route, filter, or personal context exists yet."
@@ -207,12 +230,12 @@
       "connection_strength": "strong",
       "boundary": "This describes a blended feeling route, not a fixed identity."
     },
-    "religion + history": {
+    "religion + arts": {
       "input_type": "composition",
       "composition_read": {
         "theme_a": "Religion",
-        "theme_b": "History",
-        "composed_climate": "sacred memory / institution / preservation / inherited pressure"
+        "theme_b": "Arts",
+        "composed_climate": "sacred image / ritual expression / embodied symbol"
       },
       "connection_strength": "strong",
       "boundary": "This is a theme composition, not a judgment about any religion."

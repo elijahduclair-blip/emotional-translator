@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { query } from './pool.js';
+import { normalizeNodeMetadataWithFaces } from '../lib/node-faces.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -19,6 +20,7 @@ async function seed() {
     if (data.graph?.nodes) {
       console.log(`  ?? Inserting ${data.graph.nodes.length} nodes...`);
       for (const node of data.graph.nodes) {
+        const metadata = normalizeNodeMetadataWithFaces(node.metadata || {});
         await query(
           `INSERT INTO nodes (id, label, type, family, hex_color, metadata) 
            VALUES ($1, $2, $3, $4, $5, $6)
@@ -34,7 +36,7 @@ async function seed() {
             node.type,
             node.family || null,
             node.hex_color || null,
-            node.metadata ? JSON.stringify(node.metadata) : null
+            JSON.stringify(metadata)
           ]
         );
       }
@@ -43,6 +45,20 @@ async function seed() {
     if (data.themeComposition?.themes) {
       console.log(`  ?? Inserting ${data.themeComposition.themes.length} theme nodes...`);
       for (const theme of data.themeComposition.themes) {
+        const metadata = normalizeNodeMetadataWithFaces({
+          category: theme.category,
+          cues: theme.cues || [],
+          baseClimate: theme.baseClimate,
+          anchorIds: theme.anchorIds || [],
+          emotionalLogic: theme.emotionalLogic,
+          boundary: theme.boundary,
+          source: 'themeComposition',
+          definition: theme.baseClimate,
+          evidence: `Theme composition dataset: ${theme.category} theme route`,
+          function: theme.emotionalLogic,
+          origin: theme.category,
+          relationships: (theme.anchorIds || []).join(', ')
+        });
         await query(
           `INSERT INTO nodes (id, label, type, family, metadata)
            VALUES ($1, $2, 'theme', NULL, $3)
@@ -53,15 +69,7 @@ async function seed() {
           [
             `theme-${theme.id}`,
             theme.label,
-            JSON.stringify({
-              category: theme.category,
-              cues: theme.cues || [],
-              baseClimate: theme.baseClimate,
-              anchorIds: theme.anchorIds || [],
-              emotionalLogic: theme.emotionalLogic,
-              boundary: theme.boundary,
-              source: 'themeComposition'
-            })
+            JSON.stringify(metadata)
           ]
         );
       }

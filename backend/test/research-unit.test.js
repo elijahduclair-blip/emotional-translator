@@ -27,6 +27,42 @@ test('research evidence requires HTTPS, a boundary, and a counterexample', () =>
   assert.throws(() => normalizeResearchItem({ ...base, counterexample: '' }), /counterexample/i);
 });
 
+test('history index research records require lane, era, type, summary, and route seeds', () => {
+  const item = normalizeResearchItem({
+    query: 'byzantine iconography',
+    title: 'Byzantine art',
+    kind: 'history_index',
+    sourceName: 'Wikipedia',
+    sourceType: 'encyclopedic',
+    sourceUrl: 'https://en.wikipedia.org/wiki/Byzantine_art',
+    boundary: 'History context only.',
+    counterexample: 'If no devotional image, liturgical, or icon route is present.',
+    confidence: 'medium',
+    historyMetadata: {
+      eraId: 'medieval-post-classical',
+      lane: 'arts',
+      type: 'art movement',
+      summary: 'Sacred image and devotional visibility.',
+      routeSeeds: ['icon', 'gold', 'devotion']
+    }
+  });
+  assert.equal(item.kind, 'history_index');
+  assert.equal(item.historyMetadata.lane, 'arts');
+  assert.deepEqual(item.historyMetadata.routeSeeds, ['icon', 'gold', 'devotion']);
+  assert.throws(() => normalizeResearchItem({
+    query: 'x',
+    title: 'x',
+    kind: 'history_index',
+    sourceName: 'Wikipedia',
+    sourceType: 'encyclopedic',
+    sourceUrl: 'https://example.com/x',
+    boundary: 'History context only.',
+    counterexample: 'Counterexample.',
+    confidence: 'low',
+    historyMetadata: { lane: 'arts', type: 'movement', summary: 'Missing era and route seeds.' }
+  }), /era/i);
+});
+
 test('source excerpts are stripped to plain compact text', () => {
   assert.equal(stripHtml('<p>Light <b>through</b> glass.</p>'), 'Light through glass.');
 });

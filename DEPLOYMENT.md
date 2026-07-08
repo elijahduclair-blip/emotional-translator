@@ -34,7 +34,19 @@ When prompted for `DATABASE_URL`, paste the private Neon connection string. Rend
 After deployment, verify:
 
 - `https://eli-emotional-translator-api.onrender.com/api/health`
+- `https://eli-emotional-translator-api.onrender.com/api/v1/foundation/analyze` with a `POST` body like `{"text":"gold ritual gold"}`
 - `https://eli-emotional-translator-api.onrender.com/api/v1/graph`
+
+Foundation contract boundary:
+
+- `POST /api/v1/foundation/analyze` is the structure-only endpoint for word counts, co-occurrences, Pareto ordering, and repeated structural patterns
+- it does not return color landings, family meaning, cluster summaries, or activation results
+- if this endpoint returns `404`, compare the Render deploy commit and startup logs before changing frontend or Base44 code
+
+Important repo note:
+
+- Render should build from the `backend` folder described in `render.yaml`
+- the top-level `api/` folder is an older scaffold and should not be treated as the live backend source
 
 If Render assigns a different service hostname, update the production URL in `config.js`, commit, and push.
 

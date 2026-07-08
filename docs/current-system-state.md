@@ -1,16 +1,400 @@
 # Current System State
 
+## Structural Space
+
+Before the condition engine can activate anything, the system needs a space to exist inside.
+
+The order is:
+
+```text
+Structural Space
+-> Core Rules
+-> Stored Graph
+-> Condition Engine
+-> Current Read
+```
+
+The graph does not begin with meaning.
+It begins with position.
+
+### Space Laws
+
+1. **The Space Exists**
+   - The engine operates inside a finite structural space.
+   - Nothing can be stored, read, or activated outside that space.
+2. **Every State Has a Position**
+   - Every valid node has one canonical coordinate.
+   - If it has no position, it has no defined structural state.
+3. **Movement Is Measurable**
+   - A change in state is movement through space.
+   - That movement can be measured.
+4. **Relationships Are Geometric**
+   - Nearness, distance, direction, and paths matter.
+   - Labels alone are not enough.
+5. **Conditions Change Movement, Not the Space**
+   - The condition engine changes what becomes active.
+   - It does not rewrite the underlying geometry.
+
+### Structural Space Axioms
+
+```text
+S = (X, Y, Z)
+Node = (x, y, z)
+```
+
+- `X` = horizontal separation / activation-regulation spread
+- `Y` = degree of differentiation / revealed structure
+- `Z` = signal vividness / opacity lift out of suppression
+
+Reference anchors:
+
+```text
+White = (0, 100, 0)
+Black = (0, 0, -96)
+Blue  = (-92, 66, 10)
+Red   = (92, 78, 80)
+```
+
+These are reference coordinates, not just labels.
+
+### Geometry Before Interpretation
+
+Geometry enters the system in five steps:
+
+1. give every stored node a canonical coordinate
+2. measure distance between nodes
+3. measure direction as vectors
+4. resolve bridge colors between parent anchors
+5. let conditions act on movement and activation without rewriting the baseline space
+
+In plain language:
+
+```text
+position
+-> distance
+-> vector
+-> neighborhood
+-> route
+-> activation
+-> meaning
+```
+
 ## Summary
 
-The project is now best described as a local-first **Condition Engine** built on top of the canonical color synonym graph. The graph stores possibilities. Condition sources decide which stored routes become relevant now. Activated routes produce meaning. Repeated activation produces pattern.
+The project is now best described as a structural-space-first **Condition Engine** built on top of the canonical color synonym graph. The graph stores possibilities as experience paths. Nodes store experience. Routes connect experiences. Condition sources decide which stored routes become relevant now. Activated routes produce meaning. Repeated activation produces pattern.
+
+Shortest rule:
+
+- **This system measures influence, not meaning.**
+- **`activationWeight` is the graph's first real unit.**
 
 Core runtime rule:
 
 ```text
 Node + Stored Route + Condition Source -> Activation
-Activation + Context -> Meaning
+Activation + Context + Gradient Travel -> Meaning
 Repeated Activation / Meaning -> Pattern
 ```
+
+Important ordering:
+
+```text
+Structural Space -> Influence -> Activation -> Meaning
+```
+
+Measurement rule:
+
+```text
+Entry + Reuse + Proximity + Recurrence + Condition weight = Influence
+Influence + activationWeight + Context + Gradient travel = Meaning
+```
+
+This system measures influence, not meaning.
+
+It is measuring:
+
+- what enters
+- what repeats
+- what stays near what
+- what recurs across reads
+- what current conditions weight more strongly
+
+That combined pressure is `Influence`. Meaning comes later as a read outcome.
+
+`activationWeight` is the graph's first real unit.
+
+It measures:
+
+- how strongly present condition sources are weighting a stored route
+- how close that route is to visible activation now
+- how much influence is actually pressing into the current read
+
+Most important correction:
+
+- the system does **not** start from meaning
+- it starts from **entry pressure**
+- meaning only appears after pressure has become influence, influence has activated routes, and those routes have been read in context
+
+## Structural Humility
+
+Every Local Climate Read is provisional.
+
+The engine does not claim direct certainty about subjective experience or permanent identity. It computes the route that is presently best supported by the local structural evidence available now.
+
+Every supported read should expose:
+
+- the active route
+- the supporting structural evidence
+- the condition-source and environmental influence
+- the historical pattern contribution, when present
+- the current support strength, usually through `activationWeight`
+- the revision boundary: what would need to change for the current route to lose support
+
+Shortest rule:
+
+```text
+best-supported now
+not fixed forever
+```
+
+Revision rule:
+
+```text
+if evidence changes
+or condition sources change
+or contradictory route pressure enters
+then recompute
+```
+
+When that happens, the earlier result becomes historical context rather than active truth.
+
+`Unresolved` is a valid outcome.
+
+If the graph cannot sufficiently distinguish among competing routes, returning unresolved is the correct computational result.
+
+System rules:
+
+```text
+Foundation
+- Node: stored experience; a starting point in the system.
+
+Foundation
+- Stored route: a possible path that connects experiences even when nothing is using it right now.
+
+Condition Engine
+- Condition source: anything that can weight, select, or activate a stored route, changing which experiences matter now.
+
+Condition Engine
+- Activation: the event where a stored route becomes relevant now.
+
+Condition Engine
+- activationWeight: the measurable amount of present route relevance created by current condition sources.
+
+Read
+- Gradient: the difference in accumulated experience between nodes, routes, or local fields.
+
+Read
+- Influence: measurable route pressure created by entry, reuse, proximity, recurrence, and condition weight.
+
+Read
+- Meaning: what emerges from traversing active routes and gradients under current context after influence has activated them.
+
+Read
+- Pattern: repeated activation behavior across reads.
+```
+
+Entry rule:
+
+```text
+direct naming
+or defensible route support
++ reuse
++ proximity
++ recurrence
++ condition weight
+= entry pressure
+
+enough entry pressure
+= node influence
+```
+
+Operationally:
+
+- language does not enter a node just because it vaguely feels related
+- it enters when the system can defend the route and the local pressure is strong enough to count
+- repeated entry adds local weight / gravity
+- added weight changes later activation behavior and can raise activationWeight on nearby stored routes
+- meaning emerges after that, not before that
+
+Interface split:
+
+```text
+Foundation = Color map
+Condition = Word bank
+```
+
+Operational meaning:
+
+- **Foundation / Color map** = the stored structure of base colors, secondary colors, shade language, and routed support
+- **Condition / Word bank** = the currently entered, counted, or active language that moves through the stored structure
+- the color map stores what is available
+- the word bank shows what is being used now
+- activation is the bridge between them
+- entered language is treated as new experience entering the system
+
+Shortest shared formula:
+
+```text
+Foundation + Condition -> Activation
+Activation + Context + Gradient Travel -> Meaning
+Repeated activation -> Pattern
+```
+
+Runtime route unit:
+
+```text
+stored possibility
++ condition source pressure
+= activationWeight
+
+activationWeight
++ context
+= active route visibility
+```
+
+## Bridge-Distance Baseline
+
+The stored color map now follows a cleaner anchor-and-bridge rule:
+
+```text
+Base colors = fixed anchors
+Bridge colors = secondary colors between two strongest base parents
+Closer to one side = stronger influence from that parent
+Shades = inherit through the strongest bridge/base path
+```
+
+Operationally:
+
+- `Base color family` holds the fixed backbone coordinates.
+- `Secondary color` is treated as a bridge color, not a free-floating family.
+- `Shade` is a refinement that inherits its baseline from the nearest defensible base-or-bridge route.
+- `Synonym` remains language support and does not become its own geometry anchor.
+- `Main colors never move` inside the stored baseline.
+- `All positions are relative`, forming a balanced color space.
+
+Optional 3D extension:
+
+```text
+X-axis = Cool (Blue-Green) <-> Warm (Yellow-Red)
+Y-axis = Degree of Differentiation
+Z-axis = Muted (Gray-Brown) <-> Vivid (Pink-Orange)
+```
+
+Interpret the Y-axis as revealed structure:
+
+- `0 = Black` = field / abstract baseline / zero revealed information
+- `Gray` = partial differentiation / becoming / structure emerging
+- `Bridge colors` = multiple influences between anchors
+- `Primary colors` = stable attractors
+- `100 = White` = maximum differentiation / fully revealed information
+
+Stored backbone order:
+
+```text
+Black
+  -> Gray
+    -> Bridge colors
+      -> Primary colors
+        -> White
+```
+
+That means:
+
+- `Black` is not merely a negative point; it is the field everything begins inside
+- `Gray` is not merely halfway brightness; it is partial differentiation
+- `Bridge colors` show mixed influence between anchors
+- `Primary colors` behave like stable attractors
+- `White` is maximum differentiation / most revealed structure
+
+Boundary:
+
+- the **stored baseline map** uses the bridge-distance rule
+- the **live runtime map** can still be temporarily shifted by theme conditions, atlas influence, personal influence, environment conditions, and other condition sources
+- removing those condition sources returns the graph to the stored bridge-distance baseline
+
+Question split:
+
+- Foundation asks: `What is available?`
+- Condition asks: `What is being used now?`
+- Activation asks: `What became relevant?`
+- Meaning asks: `What emerged from that relevance?`
+- Pattern asks: `What keeps repeating?`
+
+Expanded node rule:
+
+- A node is usually a `word`, `emotion`, `color`, `shade`, `object`, `theme`, or `condition`.
+- A node is not limited to only a word or emotion.
+
+## Three Dimensional W.A.T.E.R
+
+The current movement model inside the condition engine is named **Three dimensional W.A.T.E.R**.
+
+`Three dimensional` means route behavior is not treated as one flat straight-line jump. A condition or route can move:
+
+- horizontally
+- vertically
+- diagonally
+
+W.A.T.E.R expands to:
+
+```text
+W = Words
+A = Altered
+T = Together
+E = Entering
+R = Reuse
+```
+
+Its working formula is:
+
+```text
+Word enters node -> node gains weight -> repeated entry increases gravity -> gravity changes later route behavior -> repeated weighted routes create pattern
+```
+
+Graph travel rule:
+
+```text
+Stored route + entering words + reuse pressure -> heavier node influence
+heavier node influence + current condition -> stronger activation pull
+stronger activation pull + context -> clearer meaning
+```
+
+Interpretation rule:
+
+- words are the entry material
+- entering changes the local route field
+- meaning is shaped together rather than in isolation
+- reuse creates history
+- history creates local gravity / weight
+- gradients reveal the differences in accumulated experience across that local field
+
+In system terms:
+
+- stored routes remain the possibility layer
+- condition sources still decide what can activate
+- W.A.T.E.R explains how repeated language travel adds runtime weight to nodes and routes
+- meaning becomes clearer when the read traverses those gradients instead of treating every node as equally flat
+
+Current gravity rule:
+
+- each time route activity enters a node, that node can gain local weight
+- heavier nodes can influence later route selection more strongly
+- repeated weighted behavior is one path by which patterns become visible
+
+Boundary:
+
+- W.A.T.E.R does not automatically rewrite stored graph truth
+- it explains movement, reuse, and runtime influence inside the condition engine
 
 The app still translates feelings, words, and concepts into explained color-climate paths, but the product center is no longer "the graph" by itself. The product center is the activation layer that decides which graph possibilities matter under current conditions.
 
@@ -58,7 +442,7 @@ The live backend source of truth is the Express service in `backend/`. The separ
 - Neutral words tab: a Word bank view that groups unresolved neutral words by reason while excluding reclassified theme-layer terms.
 - Shade graph: a Word bank tool that converts Hex/RGB values and compares color words on X/Y/Z condition-space axes.
 - Natural shade atlas: a Word bank view that groups natural source terms into sky/weather, water/ice, earth/stone, plants, fire/light, body/material, and season/time. Each entry shows source, shade family, environment condition, X/Y/Z position, and graph route; this supports the noun/source plus adjective/condition vocabulary without making nature words strict color synonyms.
-- 3D color web: a graph mode that projects nodes into stable shade-space where every axis is centered at `0`: X moves regulation/cooling negative to activation/warming positive, Y moves depth/density negative to exposure/openness positive, and Z moves diffusion/ambiguity negative to clarity/signal positive; numbered ticks mark the axes, the Z axis is attached to the graph, the axis-view control aligns the view through Free/X/Y/Z perspectives, drag creates a custom view, and clicking a sphere inspects that node.
+- 3D color web: a graph mode that projects nodes into stable shade-space. X moves cool/blue-green to warm/yellow-red, Y measures **degree of differentiation** from `0 = black field / abstract` to `100 = white / fully differentiated`, and Z moves muted/gray-brown to vivid/pink-orange. The stored Y ladder now reads `black -> gray -> bridge colors -> primary colors -> white`; numbered ticks mark the axes, the Z axis is attached to the graph, the axis-view control aligns the view through Free/X/Y/Z perspectives, drag creates a custom view, and clicking a sphere inspects that node.
 
 ## Theme Conditions
 
@@ -218,7 +602,7 @@ Each runtime condition source can be described by:
 - Associations tab -> maps direct color words, common words, neutral bridge words, emotion words, and reclassified theme words under their families or theme layers.
 - Neutral words tab -> shows unresolved words such as `because` while excluding reclassified terms such as `signal`.
 - Shade graph tab -> converts inputs like `#6c8499`, `rgb(108,132,153)`, or known color words into centered X/Y/Z condition coordinates where `0` is the middle of each axis.
-- Graph mode button -> cycles Ring, Graph theory, Connected scatter, and 3D color web views; the 3D view keeps the same graph relationships but lets the color nodes sit in a numbered X/Y/Z shade-space with negative and positive directions. The axis-view button cycles Free, X, Y, and Z views so the graph can stay still while the viewer aligns through a chosen axis.
+- Graph mode button -> cycles Ring, Graph theory, Connected scatter, and 3D color web views; the 3D view keeps the same graph relationships but lets the color nodes sit in a numbered X/Y/Z shade-space. X and Z still read as opposing poles, while Y now reads as a `0..100` differentiation ladder from black field to white. The axis-view button cycles Free, X, Y, and Z views so the graph can stay still while the viewer aligns through a chosen axis.
 - Selected node detail -> shows **Environment Condition** for supported base and mixed color families. Example: red reads as heat / activation / urgency before it routes to anger, passion, danger, or intensity; green reads as regulation / growth / living balance before it routes to calm, hope, trust, envy, or endurance.
 - Graph Show filters -> includes **Conditions**, which toggles environment-condition nodes and condition-synonym nodes on or off.
 - Node detail -> now reads as a **Node info cluster**. It keeps **Routes From** and **Routes Into** separate, shows **Stored routes nearby** as quieter local truth, and only opens an **Extended cluster** when active routes chain or reconverge strongly enough to justify a second hop.

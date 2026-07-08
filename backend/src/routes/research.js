@@ -6,6 +6,8 @@ import { requireAdmin, requireAuth, requirePasswordCurrent } from '../middleware
 const router = express.Router();
 const ALLOWED_SOURCES = new Set(['wikipedia', 'crossref']);
 const ALLOWED_CONFIDENCE = new Set(['low', 'medium', 'high']);
+const ALLOWED_RESEARCH_KINDS = new Set(['general', 'history_index']);
+const ALLOWED_HISTORY_LANES = new Set(['religion', 'arts']);
 const USER_AGENT = 'EmotionalTranslatorResearch/1.0 (https://elijahduclair-blip.github.io/emotional-translator/)';
 const SEARCH_CACHE_TTL_MS = 10 * 60 * 1000;
 const SEARCH_LIMIT_WINDOW_MS = 10 * 60 * 1000;
@@ -42,10 +44,12 @@ router.get('/research/search', requireAuth, requirePasswordCurrent, limitResearc
 router.get('/research/items', requireAuth, requirePasswordCurrent, async (req, res, next) => {
   try {
     const status = nullableText(req.query.status);
+    const kind = nullableText(req.query.kind);
     const params = [];
     const conditions = [];
     if (req.user.role !== 'admin') { params.push(req.user.sub); conditions.push(`r.proposed_by=$${params.length}`); }
     if (status) { params.push(status); conditions.push(`r.status=$${params.length}`); }
+    if (kind) { params.push(kind); conditions.push(`r.kind=$${params.length}`); }
     const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
     const result = await query(
       `SELECT r.*, proposer.username AS proposed_by_name, reviewer.username AS reviewer_name
@@ -62,10 +66,10 @@ router.post('/research/items', requireAuth, requirePasswordCurrent, async (req, 
     const item = normalizeResearchItem(req.body);
     const result = await query(
       `INSERT INTO research_items
-       (id,query,title,source_name,source_type,source_url,excerpt,published_at,suggestions,emotional_logic,boundary,counterexample,confidence,status,proposed_by)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'proposed',$14) RETURNING *`,
-      [crypto.randomUUID(), item.query, item.title, item.sourceName, item.sourceType, item.sourceUrl, item.excerpt,
-        item.publishedAt, item.suggestions, item.emotionalLogic, item.boundary, item.counterexample, item.confidence, req.user.sub]
+       (id,query,title,kind,source_name,source_type,source_url,excerpt,published_at,suggestions,history_metadata,emotional_logic,boundary,counterexample,confidence,status,proposed_by)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,'proposed',$16) RETURNING *`,
+      [crypto.randomUUID(), item.query, item.title, item.kind, item.sourceName, item.sourceType, item.sourceUrl, item.excerpt,
+        item.publishedAt, item.suggestions, item.historyMetadata, item.emotionalLogic, item.boundary, item.counterexample, item.confidence, req.user.sub]
     );
     res.status(201).json({ item: result.rows[0] });
   } catch (error) { next(error); }
@@ -209,17 +213,22 @@ function normalizeResearchItem(value = {}) {
   let parsed;
   try { parsed = new URL(sourceUrl); } catch { throw httpError(400, 'Source URL must be valid.'); }
   if (parsed.protocol !== 'https:') throw httpError(400, 'Source URL must use HTTPS.');
+  const kind = String(value.kind || 'general').trim().toLowerCase();
+  if (!ALLOWED_RESEARCH_KINDS.has(kind)) throw httpError(400, 'Research kind must be general or history_index.');
   const confidence = String(value.confidence || 'low');
   if (!ALLOWED_CONFIDENCE.has(confidence)) throw httpError(400, 'Confidence must be low, medium, or high.');
+  const historyMetadata = normalizeHistoryMetadata(value.historyMetadata, kind);
   return {
     query: requiredText(value.query, 'Research query is required.').slice(0, 180),
     title: requiredText(value.title, 'Title is required.').slice(0, 500),
+    kind,
     sourceName: requiredText(value.sourceName, 'Source name is required.').slice(0, 240),
     sourceType,
     sourceUrl: parsed.toString(),
     excerpt: nullableText(value.excerpt)?.slice(0, 4000) || null,
     publishedAt: value.publishedAt || null,
     suggestions: value.suggestions && typeof value.suggestions === 'object' ? value.suggestions : {},
+    historyMetadata,
     emotionalLogic: nullableText(value.emotionalLogic)?.slice(0, 2000) || null,
     boundary: requiredText(value.boundary, 'A boundary is required.').slice(0, 2000),
     counterexample: requiredText(value.counterexample, 'A counterexample or falsification condition is required.').slice(0, 2000),
@@ -227,11 +236,62 @@ function normalizeResearchItem(value = {}) {
   };
 }
 
+function normalizeHistoryMetadata(value = {}, kind = 'general') {
+  if (!value || typeof value !== 'object') {
+    if (kind === 'history_index') throw httpError(400, 'History index records need structured history metadata.');
+    return {};
+  }
+
+  const metadata = {
+    eraId: nullableText(value.eraId)?.slice(0, 80) || null,
+    lane: nullableText(value.lane)?.toLowerCase() || null,
+    region: nullableText(value.region)?.slice(0, 160) || null,
+    civilization: nullableText(value.civilization)?.slice(0, 160) || null,
+    type: nullableText(value.type)?.slice(0, 120) || null,
+    summary: nullableText(value.summary)?.slice(0, 2000) || null,
+    wikipediaTitle: nullableText(value.wikipediaTitle)?.slice(0, 240) || null,
+    sourceNote: nullableText(value.sourceNote)?.slice(0, 1000) || null,
+    routeSeeds: uniqueTrimmedList(value.routeSeeds, 12, 80),
+    themeConditions: uniqueTrimmedList(value.themeConditions, 6, 80),
+    anchorHints: uniqueTrimmedList(value.anchorHints || value.atlasPull, 6, 80),
+    relatedEntries: uniqueTrimmedList(value.relatedEntries, 12, 120)
+  };
+
+  if (metadata.lane && !ALLOWED_HISTORY_LANES.has(metadata.lane)) {
+    throw httpError(400, 'History lane must be religion or arts.');
+  }
+
+  if (kind === 'history_index') {
+    if (!metadata.eraId) throw httpError(400, 'History index records need an era.');
+    if (!metadata.lane) throw httpError(400, 'History index records need a lane.');
+    if (!metadata.type) throw httpError(400, 'History index records need a type.');
+    if (!metadata.summary) throw httpError(400, 'History index records need a short summary.');
+    if (!metadata.routeSeeds.length) throw httpError(400, 'History index records need at least one route seed.');
+  }
+
+  const hasAnyValue = Object.values(metadata).some(value =>
+    Array.isArray(value) ? value.length : Boolean(value)
+  );
+  return hasAnyValue ? metadata : {};
+}
+
 function parseSources(value) {
   const requested = String(value || 'wikipedia,crossref').split(',').map(item => item.trim().toLowerCase()).filter(Boolean);
   const sources = new Set(requested.filter(item => ALLOWED_SOURCES.has(item)));
   if (!sources.size) throw httpError(400, 'Choose Wikipedia, Crossref, or both.');
   return sources;
+}
+
+function uniqueTrimmedList(value, limit = 12, itemLimit = 80) {
+  const list = Array.isArray(value)
+    ? value
+    : String(value || '')
+      .split(',')
+      .map(item => item.trim())
+      .filter(Boolean);
+  return [...new Set(list.map(item => String(item || '').trim()).filter(Boolean))]
+    .slice(0, limit)
+    .map(item => item.slice(0, itemLimit));
 }
 
 function stripHtml(value) { return String(value || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 1200); }

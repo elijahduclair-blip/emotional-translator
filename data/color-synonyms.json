@@ -1,5 +1,5 @@
 ﻿{
-    "version": "1.1.0",
+    "version": "1.1.1",
     "style": "editorial",
     "description": "Evocative color synonym dataset for mapping ordinary color names to editorial naming options grouped by family and mood.",
     "inputContext": {
@@ -221,6 +221,290 @@
             }
         ]
     },
+    "selectionClimate": {
+        "name": "Selection Climate Rule Set",
+        "systemName": "Pattern Extraction System",
+        "policy": "repetition-before-fixed-meaning",
+        "purpose": "Read a set of chosen colors or forms as a repeated preference pattern before making an interpretive climate statement.",
+        "boundary": "Selection climate is a relational read across repeated choices. It is not diagnosis, personality proof, or permanent identity.",
+        "minimumMatches": 2,
+        "stages": [
+            {
+                "id": "selection",
+                "label": "Selection intake",
+                "purpose": "Normalize the set and identify which supported selections are actually present."
+            },
+            {
+                "id": "observation",
+                "label": "Observable pattern",
+                "purpose": "Name repeated signals that can be pointed to directly in the set."
+            },
+            {
+                "id": "tendency",
+                "label": "Inferred tendency",
+                "purpose": "Convert repeated observable signals into cautious preference statements."
+            },
+            {
+                "id": "climate",
+                "label": "Relational climate",
+                "purpose": "Describe the shared environment condition created by the repeated pattern."
+            },
+            {
+                "id": "boundary",
+                "label": "Boundary check",
+                "purpose": "Keep the read falsifiable and prevent it from turning into essence claims."
+            }
+        ],
+        "boundaryChecks": [
+            "Separate observation from inference.",
+            "Do not claim one selection proves a whole tendency.",
+            "Do not turn repeated preference into permanent identity.",
+            "If the repeated route cannot be shown, mark the extraction weak or unresolved."
+        ],
+        "attributes": [
+            {
+                "id": "reflection",
+                "label": "Reflection",
+                "group": "perception",
+                "description": "Preference for inward atmosphere, observation, and internal distance."
+            },
+            {
+                "id": "depth",
+                "label": "Depth",
+                "group": "perception",
+                "description": "Preference for heavier, deeper, or more layered shades over flatter visibility."
+            },
+            {
+                "id": "regulation",
+                "label": "Regulation",
+                "group": "regulation_growth",
+                "description": "Preference for balance, recovery, and room to breathe."
+            },
+            {
+                "id": "growth",
+                "label": "Growth",
+                "group": "regulation_growth",
+                "description": "Preference for living development rather than static display."
+            },
+            {
+                "id": "contained",
+                "label": "Contained",
+                "group": "containment",
+                "description": "Preference for weight held in form rather than explosive release."
+            },
+            {
+                "id": "adaptive_structure",
+                "label": "Adaptive structure",
+                "group": "structure",
+                "description": "Preference for structure that can vary without becoming random."
+            },
+            {
+                "id": "variation",
+                "label": "Variation",
+                "group": "structure",
+                "description": "Preference for non-uniform pattern over strict symmetry."
+            },
+            {
+                "id": "natural_material",
+                "label": "Natural material",
+                "group": "material",
+                "description": "Preference for natural-object shades over neon or synthetic signal."
+            },
+            {
+                "id": "muted_weight",
+                "label": "Muted weight",
+                "group": "containment",
+                "description": "Preference for weight, gravity, and low-spectacle presence."
+            },
+            {
+                "id": "quiet_warmth",
+                "label": "Quiet warmth",
+                "group": "containment",
+                "description": "Preference for warmth that does not demand attention."
+            }
+        ],
+        "entries": [
+            {
+                "id": "teal-green",
+                "label": "Teal Green",
+                "cues": [
+                    "teal green",
+                    "teal"
+                ],
+                "attributes": [
+                    "reflection",
+                    "regulation",
+                    "growth",
+                    "contained"
+                ],
+                "observation": "Teal keeps choosing the bridge between awareness and growth instead of a louder pure-green signal."
+            },
+            {
+                "id": "blue-sapphire",
+                "label": "Blue Sapphire",
+                "cues": [
+                    "blue sapphire",
+                    "sapphire"
+                ],
+                "attributes": [
+                    "reflection",
+                    "depth",
+                    "contained",
+                    "natural_material"
+                ],
+                "observation": "Sapphire favors depth, internal atmosphere, and gem-like weight over lighter blue visibility."
+            },
+            {
+                "id": "evergreen",
+                "label": "Evergreen",
+                "cues": [
+                    "evergreen"
+                ],
+                "attributes": [
+                    "regulation",
+                    "growth",
+                    "contained",
+                    "natural_material"
+                ],
+                "observation": "Evergreen favors healthy growth, regulation, and endurance over brighter green intensity."
+            },
+            {
+                "id": "red-mahogany",
+                "label": "Red Mahogany",
+                "cues": [
+                    "red mahogany",
+                    "mahogany"
+                ],
+                "attributes": [
+                    "depth",
+                    "contained",
+                    "natural_material",
+                    "muted_weight"
+                ],
+                "observation": "Mahogany carries emotional gravity and contained warmth rather than bright red spectacle."
+            },
+            {
+                "id": "sand-yellow",
+                "label": "Sand Yellow",
+                "cues": [
+                    "sand yellow",
+                    "sand-yellow"
+                ],
+                "attributes": [
+                    "quiet_warmth",
+                    "contained",
+                    "natural_material",
+                    "muted_weight"
+                ],
+                "observation": "Sand yellow keeps warmth quiet, grounded, and low-spectacle instead of turning it into gold display."
+            },
+            {
+                "id": "irregular-quadrilateral",
+                "label": "Irregular Quadrilateral",
+                "cues": [
+                    "irregular quadrilateral",
+                    "irregular quad",
+                    "irregular quadrilateral shape",
+                    "irregular shape"
+                ],
+                "attributes": [
+                    "adaptive_structure",
+                    "variation",
+                    "contained"
+                ],
+                "observation": "The irregular quadrilateral keeps structure while allowing variation, rather than choosing pure symmetry or chaos."
+            }
+        ],
+        "observableRules": [
+            {
+                "id": "deep-over-bright",
+                "anyOf": [
+                    "depth",
+                    "muted_weight"
+                ],
+                "minimumCount": 3,
+                "statement": "You repeatedly choose deeper shades over bright shades."
+            },
+            {
+                "id": "natural-over-neon",
+                "anyOf": [
+                    "natural_material"
+                ],
+                "minimumCount": 4,
+                "statement": "You repeatedly choose natural-object colors over neon or synthetic colors."
+            },
+            {
+                "id": "contained-over-explosive",
+                "anyOf": [
+                    "contained"
+                ],
+                "minimumCount": 4,
+                "statement": "You repeatedly choose contained weight over explosive signal."
+            },
+            {
+                "id": "variation-within-structure",
+                "allOf": [
+                    "adaptive_structure",
+                    "variation"
+                ],
+                "minimumCount": 1,
+                "statement": "You choose variation within structure instead of rigid symmetry."
+            }
+        ],
+        "inferenceRules": [
+            {
+                "id": "depth-over-visibility",
+                "allOf": [
+                    "reflection",
+                    "depth"
+                ],
+                "statement": "depth > visibility"
+            },
+            {
+                "id": "variation-over-symmetry",
+                "allOf": [
+                    "adaptive_structure",
+                    "variation"
+                ],
+                "statement": "variation > symmetry"
+            },
+            {
+                "id": "continuity-over-intensity",
+                "allOf": [
+                    "regulation",
+                    "growth",
+                    "contained"
+                ],
+                "statement": "continuity > intensity"
+            },
+            {
+                "id": "containment-over-spectacle",
+                "allOf": [
+                    "contained",
+                    "muted_weight"
+                ],
+                "statement": "containment > spectacle"
+            }
+        ],
+        "finalReads": [
+            {
+                "id": "depth-and-adaptation",
+                "allOf": [
+                    "depth",
+                    "adaptive_structure"
+                ],
+                "statement": "Depth is preferred over spectacle, and adaptation is preferred over rigidity."
+            },
+            {
+                "id": "contained-and-regulated",
+                "allOf": [
+                    "contained",
+                    "regulation"
+                ],
+                "statement": "The set prefers weight held in form, with balance acting as a stabilizing condition rather than a fixed destination."
+            }
+        ]
+    },
     "themeComposition": {
         "name": "Theme Composition Engine",
         "policy": "combined-themes-create-relational-climates-not-strict-synonyms",
@@ -249,71 +533,6 @@
                 "boundary": "Religious categories are treated respectfully as sacred/cultural theme systems, not as claims of truth or falsehood."
             },
             {
-                "id": "season",
-                "label": "Season",
-                "role": "time, weather, cycle, and environmental mood",
-                "question": "What does timing, weather, return, or seasonal pressure do to the theme?",
-                "contains": [
-                    "Season",
-                    "Spring",
-                    "Summer",
-                    "Fall",
-                    "Winter",
-                    "December"
-                ],
-                "mixesWith": [
-                    "Religion",
-                    "History",
-                    "Science",
-                    "Arts"
-                ],
-                "boundary": "Season is a climate filter; it changes presentation without becoming the whole meaning."
-            },
-            {
-                "id": "history",
-                "label": "History",
-                "role": "memory, institution, pressure, rupture, survival, and inheritance",
-                "question": "What does accumulated human time do to the theme?",
-                "contains": [
-                    "History",
-                    "Ritual",
-                    "Archive",
-                    "Memory",
-                    "Migration",
-                    "Revolution",
-                    "Empire"
-                ],
-                "mixesWith": [
-                    "Religion",
-                    "Season",
-                    "Science",
-                    "Arts"
-                ],
-                "boundary": "History means human pressure over time, not just dates or a single event."
-            },
-            {
-                "id": "science",
-                "label": "Science",
-                "role": "process, mechanism, evidence, structure, and revision",
-                "question": "What real mechanism or structure resembles this emotional movement?",
-                "contains": [
-                    "Science",
-                    "Light",
-                    "Optics",
-                    "Biology",
-                    "Geology",
-                    "Weather",
-                    "Geometry"
-                ],
-                "mixesWith": [
-                    "Religion",
-                    "Season",
-                    "History",
-                    "Arts"
-                ],
-                "boundary": "Science is used as process logic, not as a replacement for emotional or cultural meaning."
-            },
-            {
                 "id": "arts",
                 "label": "Arts",
                 "role": "form, perception, symbol, performance, and composition",
@@ -327,129 +546,9 @@
                     "Costume"
                 ],
                 "mixesWith": [
-                    "Religion",
-                    "Season",
-                    "History",
-                    "Science"
+                    "Religion"
                 ],
                 "boundary": "Arts are expressive frames, not strict evidence for color definitions."
-            },
-            {
-                "id": "foundation",
-                "label": "Foundation",
-                "role": "experience, perception, emotion, identity, adaptation, and behavior inside a human",
-                "question": "What human engine is producing the signal before language organizes it?",
-                "contains": [
-                    "Experience",
-                    "Perception",
-                    "Emotion",
-                    "Identity",
-                    "Adaptation",
-                    "Behavior"
-                ],
-                "mixesWith": [
-                    "Pattern",
-                    "Translation",
-                    "Movement",
-                    "Identity"
-                ],
-                "boundary": "Foundation names the internal human layer, not a fixed essence or diagnosis."
-            },
-            {
-                "id": "pattern",
-                "label": "Pattern",
-                "role": "repetition, structure, connection, relation, association, network, context, similarity, and difference",
-                "question": "What repeated structure or relationship makes the meaning readable?",
-                "contains": [
-                    "Pattern",
-                    "Repetition",
-                    "Structure",
-                    "Connection",
-                    "Relation",
-                    "Association",
-                    "Network",
-                    "Context",
-                    "Similarity",
-                    "Difference"
-                ],
-                "mixesWith": [
-                    "Foundation",
-                    "Translation",
-                    "Movement",
-                    "Identity"
-                ],
-                "boundary": "Pattern is the meaning engine; it explains relation before interpretation."
-            },
-            {
-                "id": "translation",
-                "label": "Translation",
-                "role": "signal, symbol, representation, color, shade, climate, meaning, interpretation, and translation",
-                "question": "How does felt experience become a readable color-climate signal?",
-                "contains": [
-                    "Signal",
-                    "Symbol",
-                    "Representation",
-                    "Color",
-                    "Shade",
-                    "Climate",
-                    "Meaning",
-                    "Interpretation",
-                    "Translation"
-                ],
-                "mixesWith": [
-                    "Foundation",
-                    "Pattern",
-                    "Movement",
-                    "Identity"
-                ],
-                "boundary": "Translation is the bridge between experience and language, not proof that a symbol has one fixed meaning."
-            },
-            {
-                "id": "movement",
-                "label": "Movement",
-                "role": "change, response, pressure, movement, growth, stability, regulation, adjustment, and transition",
-                "question": "What changes under pressure, and what regulates the change?",
-                "contains": [
-                    "Change",
-                    "Response",
-                    "Pressure",
-                    "Movement",
-                    "Growth",
-                    "Stability",
-                    "Regulation",
-                    "Adjustment",
-                    "Transition"
-                ],
-                "mixesWith": [
-                    "Foundation",
-                    "Pattern",
-                    "Translation",
-                    "Identity",
-                    "Season"
-                ],
-                "boundary": "Movement names change and regulation; it does not make instability or growth permanent."
-            },
-            {
-                "id": "identity",
-                "label": "Identity",
-                "role": "preference, tendency, habit, trait, character, personality, and individuality as output",
-                "question": "What outward identity pattern appears after experience, pattern, translation, and movement?",
-                "contains": [
-                    "Preference",
-                    "Tendency",
-                    "Habit",
-                    "Trait",
-                    "Character",
-                    "Personality",
-                    "Individuality"
-                ],
-                "mixesWith": [
-                    "Foundation",
-                    "Pattern",
-                    "Translation",
-                    "Movement"
-                ],
-                "boundary": "Identity is an output layer and climate-facing pattern, not a permanent label."
             }
         ],
         "themes": [
@@ -531,161 +630,6 @@
                 "boundary": "Judaism is treated respectfully as a sacred-cultural theme route, not as one fixed emotional color."
             },
             {
-                "id": "season",
-                "label": "Season",
-                "category": "Season",
-                "cues": [
-                    "season",
-                    "seasons",
-                    "seasonal"
-                ],
-                "baseClimate": "cycle / weather / return / time climate",
-                "anchorIds": [
-                    "green",
-                    "silver",
-                    "midnight"
-                ],
-                "emotionalLogic": "Season enters as environmental timing: growth, heat, decline, wintering, and return.",
-                "boundary": "Season is a timing filter, not a permanent mood."
-            },
-            {
-                "id": "spring",
-                "label": "Spring",
-                "category": "Season",
-                "cues": [
-                    "spring"
-                ],
-                "baseClimate": "renewal / germination / return of life",
-                "anchorIds": [
-                    "green",
-                    "rose"
-                ],
-                "emotionalLogic": "Spring routes through emergence, softness, beginning again, and open growth.",
-                "boundary": "Spring names a renewal climate, not guaranteed happiness."
-            },
-            {
-                "id": "summer",
-                "label": "Summer",
-                "category": "Season",
-                "cues": [
-                    "summer"
-                ],
-                "baseClimate": "heat / fullness / outward energy",
-                "anchorIds": [
-                    "ember",
-                    "green"
-                ],
-                "emotionalLogic": "Summer routes through exposure, vitality, abundance, heat, and release.",
-                "boundary": "Summer is a seasonal intensity filter, not only joy."
-            },
-            {
-                "id": "fall",
-                "label": "Fall",
-                "category": "Season",
-                "cues": [
-                    "fall",
-                    "autumn"
-                ],
-                "baseClimate": "harvest / decline / amber memory",
-                "anchorIds": [
-                    "ember",
-                    "silver"
-                ],
-                "emotionalLogic": "Fall routes through ripeness, letting go, preparation, and visible change.",
-                "boundary": "Fall is a transition climate, not only loss."
-            },
-            {
-                "id": "winter",
-                "label": "Winter",
-                "category": "Season",
-                "cues": [
-                    "winter",
-                    "december"
-                ],
-                "baseClimate": "darkness / preservation / vigil / sheltered warmth",
-                "anchorIds": [
-                    "midnight",
-                    "silver",
-                    "green"
-                ],
-                "emotionalLogic": "Winter routes through cold, memory, endurance, stillness, gathering, and ritual light.",
-                "boundary": "Winter is a preservation climate, not only sadness."
-            },
-            {
-                "id": "history",
-                "label": "History",
-                "category": "History",
-                "cues": [
-                    "history",
-                    "historical",
-                    "past"
-                ],
-                "baseClimate": "memory / pressure / inheritance / record",
-                "anchorIds": [
-                    "silver",
-                    "obsidian",
-                    "green"
-                ],
-                "emotionalLogic": "History enters as accumulated pressure, record, rupture, preservation, institution, and survival.",
-                "boundary": "History is human pressure over time, not just dates."
-            },
-            {
-                "id": "ritual",
-                "label": "Ritual",
-                "category": "History",
-                "cues": [
-                    "ritual",
-                    "ceremony",
-                    "calendar"
-                ],
-                "baseClimate": "repeated meaning / embodied memory / sacred time",
-                "anchorIds": [
-                    "green",
-                    "rose",
-                    "midnight"
-                ],
-                "emotionalLogic": "Ritual routes through repeated action that preserves meaning and regulates belonging.",
-                "boundary": "Ritual is a repeated form, not automatic belief."
-            },
-            {
-                "id": "geometry",
-                "label": "Geometry",
-                "category": "Science",
-                "cues": [
-                    "geometry",
-                    "symmetry"
-                ],
-                "baseClimate": "order / symmetry / sacred abstraction",
-                "anchorIds": [
-                    "silver",
-                    "green",
-                    "midnight"
-                ],
-                "emotionalLogic": "Geometry routes through pattern, balance, repetition, proportion, and intelligible order.",
-                "boundary": "Geometry is a structural filter, not a fixed cultural meaning."
-            },
-            {
-                "id": "science",
-                "label": "Science",
-                "category": "Science",
-                "cues": [
-                    "science",
-                    "light",
-                    "optics",
-                    "biology",
-                    "geology",
-                    "weather"
-                ],
-                "baseClimate": "process / evidence / mechanism / revision",
-                "anchorIds": [
-                    "silver",
-                    "green",
-                    "ember"
-                ],
-                "emotionalLogic": "Science enters as mechanism, pressure testing, observed change, and revision under evidence.",
-                "boundary": "Science is a process filter, not a replacement for emotional meaning."
-            },
-            {
                 "id": "arts",
                 "label": "Arts",
                 "category": "Arts",
@@ -706,328 +650,26 @@
                 ],
                 "emotionalLogic": "Arts enter as visible, audible, spatial, or symbolic form that makes a climate perceivable.",
                 "boundary": "Arts are expressive frames, not evidence for strict color definitions."
-            },
-            {
-                "id": "foundation",
-                "label": "Foundation",
-                "category": "Foundation",
-                "cues": [
-                    "foundation",
-                    "experience",
-                    "perception",
-                    "emotion",
-                    "adaptation",
-                    "behavior",
-                    "human engine",
-                    "inside a human"
-                ],
-                "baseClimate": "human engine / lived input / felt perception",
-                "anchorIds": [
-                    "green",
-                    "rose",
-                    "midnight"
-                ],
-                "emotionalLogic": "Foundation routes through what happens inside a human before the system names it: experience, perception, emotion, adaptation, and behavior.",
-                "boundary": "Foundation is a pre-interpretive layer, not a claim that the person is one stable essence."
-            },
-            {
-                "id": "pattern",
-                "label": "Pattern",
-                "category": "Pattern",
-                "cues": [
-                    "pattern",
-                    "repetition",
-                    "structure",
-                    "connection",
-                    "relation",
-                    "association",
-                    "network",
-                    "context",
-                    "similarity",
-                    "difference",
-                    "meaning engine"
-                ],
-                "baseClimate": "meaning engine / relation / repeated structure",
-                "anchorIds": [
-                    "green",
-                    "silver",
-                    "midnight"
-                ],
-                "emotionalLogic": "Pattern routes through repeated relation: connection, context, similarity, difference, and network structure make the signal readable.",
-                "boundary": "Pattern explains structure before interpretation; it is not decoration or loose association."
-            },
-            {
-                "id": "translation",
-                "label": "Translation",
-                "category": "Translation",
-                "cues": [
-                    "translation",
-                    "translate",
-                    "translator",
-                    "signal",
-                    "symbol",
-                    "representation",
-                    "color",
-                    "shade",
-                    "climate",
-                    "meaning",
-                    "interpretation",
-                    "color work"
-                ],
-                "baseClimate": "experience-to-language bridge / color-climate signal",
-                "anchorIds": [
-                    "silver",
-                    "midnight",
-                    "rose"
-                ],
-                "emotionalLogic": "Translation routes through the bridge where felt experience becomes symbol, color, shade, climate, meaning, and interpretation.",
-                "boundary": "Translation makes a signal readable without turning the signal into a strict synonym or permanent truth."
-            },
-            {
-                "id": "movement",
-                "label": "Movement",
-                "category": "Movement",
-                "cues": [
-                    "movement",
-                    "change",
-                    "response",
-                    "pressure",
-                    "growth",
-                    "stability",
-                    "regulation",
-                    "adjustment",
-                    "transition",
-                    "spring method"
-                ],
-                "baseClimate": "pressure / response / regulation / transition",
-                "anchorIds": [
-                    "ember",
-                    "green",
-                    "silver"
-                ],
-                "emotionalLogic": "Movement routes through change under pressure: response, growth, stability, regulation, adjustment, and transition.",
-                "boundary": "Movement describes process and regulation, not a permanent emotional label."
-            },
-            {
-                "id": "identity-layer",
-                "label": "Identity Layer",
-                "category": "Identity",
-                "cues": [
-                    "identity layer",
-                    "identity",
-                    "preference",
-                    "tendency",
-                    "habit",
-                    "trait",
-                    "character",
-                    "personality",
-                    "individuality",
-                    "output layer"
-                ],
-                "baseClimate": "output layer / behavioral fingerprint / climate-facing identity",
-                "anchorIds": [
-                    "obsidian",
-                    "green",
-                    "rose"
-                ],
-                "emotionalLogic": "Identity routes through the patterns that appear as preference, tendency, habit, trait, character, personality, and individuality.",
-                "boundary": "Identity is treated as an output of moving climates, not a fixed label."
             }
         ],
         "compositions": [
             {
-                "id": "religion-history",
+                "id": "religion-arts",
                 "themeIds": [
                     "religion",
-                    "history"
+                    "arts"
                 ],
-                "composedClimate": "sacred memory / institution / preservation / inherited pressure",
-                "anchorIds": [
-                    "midnight",
-                    "silver",
-                    "green",
-                    "obsidian"
-                ],
-                "colorShift": "Religion's devotional rose/green climate darkens toward midnight, silver, and obsidian when historical memory and institutions enter.",
-                "emotionalShift": "Awe becomes inheritance, obligation, conflict, preservation, and collective memory.",
-                "meaningShift": "The question changes from private faith to religion as lived record, institution, rupture, and survival over time.",
-                "boundary": "This composition describes relational climate, not the truth or value of any religion."
-            },
-            {
-                "id": "christianity-winter",
-                "themeIds": [
-                    "christianity",
-                    "winter"
-                ],
-                "composedClimate": "vigil / birth in darkness / ritual light / sheltered warmth",
-                "anchorIds": [
-                    "midnight",
-                    "green",
-                    "rose",
-                    "silver"
-                ],
-                "colorShift": "Christianity's mercy and ritual light move into midnight and silver winter, with green endurance and rose tenderness preserved.",
-                "emotionalShift": "Devotion becomes waiting, warmth, incarnation, memory, and light held inside darkness.",
-                "meaningShift": "The theme becomes sacred winter time: not just belief, not just season, but ritual birth and vigil.",
-                "boundary": "This is a Christian-winter theme composition, not a claim about all Christianity."
-            },
-            {
-                "id": "islam-geometry",
-                "themeIds": [
-                    "islam",
-                    "geometry"
-                ],
-                "composedClimate": "devotion / order / pattern / sacred abstraction",
-                "anchorIds": [
-                    "green",
-                    "silver",
-                    "midnight"
-                ],
-                "colorShift": "Islam's green devotion and midnight depth clarify through silver pattern and symmetry.",
-                "emotionalShift": "Devotion becomes order, rhythm, discipline, contemplation, and sacred abstraction.",
-                "meaningShift": "The theme moves from religion alone into a structured visual-spiritual language of pattern.",
-                "boundary": "This composition names a respectful symbolic route, not a total description of Islam."
-            },
-            {
-                "id": "judaism-history",
-                "themeIds": [
-                    "judaism",
-                    "history"
-                ],
-                "composedClimate": "covenant / exile / archive / endurance / return",
-                "anchorIds": [
-                    "midnight",
-                    "green",
-                    "silver",
-                    "obsidian"
-                ],
-                "colorShift": "Judaism's covenant and study climate deepens into midnight memory, green endurance, silver archive, and obsidian exposure.",
-                "emotionalShift": "Sacred relation becomes endurance, record, rupture, return, and preserved identity under pressure.",
-                "meaningShift": "The theme becomes covenant moving through history rather than religion as an isolated label.",
-                "boundary": "This is a respectful theme composition, not a reduction of Judaism to suffering or history alone."
-            },
-            {
-                "id": "season-religion",
-                "themeIds": [
-                    "season",
-                    "religion"
-                ],
-                "composedClimate": "ritual calendar / sacred time / cyclical devotion",
-                "anchorIds": [
-                    "green",
-                    "midnight",
-                    "rose",
-                    "silver"
-                ],
-                "colorShift": "Season's green/silver cycles give religion a calendar body: midnight vigil, rose devotion, and green return.",
-                "emotionalShift": "Devotion becomes timed, repeated, communal, and seasonally renewed.",
-                "meaningShift": "The theme becomes sacred time: belief experienced through cycles, festivals, waiting, and return.",
-                "boundary": "This composition describes how seasonal context affects religious meaning, not one universal religious calendar."
-            },
-            {
-                "id": "foundation-pattern",
-                "themeIds": [
-                    "foundation",
-                    "pattern"
-                ],
-                "composedClimate": "felt structure / repeated human signal / meaning engine",
-                "anchorIds": [
-                    "green",
-                    "silver",
-                    "midnight",
-                    "rose"
-                ],
-                "colorShift": "Foundation's green/rose lived input becomes more silver and midnight when pattern makes the repeated structure visible.",
-                "emotionalShift": "Raw experience becomes recognizable tendency, relation, and recurring signal.",
-                "meaningShift": "The question changes from what is felt to what repeats enough to become readable.",
-                "boundary": "This composition describes pattern recognition, not a diagnosis or fixed identity."
-            },
-            {
-                "id": "pattern-translation",
-                "themeIds": [
-                    "pattern",
-                    "translation"
-                ],
-                "composedClimate": "relational language / color-climate map / readable network",
-                "anchorIds": [
-                    "silver",
-                    "midnight",
-                    "green"
-                ],
-                "colorShift": "Pattern's green/silver structure clarifies through translation's silver-blue bridge into a readable color-climate map.",
-                "emotionalShift": "Connection becomes language; repetition becomes a signal that can be named without flattening it.",
-                "meaningShift": "The theme becomes an emotional translator: relation first, language second, color as trace.",
-                "boundary": "This composition supports interpretation only when the pattern can name its structure."
-            },
-            {
-                "id": "foundation-translation",
-                "themeIds": [
-                    "foundation",
-                    "translation"
-                ],
-                "composedClimate": "experience-to-symbol bridge / felt signal becoming language",
+                "composedClimate": "sacred form / ritual expression / embodied symbol",
                 "anchorIds": [
                     "rose",
+                    "midnight",
                     "silver",
-                    "midnight"
+                    "ember"
                 ],
-                "colorShift": "Foundation's rose/green lived feeling moves through silver translation and midnight reflection.",
-                "emotionalShift": "Feeling becomes signal, signal becomes symbol, and symbol becomes interpretable climate.",
-                "meaningShift": "The theme becomes the bridge between being inside an experience and being able to describe it.",
-                "boundary": "This composition does not claim language perfectly captures experience."
-            },
-            {
-                "id": "movement-identity",
-                "themeIds": [
-                    "movement",
-                    "identity"
-                ],
-                "composedClimate": "pressure-shaped identity / habit under change / recovery pattern",
-                "anchorIds": [
-                    "ember",
-                    "green",
-                    "obsidian",
-                    "silver"
-                ],
-                "colorShift": "Movement's ember pressure and green regulation pull identity toward obsidian reinvention and silver revision.",
-                "emotionalShift": "Identity becomes adaptive: preference, habit, and character appear through response, adjustment, and recovery.",
-                "meaningShift": "The theme changes from a fixed person-label into an output of pressure, regulation, and transition.",
-                "boundary": "This composition protects identity from being reduced to one permanent state."
-            },
-            {
-                "id": "translation-identity",
-                "themeIds": [
-                    "translation",
-                    "identity"
-                ],
-                "composedClimate": "named self-pattern / behavioral fingerprint / interpreted individuality",
-                "anchorIds": [
-                    "silver",
-                    "rose",
-                    "obsidian",
-                    "green"
-                ],
-                "colorShift": "Translation's silver signal turns identity's green/obsidian output into a named behavioral fingerprint.",
-                "emotionalShift": "The self becomes easier to read, but also more vulnerable to being mislabeled.",
-                "meaningShift": "The theme becomes identity as interpreted pattern rather than identity as isolated essence.",
-                "boundary": "This composition requires boundary checks so the translation does not harden into a label."
-            },
-            {
-                "id": "pattern-movement",
-                "themeIds": [
-                    "pattern",
-                    "movement"
-                ],
-                "composedClimate": "dynamic structure / repeated adjustment / spring method",
-                "anchorIds": [
-                    "green",
-                    "ember",
-                    "silver"
-                ],
-                "colorShift": "Pattern's green/silver structure warms with movement's ember pressure and regulation.",
-                "emotionalShift": "Repetition becomes adaptive rather than static; the structure changes as pressure changes.",
-                "meaningShift": "The theme becomes the Spring Method layer: noticing change, response, stability, adjustment, and transition.",
-                "boundary": "This composition describes a moving system, not endless interpretation."
+                "colorShift": "Religion's devotional structure becomes more visible and embodied when Arts enters as symbol, composition, performance, and form.",
+                "emotionalShift": "Awe and devotion become expressive, perceivable, spatial, and symbolic.",
+                "meaningShift": "The read shifts from sacred system alone toward how sacred meaning becomes visible, audible, staged, built, or symbolically carried.",
+                "boundary": "This composition describes a relational theme field, not the truth or total meaning of religion or art."
             }
         ],
         "defaultComposition": {
@@ -1207,16 +849,7 @@
                 "history": "kinship, friendship, alliance, courtship, conflict, repair",
                 "science": "attachment, signaling, feedback loops, boundary regulation",
                 "arts": "theater, duet, portrait, dialogue, choreography",
-                "emotionalLogic": "Intimacy is real because it includes masks, tension, imperfection, and repair."
-            },
-            {
-                "id": "identity-pressure-river",
-                "label": "Identity/Pressure River",
-                "myth": "trial, exile, descent, forge, return, shapeshifter",
-                "history": "migration, reinvention, revolution, recovery, public record",
-                "science": "adaptation, stress response, metamorphosis, compression",
-                "arts": "character arc, revision, costume change, motif transformation",
-                "emotionalLogic": "Identity forms through pressure and movement without becoming only its wound."
+                "emotionalLogic": "A node is understood by how it changes when another node is involved. Relation changes salience, pressure, visibility, softness, tension, and repair without replacing the underlying node."
             }
         ]
     },
@@ -2197,6 +1830,20 @@
                 }
             },
             {
+                "id": "subfamily-blue-green",
+                "label": "blue-green",
+                "type": "subfamily",
+                "family": "blue-green",
+                "metadata": {
+                    "families": [
+                        "blue",
+                        "green"
+                    ],
+                    "evidence": "blue-green / teal / cyan bridge",
+                    "definitionBasis": "definition-derived color bridge"
+                }
+            },
+            {
                 "id": "subfamily-blue-purple",
                 "label": "blue-purple",
                 "type": "subfamily",
@@ -2828,6 +2475,978 @@
                     "definitionBasis": "exact definition phrase",
                     "definitionPhrase": "bluish purple",
                     "naturalNameBasis": "existing natural/material color name for the definition phrase"
+                }
+            },
+            {
+                "id": "shade-ocean-blue",
+                "label": "ocean blue",
+                "type": "shade",
+                "family": "blue",
+                "metadata": {
+                    "families": [
+                        "blue"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-deep-blue",
+                "label": "deep blue",
+                "type": "shade",
+                "family": "blue",
+                "metadata": {
+                    "families": [
+                        "blue"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-electric-blue",
+                "label": "electric blue",
+                "type": "shade",
+                "family": "blue",
+                "metadata": {
+                    "families": [
+                        "blue"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-crystal-blue",
+                "label": "crystal blue",
+                "type": "shade",
+                "family": "blue",
+                "metadata": {
+                    "families": [
+                        "blue"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-aurora-blue",
+                "label": "aurora blue",
+                "type": "shade",
+                "family": "blue",
+                "metadata": {
+                    "families": [
+                        "blue"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-midnight-blue",
+                "label": "midnight blue",
+                "type": "shade",
+                "family": "blue",
+                "metadata": {
+                    "families": [
+                        "blue"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-midnight-lake",
+                "label": "midnight lake",
+                "type": "shade",
+                "family": "blue-black",
+                "metadata": {
+                    "subfamily": "subfamily-blue-black",
+                    "families": [
+                        "blue",
+                        "black"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-midnight-ocean",
+                "label": "midnight ocean",
+                "type": "shade",
+                "family": "blue-black",
+                "metadata": {
+                    "subfamily": "subfamily-blue-black",
+                    "families": [
+                        "blue",
+                        "black"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-moonlit-lake",
+                "label": "moonlit lake",
+                "type": "shade",
+                "family": "blue-gray",
+                "metadata": {
+                    "subfamily": "subfamily-blue-gray",
+                    "families": [
+                        "blue",
+                        "gray"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-mist-silver",
+                "label": "mist silver",
+                "type": "shade",
+                "family": "gray-white",
+                "metadata": {
+                    "subfamily": "subfamily-gray-white",
+                    "families": [
+                        "gray",
+                        "white"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-fog-silver",
+                "label": "fog silver",
+                "type": "shade",
+                "family": "gray-white",
+                "metadata": {
+                    "subfamily": "subfamily-gray-white",
+                    "families": [
+                        "gray",
+                        "white"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-cloud-white",
+                "label": "cloud white",
+                "type": "shade",
+                "family": "gray-white",
+                "metadata": {
+                    "subfamily": "subfamily-gray-white",
+                    "families": [
+                        "gray",
+                        "white"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-moon-silver",
+                "label": "moon silver",
+                "type": "shade",
+                "family": "gray-white",
+                "metadata": {
+                    "subfamily": "subfamily-gray-white",
+                    "families": [
+                        "gray",
+                        "white"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-storm-silver",
+                "label": "storm silver",
+                "type": "shade",
+                "family": "gray-white",
+                "metadata": {
+                    "subfamily": "subfamily-gray-white",
+                    "families": [
+                        "gray",
+                        "white"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-storm-gray",
+                "label": "storm gray",
+                "type": "shade",
+                "family": "gray",
+                "metadata": {
+                    "families": [
+                        "gray"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-rain-gray",
+                "label": "rain gray",
+                "type": "shade",
+                "family": "gray",
+                "metadata": {
+                    "families": [
+                        "gray"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-rain-charcoal",
+                "label": "rain charcoal",
+                "type": "shade",
+                "family": "gray-black",
+                "metadata": {
+                    "subfamily": "subfamily-gray-black",
+                    "families": [
+                        "gray",
+                        "black"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-sage-green",
+                "label": "sage green",
+                "type": "shade",
+                "family": "green",
+                "metadata": {
+                    "families": [
+                        "green"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-pine-green",
+                "label": "pine green",
+                "type": "shade",
+                "family": "green",
+                "metadata": {
+                    "families": [
+                        "green"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-forest-shadow",
+                "label": "forest shadow",
+                "type": "shade",
+                "family": "green-gray",
+                "metadata": {
+                    "subfamily": "subfamily-green-gray",
+                    "families": [
+                        "green",
+                        "gray"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-teal",
+                "label": "teal",
+                "type": "shade",
+                "family": "blue-green",
+                "metadata": {
+                    "subfamily": "subfamily-blue-green",
+                    "families": [
+                        "blue",
+                        "green"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-moss-electric",
+                "label": "moss electric",
+                "type": "shade",
+                "family": "blue-green",
+                "metadata": {
+                    "subfamily": "subfamily-blue-green",
+                    "families": [
+                        "blue",
+                        "green"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-warm-sand",
+                "label": "warm sand",
+                "type": "shade",
+                "family": "yellow-brown",
+                "metadata": {
+                    "subfamily": "subfamily-yellow-brown",
+                    "families": [
+                        "yellow",
+                        "brown"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-earth-brown",
+                "label": "earth brown",
+                "type": "shade",
+                "family": "brown",
+                "metadata": {
+                    "families": [
+                        "brown"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-cedar-brown",
+                "label": "cedar brown",
+                "type": "shade",
+                "family": "brown",
+                "metadata": {
+                    "families": [
+                        "brown"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-bronze-oak",
+                "label": "bronze oak",
+                "type": "shade",
+                "family": "brown-orange",
+                "metadata": {
+                    "subfamily": "subfamily-brown-orange",
+                    "families": [
+                        "brown",
+                        "orange"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-autumn-oak",
+                "label": "autumn oak",
+                "type": "shade",
+                "family": "brown-orange",
+                "metadata": {
+                    "subfamily": "subfamily-brown-orange",
+                    "families": [
+                        "brown",
+                        "orange"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-wheat-gold",
+                "label": "wheat gold",
+                "type": "shade",
+                "family": "yellow-brown",
+                "metadata": {
+                    "subfamily": "subfamily-yellow-brown",
+                    "families": [
+                        "yellow",
+                        "brown"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-ember",
+                "label": "ember",
+                "type": "shade",
+                "family": "red",
+                "metadata": {
+                    "families": [
+                        "red"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-iron-ember",
+                "label": "iron ember",
+                "type": "shade",
+                "family": "red-brown",
+                "metadata": {
+                    "subfamily": "subfamily-red-brown",
+                    "families": [
+                        "red",
+                        "brown"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-amber",
+                "label": "amber",
+                "type": "shade",
+                "family": "orange",
+                "metadata": {
+                    "families": [
+                        "orange"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-honey-amber",
+                "label": "honey amber",
+                "type": "shade",
+                "family": "yellow-orange",
+                "metadata": {
+                    "subfamily": "subfamily-yellow-orange",
+                    "families": [
+                        "yellow",
+                        "orange"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-ember-red",
+                "label": "ember red",
+                "type": "shade",
+                "family": "red-orange",
+                "metadata": {
+                    "subfamily": "subfamily-red-orange",
+                    "families": [
+                        "red",
+                        "orange"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-volcanic-red",
+                "label": "volcanic red",
+                "type": "shade",
+                "family": "red",
+                "metadata": {
+                    "families": [
+                        "red"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-burnt-rose",
+                "label": "burnt rose",
+                "type": "shade",
+                "family": "pink-red",
+                "metadata": {
+                    "subfamily": "subfamily-pink-red",
+                    "families": [
+                        "pink",
+                        "red"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-rose-ember",
+                "label": "rose ember",
+                "type": "shade",
+                "family": "pink-red",
+                "metadata": {
+                    "subfamily": "subfamily-pink-red",
+                    "families": [
+                        "pink",
+                        "red"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-magenta-bloom",
+                "label": "magenta bloom",
+                "type": "shade",
+                "family": "purple-red",
+                "metadata": {
+                    "subfamily": "subfamily-purple-red",
+                    "families": [
+                        "purple",
+                        "red"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-neon-coral",
+                "label": "neon coral",
+                "type": "shade",
+                "family": "pink-orange",
+                "metadata": {
+                    "subfamily": "subfamily-pink-orange",
+                    "families": [
+                        "pink",
+                        "orange"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-lavender-fog",
+                "label": "lavender fog",
+                "type": "shade",
+                "family": "blue-purple",
+                "metadata": {
+                    "subfamily": "subfamily-blue-purple",
+                    "families": [
+                        "blue",
+                        "purple"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-burgundy",
+                "label": "burgundy",
+                "type": "shade",
+                "family": "red-brown",
+                "metadata": {
+                    "subfamily": "subfamily-red-brown",
+                    "families": [
+                        "red",
+                        "brown"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-obsidian",
+                "label": "obsidian",
+                "type": "shade",
+                "family": "black",
+                "metadata": {
+                    "families": [
+                        "black"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-black-basalt",
+                "label": "black basalt",
+                "type": "shade",
+                "family": "gray-black",
+                "metadata": {
+                    "subfamily": "subfamily-gray-black",
+                    "families": [
+                        "gray",
+                        "black"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-smoke-black",
+                "label": "smoke black",
+                "type": "shade",
+                "family": "gray-black",
+                "metadata": {
+                    "subfamily": "subfamily-gray-black",
+                    "families": [
+                        "gray",
+                        "black"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-volcanic-black",
+                "label": "volcanic black",
+                "type": "shade",
+                "family": "black",
+                "metadata": {
+                    "families": [
+                        "black"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-sunlit-gold",
+                "label": "sunlit gold",
+                "type": "shade",
+                "family": "yellow",
+                "metadata": {
+                    "families": [
+                        "yellow"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-winter-plum",
+                "label": "winter plum",
+                "type": "shade",
+                "family": "purple",
+                "metadata": {
+                    "families": [
+                        "purple"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-highway-dusk",
+                "label": "highway dusk",
+                "type": "shade",
+                "family": "gray",
+                "metadata": {
+                    "families": [
+                        "gray"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-dusk-violet",
+                "label": "dusk violet",
+                "type": "shade",
+                "family": "blue-purple",
+                "metadata": {
+                    "subfamily": "subfamily-blue-purple",
+                    "families": [
+                        "blue",
+                        "purple"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-violet-dusk",
+                "label": "violet dusk",
+                "type": "shade",
+                "family": "blue-purple",
+                "metadata": {
+                    "subfamily": "subfamily-blue-purple",
+                    "families": [
+                        "blue",
+                        "purple"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-violet-storm",
+                "label": "violet storm",
+                "type": "shade",
+                "family": "blue-purple",
+                "metadata": {
+                    "subfamily": "subfamily-blue-purple",
+                    "families": [
+                        "blue",
+                        "purple"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-elderberry",
+                "label": "elderberry",
+                "type": "shade",
+                "family": "purple",
+                "metadata": {
+                    "families": [
+                        "purple"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-sunrise-prism",
+                "label": "sunrise prism",
+                "type": "shade",
+                "family": "yellow-orange",
+                "metadata": {
+                    "subfamily": "subfamily-yellow-orange",
+                    "families": [
+                        "yellow",
+                        "orange"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-banana-yellow",
+                "label": "banana yellow",
+                "type": "shade",
+                "family": "yellow",
+                "metadata": {
+                    "families": [
+                        "yellow"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-indigo",
+                "label": "indigo",
+                "type": "shade",
+                "family": "purple",
+                "metadata": {
+                    "families": [
+                        "purple"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-mist",
+                "label": "mist",
+                "type": "shade",
+                "family": "gray",
+                "metadata": {
+                    "families": [
+                        "gray"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-silver",
+                "label": "silver",
+                "type": "shade",
+                "family": "gray",
+                "metadata": {
+                    "families": [
+                        "gray"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-green",
+                "label": "green",
+                "type": "shade",
+                "family": "green",
+                "metadata": {
+                    "families": [
+                        "green"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-sage",
+                "label": "sage",
+                "type": "shade",
+                "family": "green",
+                "metadata": {
+                    "families": [
+                        "green"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-evergreen",
+                "label": "evergreen",
+                "type": "shade",
+                "family": "green",
+                "metadata": {
+                    "families": [
+                        "green"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-scarlet",
+                "label": "scarlet",
+                "type": "shade",
+                "family": "red",
+                "metadata": {
+                    "families": [
+                        "red"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-rose",
+                "label": "rose",
+                "type": "shade",
+                "family": "pink",
+                "metadata": {
+                    "families": [
+                        "pink"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-stone",
+                "label": "stone",
+                "type": "shade",
+                "family": "gray",
+                "metadata": {
+                    "families": [
+                        "gray"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-ash",
+                "label": "ash",
+                "type": "shade",
+                "family": "gray",
+                "metadata": {
+                    "families": [
+                        "gray"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-charcoal",
+                "label": "charcoal",
+                "type": "shade",
+                "family": "gray",
+                "metadata": {
+                    "families": [
+                        "gray"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
+                }
+            },
+            {
+                "id": "shade-gold",
+                "label": "gold",
+                "type": "shade",
+                "family": "yellow",
+                "metadata": {
+                    "families": [
+                        "yellow"
+                    ],
+                    "evidence": "user-provided atlas color",
+                    "definitionBasis": "user-provided atlas color",
+                    "naturalNameBasis": "user natural source / atmospheric atlas term"
                 }
             },
             {
@@ -5713,13 +6332,16 @@
                 "id": "english-light",
                 "label": "light",
                 "type": "common_word",
-                "family": null,
+                "family": "yellow",
                 "metadata": {
                     "source": "curated local association",
                     "associationBasis": "concrete, natural, or culturally legible color association",
                     "contextDefinition": "visible illumination commonly associated with white, yellow-white, and yellow",
                     "definitionBasis": "common-word context definition",
-                    "promotedFromNeutral": true
+                    "promotedFromNeutral": true,
+                    "conditionFieldRole": "visibility, reflection, exposure, and readable signal condition",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
                 }
             },
             {
@@ -6181,20 +6803,39 @@
                     "associationBasis": "concrete or culturally legible color association",
                     "contextDefinition": "dark shape made by blocked light, associated with black, gray, and blue-black",
                     "definitionBasis": "common-word context definition",
-                    "promotedFromNeutral": true
+                    "promotedFromNeutral": true,
+                    "faces": {
+                        "verification": {
+                            "definition": "Shadow is the darkened form that appears when light is blocked, reduced, or partially withheld.",
+                            "evidence": "It repeatedly appears in the graph beside fear, obscurity, exposure, and partial visibility rather than bright certainty.",
+                            "function": "It introduces contrast, concealment, threshold feeling, and the sense that something is present but not fully readable.",
+                            "origin": "It arises from interrupted light, blocked visibility, and the lived experience of partial perception.",
+                            "relationships": "Tied to fear, obscurity, exposure, silver-mist ambiguity, midnight atmosphere, and obsidian-style reinvention climates.",
+                            "prediction": "When shadow is active, darkness-linked nodes gain weight, visibility becomes partial, and interpretation tends to shift toward caution, exposure, or threshold awareness."
+                        },
+                        "texture": {
+                            "touch": "cool, edged, withholding",
+                            "sight": "dim, contrasted, partially outlined",
+                            "sound": "muted, close, watchful",
+                            "effects": "Reduces full readability while increasing tension, depth, and threshold awareness."
+                        }
+                    }
                 }
             },
             {
                 "id": "english-signal",
                 "label": "signal",
                 "type": "common_word",
-                "family": null,
+                "family": "yellow",
                 "metadata": {
                     "source": "curated local association",
                     "associationBasis": "concrete or culturally legible color association",
                     "contextDefinition": "visible or symbolic indicator associated with colored lights and warning marks",
                     "definitionBasis": "common-word context definition",
-                    "promotedFromNeutral": true
+                    "promotedFromNeutral": true,
+                    "conditionFieldRole": "a readable mark, cue, or emitted meaning",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
                 }
             },
             {
@@ -6247,13 +6888,16 @@
                 "id": "english-soil",
                 "label": "soil",
                 "type": "common_word",
-                "family": null,
+                "family": "brown",
                 "metadata": {
                     "source": "3,000 english words.docx",
                     "associationBasis": "concrete object color association",
                     "contextDefinition": "the upper layer of earth where plants grow, commonly brown",
                     "definitionBasis": "common-word context definition",
-                    "promotedFromNeutral": true
+                    "promotedFromNeutral": true,
+                    "conditionFieldRole": "ground, memory, nutrient, constraint, and rooting condition",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
                 }
             },
             {
@@ -6531,8 +7175,12 @@
                     "source": "100 common.docx",
                     "associationBasis": "concrete object color association",
                     "contextDefinition": "a clear liquid found in rain, rivers, lakes, and oceans",
-                    "definitionBasis": "common-word context definition"
-                }
+                    "definitionBasis": "common-word context definition",
+                    "conditionFieldRole": "flow, depth, permeability, and emotional movement condition",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                },
+                "family": "blue"
             },
             {
                 "id": "english-wedding",
@@ -6921,8 +7569,12 @@
                     "associationBasis": "contextual emotional color association",
                     "definitionBasis": "emotion input context, not strict color synonym",
                     "confidence": "medium",
-                    "aliases": []
-                }
+                    "aliases": [],
+                    "conditionFieldRole": "a condition of sharpened visibility or reduced ambiguity",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                },
+                "family": "white"
             },
             {
                 "id": "emotion-clear",
@@ -7248,7 +7900,9 @@
                     "associationBasis": "color-climate emotional association",
                     "definitionBasis": "emotion input context, not strict color synonym",
                     "confidence": "medium",
-                    "climateFamily": "black"
+                    "climateFamily": "black",
+                    "conditionFieldRole": "Feeling made visible by the light/exposure condition.",
+                    "ecosystemFoundation": true
                 }
             },
             {
@@ -7289,7 +7943,24 @@
                     "confidence": "medium",
                     "aliases": [
                         "afraid"
-                    ]
+                    ],
+                    "faces": {
+                        "verification": {
+                            "definition": "Fear is an alert emotional state organized around threat, danger, uncertainty, or possible harm.",
+                            "evidence": "The graph consistently routes fear toward shadow, vigilance, partial visibility, and guarded atmospheric climates.",
+                            "function": "It protects attention by heightening caution, scanning, preparation, and sensitivity to risk.",
+                            "origin": "It arises when a person or system reads a condition as dangerous, unstable, unknown, or capable of harm.",
+                            "relationships": "Closely tied to shadow, pressure, vigilance, darkness, exposure, uncertainty, and protective withdrawal or readiness.",
+                            "prediction": "If a route is genuinely fear-shaped, warning signals, boundary sensitivity, avoidance, or preparation behavior should become more visible."
+                        },
+                        "texture": {
+                            "touch": "tight, cold, braced",
+                            "sight": "narrowed, sharpened, watchful",
+                            "taste": "metallic, dry",
+                            "sound": "hushed, sudden, brittle",
+                            "effects": "Compresses attention around survival-relevant signals and increases caution."
+                        }
+                    }
                 }
             },
             {
@@ -7562,8 +8233,12 @@
                     "associationBasis": "contextual emotional color association",
                     "definitionBasis": "emotion input context, not strict color synonym",
                     "confidence": "medium",
-                    "aliases": []
-                }
+                    "aliases": [],
+                    "conditionFieldRole": "how strongly a signal, feeling, or pressure is charged",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                },
+                "family": "red"
             },
             {
                 "id": "emotion-isolated",
@@ -7591,7 +8266,24 @@
                     "aliases": [
                         "happy",
                         "enjoy"
-                    ]
+                    ],
+                    "faces": {
+                        "verification": {
+                            "definition": "Joy is a brightening emotional state of delight, aliveness, pleasure, or lifted ease.",
+                            "evidence": "The graph places joy with bright, open, warm, and expressive climates rather than compressed or obscured ones.",
+                            "function": "It expands emotional room, supports connection, and makes positive attachment or celebration more shareable.",
+                            "origin": "It arises when experience is felt as welcome, meaningful, relieving, connective, or vividly life-giving.",
+                            "relationships": "Tied to light, warmth, expression, delight, openness, relief, and socially shareable positive energy.",
+                            "prediction": "When joy is the valid node, brighter relational routes, outward expression, easier connection, and lifted atmosphere should tend to appear."
+                        },
+                        "texture": {
+                            "touch": "warm, buoyant, open",
+                            "sight": "bright, clear, expansive",
+                            "taste": "sweet, fresh",
+                            "sound": "ringing, lively, rising",
+                            "effects": "Increases expressive energy, ease of connection, and perceptible emotional light."
+                        }
+                    }
                 }
             },
             {
@@ -7973,8 +8665,28 @@
                     "associationBasis": "color-climate emotional association",
                     "definitionBasis": "emotion input context, not strict color synonym",
                     "confidence": "medium",
-                    "climateFamily": "red-orange"
-                }
+                    "climateFamily": "red-orange",
+                    "conditionFieldRole": "force that changes response, shape, or release",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym.",
+                    "faces": {
+                        "verification": {
+                            "definition": "Pressure is a compressed condition that applies force to feeling, response, structure, or release.",
+                            "evidence": "It already appears as ecosystem-foundation vocabulary and is repeatedly tied to red-orange activation, compression, and change in response shape.",
+                            "function": "It tests capacity, reshapes behavior, and can either intensify rupture or produce adaptation and release.",
+                            "origin": "It arises when force, demand, constraint, urgency, or emotional load exceeds a system's easy resting state.",
+                            "relationships": "Linked to fear, adaptation, regulation, release, compression, activation, and identity change under strain.",
+                            "prediction": "When pressure is valid, nearby response nodes should polarize toward regulation, adaptation, release, rupture, or heightened vigilance."
+                        },
+                        "texture": {
+                            "touch": "compressed, hot, pressing",
+                            "sight": "dense, narrowed, activated",
+                            "sound": "tense, building, strained",
+                            "effects": "Pushes a system toward change, reveals weak points, and forces reaction."
+                        }
+                    }
+                },
+                "family": "red-orange"
             },
             {
                 "id": "emotion-radiant",
@@ -8038,7 +8750,9 @@
                     "associationBasis": "color-climate emotional association",
                     "definitionBasis": "emotion input context, not strict color synonym",
                     "confidence": "medium",
-                    "climateFamily": "green-gray"
+                    "climateFamily": "green-gray",
+                    "conditionFieldRole": "Feeling where conditions support recovery and balance.",
+                    "ecosystemFoundation": true
                 }
             },
             {
@@ -8155,7 +8869,9 @@
                     "associationBasis": "color-climate emotional association",
                     "definitionBasis": "emotion input context, not strict color synonym",
                     "confidence": "medium",
-                    "climateFamily": "brown"
+                    "climateFamily": "brown",
+                    "conditionFieldRole": "Feeling supported by soil/root condition.",
+                    "ecosystemFoundation": true
                 }
             },
             {
@@ -8658,6 +9374,498 @@
                     "source": "3,000 english words.docx",
                     "bridgeBasis": "cited synonym",
                     "neutralStatus": "neutral"
+                }
+            },
+            {
+                "id": "condition-word-visibility",
+                "label": "visibility",
+                "type": "common_word",
+                "family": "yellow",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "how much a signal can be seen or recognized",
+                    "conditionFieldRole": "how much a signal can be seen or recognized",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-exposure",
+                "label": "exposure",
+                "type": "common_word",
+                "family": "yellow",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "a condition where what was hidden becomes visible",
+                    "conditionFieldRole": "a condition where what was hidden becomes visible",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-illumination",
+                "label": "illumination",
+                "type": "common_word",
+                "family": "yellow",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "light making structure readable",
+                    "conditionFieldRole": "light making structure readable",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-flow",
+                "label": "flow",
+                "type": "common_word",
+                "family": "blue",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "movement through a system without fixed shape",
+                    "conditionFieldRole": "movement through a system without fixed shape",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-depth",
+                "label": "depth",
+                "type": "common_word",
+                "family": "blue",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "distance beneath the surface; layered or submerged meaning",
+                    "conditionFieldRole": "distance beneath the surface; layered or submerged meaning",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-permeability",
+                "label": "permeability",
+                "type": "common_word",
+                "family": "blue",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "how easily feeling or signal passes through a boundary",
+                    "conditionFieldRole": "how easily feeling or signal passes through a boundary",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-current",
+                "label": "current",
+                "type": "common_word",
+                "family": "blue",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "directional movement inside a larger flow",
+                    "conditionFieldRole": "directional movement inside a larger flow",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-tide",
+                "label": "tide",
+                "type": "common_word",
+                "family": "blue",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "cyclical pull and return in emotional or relational climate",
+                    "conditionFieldRole": "cyclical pull and return in emotional or relational climate",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-ground",
+                "label": "ground",
+                "type": "common_word",
+                "family": "brown",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "supporting base that lets growth hold",
+                    "conditionFieldRole": "supporting base that lets growth hold",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-root",
+                "label": "root",
+                "type": "common_word",
+                "family": "brown",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "where growth attaches to memory, body, or place",
+                    "conditionFieldRole": "where growth attaches to memory, body, or place",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-nutrient",
+                "label": "nutrient",
+                "type": "common_word",
+                "family": "green",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "what feeds growth without being the visible growth itself",
+                    "conditionFieldRole": "what feeds growth without being the visible growth itself",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-constraint",
+                "label": "constraint",
+                "type": "common_word",
+                "family": "brown",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "boundary or limit that gives growth form",
+                    "conditionFieldRole": "boundary or limit that gives growth form",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-foundation",
+                "label": "foundation",
+                "type": "common_word",
+                "family": "brown",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "slow support condition under visible pattern",
+                    "conditionFieldRole": "slow support condition under visible pattern",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-temperature",
+                "label": "temperature",
+                "type": "common_word",
+                "family": "orange",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "activation, pressure, warmth, cooling, and rate-of-change condition",
+                    "conditionFieldRole": "activation, pressure, warmth, cooling, and rate-of-change condition",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-activation",
+                "label": "activation",
+                "type": "common_word",
+                "family": "red-orange",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "energy rising into motion or response",
+                    "conditionFieldRole": "energy rising into motion or response",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-warmth",
+                "label": "warmth",
+                "type": "common_word",
+                "family": "orange",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "contact, comfort, or activation through heat",
+                    "conditionFieldRole": "contact, comfort, or activation through heat",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-cooling",
+                "label": "cooling",
+                "type": "common_word",
+                "family": "blue",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "reduction of activation or emotional heat",
+                    "conditionFieldRole": "reduction of activation or emotional heat",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-experience",
+                "label": "experience",
+                "type": "common_word",
+                "family": "white",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "Raw contact before the system translates it.",
+                    "conditionFieldRole": "Raw contact before the system translates it.",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-condition",
+                "label": "condition",
+                "type": "common_word",
+                "family": "gray",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "The shaping field that makes experience readable.",
+                    "conditionFieldRole": "The shaping field that makes experience readable.",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-conditions",
+                "label": "conditions",
+                "type": "common_word",
+                "family": "gray",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "Plural shaping fields that alter how words and emotions react.",
+                    "conditionFieldRole": "Plural shaping fields that alter how words and emotions react.",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-emotion",
+                "label": "emotion",
+                "type": "common_word",
+                "family": "pink",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "Feeling after experience passes through conditions.",
+                    "conditionFieldRole": "Feeling after experience passes through conditions.",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-adaptation",
+                "label": "adaptation",
+                "type": "common_word",
+                "family": "green",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "Response that adjusts to changing conditions.",
+                    "conditionFieldRole": "Response that adjusts to changing conditions.",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym.",
+                    "faces": {
+                        "verification": {
+                            "definition": "Adaptation is the response process that changes form, behavior, or strategy in order to stay viable under new conditions.",
+                            "evidence": "It is already marked as ecosystem-foundation vocabulary and repeatedly sits near growth, adjustment, response, and condition-driven change.",
+                            "function": "It allows continuity through change by altering how a system meets pressure instead of remaining rigid.",
+                            "origin": "It arises when conditions shift enough that old responses no longer fit cleanly and a new fit must be developed.",
+                            "relationships": "Connected to pressure, regulation, growth, transition, behavior, resilience, and identity tendency under changing conditions.",
+                            "prediction": "If adaptation is truly present, new behaviors, modified strategies, and more viable fit with conditions should emerge over time."
+                        },
+                        "texture": {
+                            "touch": "flexing, responsive, alive",
+                            "sight": "adjusting, rebalanced, still-growing",
+                            "sound": "shifting, responsive, not broken",
+                            "effects": "Preserves continuity while changing form so the system can keep functioning."
+                        }
+                    }
+                }
+            },
+            {
+                "id": "condition-word-behavior",
+                "label": "behavior",
+                "type": "common_word",
+                "family": "orange",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "Visible action pattern produced by adaptation.",
+                    "conditionFieldRole": "Visible action pattern produced by adaptation.",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-language",
+                "label": "language",
+                "type": "common_word",
+                "family": "blue",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "Translation layer that names and organizes behavior into signal.",
+                    "conditionFieldRole": "Translation layer that names and organizes behavior into signal.",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-pattern",
+                "label": "pattern",
+                "type": "common_word",
+                "family": "green",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "Repeated language and behavior becoming structure.",
+                    "conditionFieldRole": "Repeated language and behavior becoming structure.",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym."
+                }
+            },
+            {
+                "id": "condition-word-identity-tendency",
+                "label": "identity tendency",
+                "type": "common_word",
+                "family": "purple",
+                "metadata": {
+                    "source": "condition-field ecosystem update",
+                    "associationBasis": "ecosystem condition vocabulary",
+                    "contextDefinition": "Recurring tendency formed by repeated pattern, not permanent essence.",
+                    "conditionFieldRole": "Recurring tendency formed by repeated pattern, not permanent essence.",
+                    "definitionBasis": "condition-field vocabulary, not strict color synonym",
+                    "ecosystemFoundation": true,
+                    "boundary": "Condition-field vocabulary shapes graph reactions; it is not a strict color synonym.",
+                    "faces": {
+                        "verification": {
+                            "definition": "Identity tendency is the recurring shape a person or system leans toward through repeated patterns, without claiming fixed essence.",
+                            "evidence": "Your graph framework repeatedly separates identity from static labeling and treats it as something formed through repetition, pressure, and adaptation.",
+                            "function": "It gives continuity to pattern recognition without freezing the person or system into one permanent category.",
+                            "origin": "It arises from repeated selections, behaviors, climates, pressures, and adaptations that start to form a recognizable directional tendency.",
+                            "relationships": "Related to adaptation, behavior, pattern, pressure, regulation, reinvention, and recovery-based identity movement.",
+                            "prediction": "If identity tendency is valid, repeated choices and reactions should show directional consistency while still allowing reinvention under new conditions."
+                        },
+                        "texture": {
+                            "touch": "layered, recurring, formative",
+                            "sight": "patterned, returning, non-fixed",
+                            "sound": "echoing, self-similar, evolving",
+                            "effects": "Makes repetition readable as tendency without collapsing it into permanent essence."
+                        }
+                    }
+                }
+            },
+            {
+                "id": "emotion-permeable",
+                "label": "permeable",
+                "type": "emotion_word",
+                "metadata": {
+                    "emotionDefinition": "Feeling with porous boundaries under water/flow condition.",
+                    "tone": "open to passage",
+                    "associationBasis": "condition-field emotional association",
+                    "definitionBasis": "emotion input context, not strict color synonym",
+                    "confidence": "medium",
+                    "climateFamily": "blue-gray",
+                    "ecosystemFoundation": true
+                }
+            },
+            {
+                "id": "emotion-pressurized",
+                "label": "pressurized",
+                "type": "emotion_word",
+                "metadata": {
+                    "emotionDefinition": "Feeling shaped by pressure and temperature condition.",
+                    "tone": "compressed and activated",
+                    "associationBasis": "condition-field emotional association",
+                    "definitionBasis": "emotion input context, not strict color synonym",
+                    "confidence": "medium",
+                    "climateFamily": "red-orange",
+                    "ecosystemFoundation": true
+                }
+            },
+            {
+                "id": "emotion-coherent",
+                "label": "coherent",
+                "type": "emotion_word",
+                "metadata": {
+                    "emotionDefinition": "Feeling of structure maintained under changing conditions.",
+                    "tone": "held together while changing",
+                    "associationBasis": "condition-field emotional association",
+                    "definitionBasis": "emotion input context, not strict color synonym",
+                    "confidence": "medium",
+                    "climateFamily": "green",
+                    "ecosystemFoundation": true
+                }
+            },
+            {
+                "id": "emotion-reactive",
+                "label": "reactive",
+                "type": "emotion_word",
+                "metadata": {
+                    "emotionDefinition": "Feeling where conditions trigger fast response.",
+                    "tone": "responding quickly to conditions",
+                    "associationBasis": "condition-field emotional association",
+                    "definitionBasis": "emotion input context, not strict color synonym",
+                    "confidence": "medium",
+                    "climateFamily": "orange",
+                    "ecosystemFoundation": true
+                }
+            },
+            {
+                "id": "emotion-unresolved",
+                "label": "unresolved",
+                "type": "emotion_word",
+                "metadata": {
+                    "emotionDefinition": "Feeling where conditions have not produced a clear route.",
+                    "tone": "not yet stabilized",
+                    "associationBasis": "condition-field emotional association",
+                    "definitionBasis": "emotion input context, not strict color synonym",
+                    "confidence": "medium",
+                    "climateFamily": "gray",
+                    "ecosystemFoundation": true
                 }
             }
         ],
@@ -20254,6 +21462,782 @@
                     "evidence": "ocean is defined as the whole body of salt water that covers nearly three fourths of the earth",
                     "bridgeBasis": "cited synonym"
                 }
+            },
+            {
+                "id": "english-light-to-condition-light-condition-field",
+                "source": "english-light",
+                "target": "condition-light",
+                "type": "condition_word_shapes_driver",
+                "description": "light is condition-field vocabulary for light.",
+                "evidence": "ecosystem foundation: light shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "english-light-to-family-yellow-condition-climate",
+                "source": "english-light",
+                "target": "family-yellow",
+                "type": "conditions_color_climate",
+                "description": "light can weight the yellow climate under the condition-field model.",
+                "evidence": "condition-field association: light connects to yellow climate"
+            },
+            {
+                "id": "english-light-to-family-white-condition-climate",
+                "source": "english-light",
+                "target": "family-white",
+                "type": "conditions_color_climate",
+                "description": "light can weight the white climate under the condition-field model.",
+                "evidence": "condition-field association: light connects to white climate"
+            },
+            {
+                "id": "condition-word-visibility-to-condition-light-condition-field",
+                "source": "condition-word-visibility",
+                "target": "condition-light",
+                "type": "condition_word_shapes_driver",
+                "description": "visibility is condition-field vocabulary for light.",
+                "evidence": "ecosystem foundation: visibility shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "condition-word-visibility-to-family-yellow-condition-climate",
+                "source": "condition-word-visibility",
+                "target": "family-yellow",
+                "type": "conditions_color_climate",
+                "description": "visibility can weight the yellow climate under the condition-field model.",
+                "evidence": "condition-field association: visibility connects to yellow climate"
+            },
+            {
+                "id": "condition-word-visibility-to-family-white-condition-climate",
+                "source": "condition-word-visibility",
+                "target": "family-white",
+                "type": "conditions_color_climate",
+                "description": "visibility can weight the white climate under the condition-field model.",
+                "evidence": "condition-field association: visibility connects to white climate"
+            },
+            {
+                "id": "condition-word-exposure-to-condition-light-condition-field",
+                "source": "condition-word-exposure",
+                "target": "condition-light",
+                "type": "condition_word_shapes_driver",
+                "description": "exposure is condition-field vocabulary for light.",
+                "evidence": "ecosystem foundation: exposure shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "condition-word-exposure-to-family-yellow-condition-climate",
+                "source": "condition-word-exposure",
+                "target": "family-yellow",
+                "type": "conditions_color_climate",
+                "description": "exposure can weight the yellow climate under the condition-field model.",
+                "evidence": "condition-field association: exposure connects to yellow climate"
+            },
+            {
+                "id": "condition-word-exposure-to-family-white-condition-climate",
+                "source": "condition-word-exposure",
+                "target": "family-white",
+                "type": "conditions_color_climate",
+                "description": "exposure can weight the white climate under the condition-field model.",
+                "evidence": "condition-field association: exposure connects to white climate"
+            },
+            {
+                "id": "english-signal-to-condition-light-condition-field",
+                "source": "english-signal",
+                "target": "condition-light",
+                "type": "condition_word_shapes_driver",
+                "description": "signal is condition-field vocabulary for light.",
+                "evidence": "ecosystem foundation: signal shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "english-signal-to-family-yellow-condition-climate",
+                "source": "english-signal",
+                "target": "family-yellow",
+                "type": "conditions_color_climate",
+                "description": "signal can weight the yellow climate under the condition-field model.",
+                "evidence": "condition-field association: signal connects to yellow climate"
+            },
+            {
+                "id": "english-signal-to-family-white-condition-climate",
+                "source": "english-signal",
+                "target": "family-white",
+                "type": "conditions_color_climate",
+                "description": "signal can weight the white climate under the condition-field model.",
+                "evidence": "condition-field association: signal connects to white climate"
+            },
+            {
+                "id": "emotion-clarity-to-condition-light-condition-field",
+                "source": "emotion-clarity",
+                "target": "condition-light",
+                "type": "condition_word_shapes_driver",
+                "description": "clarity is condition-field vocabulary for light.",
+                "evidence": "ecosystem foundation: clarity shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "emotion-clarity-to-family-yellow-condition-climate",
+                "source": "emotion-clarity",
+                "target": "family-yellow",
+                "type": "conditions_color_climate",
+                "description": "clarity can weight the yellow climate under the condition-field model.",
+                "evidence": "condition-field association: clarity connects to yellow climate"
+            },
+            {
+                "id": "emotion-clarity-to-family-white-condition-climate",
+                "source": "emotion-clarity",
+                "target": "family-white",
+                "type": "conditions_color_climate",
+                "description": "clarity can weight the white climate under the condition-field model.",
+                "evidence": "condition-field association: clarity connects to white climate"
+            },
+            {
+                "id": "condition-word-illumination-to-condition-light-condition-field",
+                "source": "condition-word-illumination",
+                "target": "condition-light",
+                "type": "condition_word_shapes_driver",
+                "description": "illumination is condition-field vocabulary for light.",
+                "evidence": "ecosystem foundation: illumination shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "condition-word-illumination-to-family-yellow-condition-climate",
+                "source": "condition-word-illumination",
+                "target": "family-yellow",
+                "type": "conditions_color_climate",
+                "description": "illumination can weight the yellow climate under the condition-field model.",
+                "evidence": "condition-field association: illumination connects to yellow climate"
+            },
+            {
+                "id": "condition-word-illumination-to-family-white-condition-climate",
+                "source": "condition-word-illumination",
+                "target": "family-white",
+                "type": "conditions_color_climate",
+                "description": "illumination can weight the white climate under the condition-field model.",
+                "evidence": "condition-field association: illumination connects to white climate"
+            },
+            {
+                "id": "common-water-to-condition-water-condition-field",
+                "source": "common-water",
+                "target": "condition-water",
+                "type": "condition_word_shapes_driver",
+                "description": "water is condition-field vocabulary for water.",
+                "evidence": "ecosystem foundation: water shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "common-water-to-family-blue-condition-climate",
+                "source": "common-water",
+                "target": "family-blue",
+                "type": "conditions_color_climate",
+                "description": "water can weight the blue climate under the condition-field model.",
+                "evidence": "condition-field association: water connects to blue climate"
+            },
+            {
+                "id": "condition-word-flow-to-condition-water-condition-field",
+                "source": "condition-word-flow",
+                "target": "condition-water",
+                "type": "condition_word_shapes_driver",
+                "description": "flow is condition-field vocabulary for water.",
+                "evidence": "ecosystem foundation: flow shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "condition-word-flow-to-family-blue-condition-climate",
+                "source": "condition-word-flow",
+                "target": "family-blue",
+                "type": "conditions_color_climate",
+                "description": "flow can weight the blue climate under the condition-field model.",
+                "evidence": "condition-field association: flow connects to blue climate"
+            },
+            {
+                "id": "condition-word-depth-to-condition-water-condition-field",
+                "source": "condition-word-depth",
+                "target": "condition-water",
+                "type": "condition_word_shapes_driver",
+                "description": "depth is condition-field vocabulary for water.",
+                "evidence": "ecosystem foundation: depth shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "condition-word-depth-to-family-blue-condition-climate",
+                "source": "condition-word-depth",
+                "target": "family-blue",
+                "type": "conditions_color_climate",
+                "description": "depth can weight the blue climate under the condition-field model.",
+                "evidence": "condition-field association: depth connects to blue climate"
+            },
+            {
+                "id": "condition-word-permeability-to-condition-water-condition-field",
+                "source": "condition-word-permeability",
+                "target": "condition-water",
+                "type": "condition_word_shapes_driver",
+                "description": "permeability is condition-field vocabulary for water.",
+                "evidence": "ecosystem foundation: permeability shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "condition-word-permeability-to-family-blue-condition-climate",
+                "source": "condition-word-permeability",
+                "target": "family-blue",
+                "type": "conditions_color_climate",
+                "description": "permeability can weight the blue climate under the condition-field model.",
+                "evidence": "condition-field association: permeability connects to blue climate"
+            },
+            {
+                "id": "condition-word-current-to-condition-water-condition-field",
+                "source": "condition-word-current",
+                "target": "condition-water",
+                "type": "condition_word_shapes_driver",
+                "description": "current is condition-field vocabulary for water.",
+                "evidence": "ecosystem foundation: current shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "condition-word-current-to-family-blue-condition-climate",
+                "source": "condition-word-current",
+                "target": "family-blue",
+                "type": "conditions_color_climate",
+                "description": "current can weight the blue climate under the condition-field model.",
+                "evidence": "condition-field association: current connects to blue climate"
+            },
+            {
+                "id": "condition-word-tide-to-condition-water-condition-field",
+                "source": "condition-word-tide",
+                "target": "condition-water",
+                "type": "condition_word_shapes_driver",
+                "description": "tide is condition-field vocabulary for water.",
+                "evidence": "ecosystem foundation: tide shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "condition-word-tide-to-family-blue-condition-climate",
+                "source": "condition-word-tide",
+                "target": "family-blue",
+                "type": "conditions_color_climate",
+                "description": "tide can weight the blue climate under the condition-field model.",
+                "evidence": "condition-field association: tide connects to blue climate"
+            },
+            {
+                "id": "english-soil-to-condition-soil-condition-field",
+                "source": "english-soil",
+                "target": "condition-soil",
+                "type": "condition_word_shapes_driver",
+                "description": "soil is condition-field vocabulary for soil.",
+                "evidence": "ecosystem foundation: soil shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "english-soil-to-family-brown-condition-climate",
+                "source": "english-soil",
+                "target": "family-brown",
+                "type": "conditions_color_climate",
+                "description": "soil can weight the brown climate under the condition-field model.",
+                "evidence": "condition-field association: soil connects to brown climate"
+            },
+            {
+                "id": "english-soil-to-family-green-condition-climate",
+                "source": "english-soil",
+                "target": "family-green",
+                "type": "conditions_color_climate",
+                "description": "soil can weight the green climate under the condition-field model.",
+                "evidence": "condition-field association: soil connects to green climate"
+            },
+            {
+                "id": "condition-word-ground-to-condition-soil-condition-field",
+                "source": "condition-word-ground",
+                "target": "condition-soil",
+                "type": "condition_word_shapes_driver",
+                "description": "ground is condition-field vocabulary for soil.",
+                "evidence": "ecosystem foundation: ground shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "condition-word-ground-to-family-brown-condition-climate",
+                "source": "condition-word-ground",
+                "target": "family-brown",
+                "type": "conditions_color_climate",
+                "description": "ground can weight the brown climate under the condition-field model.",
+                "evidence": "condition-field association: ground connects to brown climate"
+            },
+            {
+                "id": "condition-word-ground-to-family-green-condition-climate",
+                "source": "condition-word-ground",
+                "target": "family-green",
+                "type": "conditions_color_climate",
+                "description": "ground can weight the green climate under the condition-field model.",
+                "evidence": "condition-field association: ground connects to green climate"
+            },
+            {
+                "id": "condition-word-root-to-condition-soil-condition-field",
+                "source": "condition-word-root",
+                "target": "condition-soil",
+                "type": "condition_word_shapes_driver",
+                "description": "root is condition-field vocabulary for soil.",
+                "evidence": "ecosystem foundation: root shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "condition-word-root-to-family-brown-condition-climate",
+                "source": "condition-word-root",
+                "target": "family-brown",
+                "type": "conditions_color_climate",
+                "description": "root can weight the brown climate under the condition-field model.",
+                "evidence": "condition-field association: root connects to brown climate"
+            },
+            {
+                "id": "condition-word-root-to-family-green-condition-climate",
+                "source": "condition-word-root",
+                "target": "family-green",
+                "type": "conditions_color_climate",
+                "description": "root can weight the green climate under the condition-field model.",
+                "evidence": "condition-field association: root connects to green climate"
+            },
+            {
+                "id": "condition-word-nutrient-to-condition-soil-condition-field",
+                "source": "condition-word-nutrient",
+                "target": "condition-soil",
+                "type": "condition_word_shapes_driver",
+                "description": "nutrient is condition-field vocabulary for soil.",
+                "evidence": "ecosystem foundation: nutrient shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "condition-word-nutrient-to-family-brown-condition-climate",
+                "source": "condition-word-nutrient",
+                "target": "family-brown",
+                "type": "conditions_color_climate",
+                "description": "nutrient can weight the brown climate under the condition-field model.",
+                "evidence": "condition-field association: nutrient connects to brown climate"
+            },
+            {
+                "id": "condition-word-nutrient-to-family-green-condition-climate",
+                "source": "condition-word-nutrient",
+                "target": "family-green",
+                "type": "conditions_color_climate",
+                "description": "nutrient can weight the green climate under the condition-field model.",
+                "evidence": "condition-field association: nutrient connects to green climate"
+            },
+            {
+                "id": "condition-word-constraint-to-condition-soil-condition-field",
+                "source": "condition-word-constraint",
+                "target": "condition-soil",
+                "type": "condition_word_shapes_driver",
+                "description": "constraint is condition-field vocabulary for soil.",
+                "evidence": "ecosystem foundation: constraint shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "condition-word-constraint-to-family-brown-condition-climate",
+                "source": "condition-word-constraint",
+                "target": "family-brown",
+                "type": "conditions_color_climate",
+                "description": "constraint can weight the brown climate under the condition-field model.",
+                "evidence": "condition-field association: constraint connects to brown climate"
+            },
+            {
+                "id": "condition-word-constraint-to-family-green-condition-climate",
+                "source": "condition-word-constraint",
+                "target": "family-green",
+                "type": "conditions_color_climate",
+                "description": "constraint can weight the green climate under the condition-field model.",
+                "evidence": "condition-field association: constraint connects to green climate"
+            },
+            {
+                "id": "condition-word-foundation-to-condition-soil-condition-field",
+                "source": "condition-word-foundation",
+                "target": "condition-soil",
+                "type": "condition_word_shapes_driver",
+                "description": "foundation is condition-field vocabulary for soil.",
+                "evidence": "ecosystem foundation: foundation shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "condition-word-foundation-to-family-brown-condition-climate",
+                "source": "condition-word-foundation",
+                "target": "family-brown",
+                "type": "conditions_color_climate",
+                "description": "foundation can weight the brown climate under the condition-field model.",
+                "evidence": "condition-field association: foundation connects to brown climate"
+            },
+            {
+                "id": "condition-word-foundation-to-family-green-condition-climate",
+                "source": "condition-word-foundation",
+                "target": "family-green",
+                "type": "conditions_color_climate",
+                "description": "foundation can weight the green climate under the condition-field model.",
+                "evidence": "condition-field association: foundation connects to green climate"
+            },
+            {
+                "id": "condition-word-temperature-to-condition-temperature-condition-field",
+                "source": "condition-word-temperature",
+                "target": "condition-temperature",
+                "type": "condition_word_shapes_driver",
+                "description": "temperature is condition-field vocabulary for temperature.",
+                "evidence": "ecosystem foundation: temperature shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "condition-word-temperature-to-family-orange-condition-climate",
+                "source": "condition-word-temperature",
+                "target": "family-orange",
+                "type": "conditions_color_climate",
+                "description": "temperature can weight the orange climate under the condition-field model.",
+                "evidence": "condition-field association: temperature connects to orange climate"
+            },
+            {
+                "id": "condition-word-temperature-to-family-red-condition-climate",
+                "source": "condition-word-temperature",
+                "target": "family-red",
+                "type": "conditions_color_climate",
+                "description": "temperature can weight the red climate under the condition-field model.",
+                "evidence": "condition-field association: temperature connects to red climate"
+            },
+            {
+                "id": "condition-word-temperature-to-family-blue-condition-climate",
+                "source": "condition-word-temperature",
+                "target": "family-blue",
+                "type": "conditions_color_climate",
+                "description": "temperature can weight the blue climate under the condition-field model.",
+                "evidence": "condition-field association: temperature connects to blue climate"
+            },
+            {
+                "id": "condition-word-activation-to-condition-temperature-condition-field",
+                "source": "condition-word-activation",
+                "target": "condition-temperature",
+                "type": "condition_word_shapes_driver",
+                "description": "activation is condition-field vocabulary for temperature.",
+                "evidence": "ecosystem foundation: activation shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "condition-word-activation-to-family-orange-condition-climate",
+                "source": "condition-word-activation",
+                "target": "family-orange",
+                "type": "conditions_color_climate",
+                "description": "activation can weight the orange climate under the condition-field model.",
+                "evidence": "condition-field association: activation connects to orange climate"
+            },
+            {
+                "id": "condition-word-activation-to-family-red-condition-climate",
+                "source": "condition-word-activation",
+                "target": "family-red",
+                "type": "conditions_color_climate",
+                "description": "activation can weight the red climate under the condition-field model.",
+                "evidence": "condition-field association: activation connects to red climate"
+            },
+            {
+                "id": "condition-word-activation-to-family-blue-condition-climate",
+                "source": "condition-word-activation",
+                "target": "family-blue",
+                "type": "conditions_color_climate",
+                "description": "activation can weight the blue climate under the condition-field model.",
+                "evidence": "condition-field association: activation connects to blue climate"
+            },
+            {
+                "id": "emotion-pressure-to-condition-temperature-condition-field",
+                "source": "emotion-pressure",
+                "target": "condition-temperature",
+                "type": "condition_word_shapes_driver",
+                "description": "pressure is condition-field vocabulary for temperature.",
+                "evidence": "ecosystem foundation: pressure shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "emotion-pressure-to-family-orange-condition-climate",
+                "source": "emotion-pressure",
+                "target": "family-orange",
+                "type": "conditions_color_climate",
+                "description": "pressure can weight the orange climate under the condition-field model.",
+                "evidence": "condition-field association: pressure connects to orange climate"
+            },
+            {
+                "id": "emotion-pressure-to-family-red-condition-climate",
+                "source": "emotion-pressure",
+                "target": "family-red",
+                "type": "conditions_color_climate",
+                "description": "pressure can weight the red climate under the condition-field model.",
+                "evidence": "condition-field association: pressure connects to red climate"
+            },
+            {
+                "id": "emotion-pressure-to-family-blue-condition-climate",
+                "source": "emotion-pressure",
+                "target": "family-blue",
+                "type": "conditions_color_climate",
+                "description": "pressure can weight the blue climate under the condition-field model.",
+                "evidence": "condition-field association: pressure connects to blue climate"
+            },
+            {
+                "id": "condition-word-warmth-to-condition-temperature-condition-field",
+                "source": "condition-word-warmth",
+                "target": "condition-temperature",
+                "type": "condition_word_shapes_driver",
+                "description": "warmth is condition-field vocabulary for temperature.",
+                "evidence": "ecosystem foundation: warmth shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "condition-word-warmth-to-family-orange-condition-climate",
+                "source": "condition-word-warmth",
+                "target": "family-orange",
+                "type": "conditions_color_climate",
+                "description": "warmth can weight the orange climate under the condition-field model.",
+                "evidence": "condition-field association: warmth connects to orange climate"
+            },
+            {
+                "id": "condition-word-warmth-to-family-red-condition-climate",
+                "source": "condition-word-warmth",
+                "target": "family-red",
+                "type": "conditions_color_climate",
+                "description": "warmth can weight the red climate under the condition-field model.",
+                "evidence": "condition-field association: warmth connects to red climate"
+            },
+            {
+                "id": "condition-word-warmth-to-family-blue-condition-climate",
+                "source": "condition-word-warmth",
+                "target": "family-blue",
+                "type": "conditions_color_climate",
+                "description": "warmth can weight the blue climate under the condition-field model.",
+                "evidence": "condition-field association: warmth connects to blue climate"
+            },
+            {
+                "id": "condition-word-cooling-to-condition-temperature-condition-field",
+                "source": "condition-word-cooling",
+                "target": "condition-temperature",
+                "type": "condition_word_shapes_driver",
+                "description": "cooling is condition-field vocabulary for temperature.",
+                "evidence": "ecosystem foundation: cooling shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "condition-word-cooling-to-family-orange-condition-climate",
+                "source": "condition-word-cooling",
+                "target": "family-orange",
+                "type": "conditions_color_climate",
+                "description": "cooling can weight the orange climate under the condition-field model.",
+                "evidence": "condition-field association: cooling connects to orange climate"
+            },
+            {
+                "id": "condition-word-cooling-to-family-red-condition-climate",
+                "source": "condition-word-cooling",
+                "target": "family-red",
+                "type": "conditions_color_climate",
+                "description": "cooling can weight the red climate under the condition-field model.",
+                "evidence": "condition-field association: cooling connects to red climate"
+            },
+            {
+                "id": "condition-word-cooling-to-family-blue-condition-climate",
+                "source": "condition-word-cooling",
+                "target": "family-blue",
+                "type": "conditions_color_climate",
+                "description": "cooling can weight the blue climate under the condition-field model.",
+                "evidence": "condition-field association: cooling connects to blue climate"
+            },
+            {
+                "id": "emotion-intensity-to-condition-temperature-condition-field",
+                "source": "emotion-intensity",
+                "target": "condition-temperature",
+                "type": "condition_word_shapes_driver",
+                "description": "intensity is condition-field vocabulary for temperature.",
+                "evidence": "ecosystem foundation: intensity shapes graph reactions as a condition, not a strict color synonym"
+            },
+            {
+                "id": "emotion-intensity-to-family-orange-condition-climate",
+                "source": "emotion-intensity",
+                "target": "family-orange",
+                "type": "conditions_color_climate",
+                "description": "intensity can weight the orange climate under the condition-field model.",
+                "evidence": "condition-field association: intensity connects to orange climate"
+            },
+            {
+                "id": "emotion-intensity-to-family-red-condition-climate",
+                "source": "emotion-intensity",
+                "target": "family-red",
+                "type": "conditions_color_climate",
+                "description": "intensity can weight the red climate under the condition-field model.",
+                "evidence": "condition-field association: intensity connects to red climate"
+            },
+            {
+                "id": "emotion-intensity-to-family-blue-condition-climate",
+                "source": "emotion-intensity",
+                "target": "family-blue",
+                "type": "conditions_color_climate",
+                "description": "intensity can weight the blue climate under the condition-field model.",
+                "evidence": "condition-field association: intensity connects to blue climate"
+            },
+            {
+                "id": "condition-word-experience-to-ecosystem-experience-foundation-flow",
+                "source": "condition-word-experience",
+                "target": "ecosystem-experience",
+                "type": "names_ecosystem_foundation_step",
+                "description": "experience names part of the ecosystem foundation flow.",
+                "evidence": "foundation flow vocabulary: experience -> ecosystem-experience"
+            },
+            {
+                "id": "condition-word-condition-to-ecosystem-conditions-foundation-flow",
+                "source": "condition-word-condition",
+                "target": "ecosystem-conditions",
+                "type": "names_ecosystem_foundation_step",
+                "description": "condition names part of the ecosystem foundation flow.",
+                "evidence": "foundation flow vocabulary: condition -> ecosystem-conditions"
+            },
+            {
+                "id": "condition-word-conditions-to-ecosystem-conditions-foundation-flow",
+                "source": "condition-word-conditions",
+                "target": "ecosystem-conditions",
+                "type": "names_ecosystem_foundation_step",
+                "description": "conditions names part of the ecosystem foundation flow.",
+                "evidence": "foundation flow vocabulary: conditions -> ecosystem-conditions"
+            },
+            {
+                "id": "condition-word-emotion-to-ecosystem-emotion-foundation-flow",
+                "source": "condition-word-emotion",
+                "target": "ecosystem-emotion",
+                "type": "names_ecosystem_foundation_step",
+                "description": "emotion names part of the ecosystem foundation flow.",
+                "evidence": "foundation flow vocabulary: emotion -> ecosystem-emotion"
+            },
+            {
+                "id": "condition-word-adaptation-to-ecosystem-adaptation-foundation-flow",
+                "source": "condition-word-adaptation",
+                "target": "ecosystem-adaptation",
+                "type": "names_ecosystem_foundation_step",
+                "description": "adaptation names part of the ecosystem foundation flow.",
+                "evidence": "foundation flow vocabulary: adaptation -> ecosystem-adaptation"
+            },
+            {
+                "id": "condition-word-behavior-to-ecosystem-behavior-foundation-flow",
+                "source": "condition-word-behavior",
+                "target": "ecosystem-behavior",
+                "type": "names_ecosystem_foundation_step",
+                "description": "behavior names part of the ecosystem foundation flow.",
+                "evidence": "foundation flow vocabulary: behavior -> ecosystem-behavior"
+            },
+            {
+                "id": "condition-word-language-to-ecosystem-language-foundation-flow",
+                "source": "condition-word-language",
+                "target": "ecosystem-language",
+                "type": "names_ecosystem_foundation_step",
+                "description": "language names part of the ecosystem foundation flow.",
+                "evidence": "foundation flow vocabulary: language -> ecosystem-language"
+            },
+            {
+                "id": "condition-word-pattern-to-ecosystem-pattern-foundation-flow",
+                "source": "condition-word-pattern",
+                "target": "ecosystem-pattern",
+                "type": "names_ecosystem_foundation_step",
+                "description": "pattern names part of the ecosystem foundation flow.",
+                "evidence": "foundation flow vocabulary: pattern -> ecosystem-pattern"
+            },
+            {
+                "id": "condition-word-identity-tendency-to-ecosystem-identity-tendency-foundation-flow",
+                "source": "condition-word-identity-tendency",
+                "target": "ecosystem-identity-tendency",
+                "type": "names_ecosystem_foundation_step",
+                "description": "identity tendency names part of the ecosystem foundation flow.",
+                "evidence": "foundation flow vocabulary: identity tendency -> ecosystem-identity-tendency"
+            },
+            {
+                "id": "emotion-exposed-to-family-yellow-condition-emotion",
+                "source": "emotion-exposed",
+                "target": "family-yellow",
+                "type": "emotion_association",
+                "description": "exposed routes to yellow as condition-shaped emotional climate.",
+                "evidence": "condition-field emotional association: Feeling made visible by the light/exposure condition."
+            },
+            {
+                "id": "emotion-exposed-to-ecosystem-emotion-condition-flow",
+                "source": "emotion-exposed",
+                "target": "ecosystem-emotion",
+                "type": "condition_shaped_emotion",
+                "description": "exposed is an emotion word shaped by the condition field.",
+                "evidence": "ecosystem foundation: emotion emerges after conditions shape experience"
+            },
+            {
+                "id": "emotion-permeable-to-family-blue-condition-emotion",
+                "source": "emotion-permeable",
+                "target": "family-blue",
+                "type": "emotion_association",
+                "description": "permeable routes to blue-gray as condition-shaped emotional climate.",
+                "evidence": "condition-field emotional association: Feeling with porous boundaries under water/flow condition."
+            },
+            {
+                "id": "emotion-permeable-to-ecosystem-emotion-condition-flow",
+                "source": "emotion-permeable",
+                "target": "ecosystem-emotion",
+                "type": "condition_shaped_emotion",
+                "description": "permeable is an emotion word shaped by the condition field.",
+                "evidence": "ecosystem foundation: emotion emerges after conditions shape experience"
+            },
+            {
+                "id": "emotion-rooted-to-family-green-condition-emotion",
+                "source": "emotion-rooted",
+                "target": "family-green",
+                "type": "emotion_association",
+                "description": "rooted routes to green as condition-shaped emotional climate.",
+                "evidence": "condition-field emotional association: Feeling supported by soil/root condition."
+            },
+            {
+                "id": "emotion-rooted-to-ecosystem-emotion-condition-flow",
+                "source": "emotion-rooted",
+                "target": "ecosystem-emotion",
+                "type": "condition_shaped_emotion",
+                "description": "rooted is an emotion word shaped by the condition field.",
+                "evidence": "ecosystem foundation: emotion emerges after conditions shape experience"
+            },
+            {
+                "id": "emotion-pressurized-to-family-red-condition-emotion",
+                "source": "emotion-pressurized",
+                "target": "family-red",
+                "type": "emotion_association",
+                "description": "pressurized routes to red-orange as condition-shaped emotional climate.",
+                "evidence": "condition-field emotional association: Feeling shaped by pressure and temperature condition."
+            },
+            {
+                "id": "emotion-pressurized-to-ecosystem-emotion-condition-flow",
+                "source": "emotion-pressurized",
+                "target": "ecosystem-emotion",
+                "type": "condition_shaped_emotion",
+                "description": "pressurized is an emotion word shaped by the condition field.",
+                "evidence": "ecosystem foundation: emotion emerges after conditions shape experience"
+            },
+            {
+                "id": "emotion-coherent-to-family-green-condition-emotion",
+                "source": "emotion-coherent",
+                "target": "family-green",
+                "type": "emotion_association",
+                "description": "coherent routes to green as condition-shaped emotional climate.",
+                "evidence": "condition-field emotional association: Feeling of structure maintained under changing conditions."
+            },
+            {
+                "id": "emotion-coherent-to-ecosystem-emotion-condition-flow",
+                "source": "emotion-coherent",
+                "target": "ecosystem-emotion",
+                "type": "condition_shaped_emotion",
+                "description": "coherent is an emotion word shaped by the condition field.",
+                "evidence": "ecosystem foundation: emotion emerges after conditions shape experience"
+            },
+            {
+                "id": "emotion-reactive-to-family-orange-condition-emotion",
+                "source": "emotion-reactive",
+                "target": "family-orange",
+                "type": "emotion_association",
+                "description": "reactive routes to orange as condition-shaped emotional climate.",
+                "evidence": "condition-field emotional association: Feeling where conditions trigger fast response."
+            },
+            {
+                "id": "emotion-reactive-to-ecosystem-emotion-condition-flow",
+                "source": "emotion-reactive",
+                "target": "ecosystem-emotion",
+                "type": "condition_shaped_emotion",
+                "description": "reactive is an emotion word shaped by the condition field.",
+                "evidence": "ecosystem foundation: emotion emerges after conditions shape experience"
+            },
+            {
+                "id": "emotion-regulated-to-family-green-condition-emotion",
+                "source": "emotion-regulated",
+                "target": "family-green",
+                "type": "emotion_association",
+                "description": "regulated routes to green as condition-shaped emotional climate.",
+                "evidence": "condition-field emotional association: Feeling where conditions support recovery and balance."
+            },
+            {
+                "id": "emotion-regulated-to-ecosystem-emotion-condition-flow",
+                "source": "emotion-regulated",
+                "target": "ecosystem-emotion",
+                "type": "condition_shaped_emotion",
+                "description": "regulated is an emotion word shaped by the condition field.",
+                "evidence": "ecosystem foundation: emotion emerges after conditions shape experience"
+            },
+            {
+                "id": "emotion-unresolved-to-family-gray-condition-emotion",
+                "source": "emotion-unresolved",
+                "target": "family-gray",
+                "type": "emotion_association",
+                "description": "unresolved routes to gray as condition-shaped emotional climate.",
+                "evidence": "condition-field emotional association: Feeling where conditions have not produced a clear route."
+            },
+            {
+                "id": "emotion-unresolved-to-ecosystem-emotion-condition-flow",
+                "source": "emotion-unresolved",
+                "target": "ecosystem-emotion",
+                "type": "condition_shaped_emotion",
+                "description": "unresolved is an emotion word shaped by the condition field.",
+                "evidence": "ecosystem foundation: emotion emerges after conditions shape experience"
             }
         ],
         "expansionPolicy": "three-cited-synonyms-per-alias",
@@ -20363,7 +22347,39 @@
             "you know",
             "like",
             "just",
-            "really"
+            "really",
+            "light",
+            "visibility",
+            "exposure",
+            "signal",
+            "clarity",
+            "illumination",
+            "flow",
+            "depth",
+            "permeability",
+            "current",
+            "tide",
+            "soil",
+            "ground",
+            "root",
+            "nutrient",
+            "constraint",
+            "foundation",
+            "temperature",
+            "activation",
+            "pressure",
+            "warmth",
+            "cooling",
+            "intensity",
+            "experience",
+            "condition",
+            "conditions",
+            "emotion",
+            "adaptation",
+            "behavior",
+            "language",
+            "pattern",
+            "identity tendency"
         ],
         "neutralWords": [
             {
@@ -20897,7 +22913,240 @@
         ],
         "definitionPolicy": "context definitions clarify everyday-word meaning and are not strict color synonym evidence",
         "bridgeAssociationPolicy": "common words may point to subfamily and shade nodes when the association is concrete and clarifies an existing family jump",
-        "expansionPolicy": "Common words are connected through concrete, natural, or culturally legible color associations; they remain separate from strict color synonyms."
+        "expansionPolicy": "Common words are connected through concrete, natural, or culturally legible color associations; they remain separate from strict color synonyms.",
+        "conditionFieldWords": [
+            {
+                "term": "light",
+                "definition": "visibility, reflection, exposure, and readable signal condition",
+                "condition": "light",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "visibility",
+                "definition": "how much a signal can be seen or recognized",
+                "condition": "light",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "exposure",
+                "definition": "a condition where what was hidden becomes visible",
+                "condition": "light",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "signal",
+                "definition": "a readable mark, cue, or emitted meaning",
+                "condition": "light",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "clarity",
+                "definition": "a condition of sharpened visibility or reduced ambiguity",
+                "condition": "light",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "illumination",
+                "definition": "light making structure readable",
+                "condition": "light",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "water",
+                "definition": "flow, depth, permeability, and emotional movement condition",
+                "condition": "water",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "flow",
+                "definition": "movement through a system without fixed shape",
+                "condition": "water",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "depth",
+                "definition": "distance beneath the surface; layered or submerged meaning",
+                "condition": "water",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "permeability",
+                "definition": "how easily feeling or signal passes through a boundary",
+                "condition": "water",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "current",
+                "definition": "directional movement inside a larger flow",
+                "condition": "water",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "tide",
+                "definition": "cyclical pull and return in emotional or relational climate",
+                "condition": "water",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "soil",
+                "definition": "ground, memory, nutrient, constraint, and rooting condition",
+                "condition": "soil",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "ground",
+                "definition": "supporting base that lets growth hold",
+                "condition": "soil",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "root",
+                "definition": "where growth attaches to memory, body, or place",
+                "condition": "soil",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "nutrient",
+                "definition": "what feeds growth without being the visible growth itself",
+                "condition": "soil",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "constraint",
+                "definition": "boundary or limit that gives growth form",
+                "condition": "soil",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "foundation",
+                "definition": "slow support condition under visible pattern",
+                "condition": "soil",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "temperature",
+                "definition": "activation, pressure, warmth, cooling, and rate-of-change condition",
+                "condition": "temperature",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "activation",
+                "definition": "energy rising into motion or response",
+                "condition": "temperature",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "pressure",
+                "definition": "force that changes response, shape, or release",
+                "condition": "temperature",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "warmth",
+                "definition": "contact, comfort, or activation through heat",
+                "condition": "temperature",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "cooling",
+                "definition": "reduction of activation or emotional heat",
+                "condition": "temperature",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "intensity",
+                "definition": "how strongly a signal, feeling, or pressure is charged",
+                "condition": "temperature",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "experience",
+                "definition": "Raw contact before the system translates it.",
+                "condition": "experience",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "condition",
+                "definition": "The shaping field that makes experience readable.",
+                "condition": "conditions",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "conditions",
+                "definition": "Plural shaping fields that alter how words and emotions react.",
+                "condition": "conditions",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "emotion",
+                "definition": "Feeling after experience passes through conditions.",
+                "condition": "emotion",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "adaptation",
+                "definition": "Response that adjusts to changing conditions.",
+                "condition": "adaptation",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "behavior",
+                "definition": "Visible action pattern produced by adaptation.",
+                "condition": "behavior",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "language",
+                "definition": "Translation layer that names and organizes behavior into signal.",
+                "condition": "language",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "pattern",
+                "definition": "Repeated language and behavior becoming structure.",
+                "condition": "pattern",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            },
+            {
+                "term": "identity tendency",
+                "definition": "Recurring tendency formed by repeated pattern, not permanent essence.",
+                "condition": "identity-tendency",
+                "status": "connected",
+                "boundary": "condition-field vocabulary, not strict color synonym"
+            }
+        ]
     },
     "englishWords": {
         "sourceFile": "3,000 english words.docx",
@@ -63949,6 +66198,51 @@
                 "connectionType": "emotion_association",
                 "confidence": "medium",
                 "family": "brown-gray"
+            },
+            {
+                "term": "permeable",
+                "aliases": [],
+                "nodeId": "emotion-permeable",
+                "status": "connected",
+                "connectionType": "condition_shaped_emotion",
+                "confidence": "medium",
+                "family": "blue-gray"
+            },
+            {
+                "term": "pressurized",
+                "aliases": [],
+                "nodeId": "emotion-pressurized",
+                "status": "connected",
+                "connectionType": "condition_shaped_emotion",
+                "confidence": "medium",
+                "family": "red-orange"
+            },
+            {
+                "term": "coherent",
+                "aliases": [],
+                "nodeId": "emotion-coherent",
+                "status": "connected",
+                "connectionType": "condition_shaped_emotion",
+                "confidence": "medium",
+                "family": "green"
+            },
+            {
+                "term": "reactive",
+                "aliases": [],
+                "nodeId": "emotion-reactive",
+                "status": "connected",
+                "connectionType": "condition_shaped_emotion",
+                "confidence": "medium",
+                "family": "orange"
+            },
+            {
+                "term": "unresolved",
+                "aliases": [],
+                "nodeId": "emotion-unresolved",
+                "status": "connected",
+                "connectionType": "condition_shaped_emotion",
+                "confidence": "medium",
+                "family": "gray"
             }
         ],
         "expansionPolicy": "Every base and mixed color family receives emotion words so emotional translation can land across the whole climate palette."

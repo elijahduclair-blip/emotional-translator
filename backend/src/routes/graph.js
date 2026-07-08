@@ -2,11 +2,23 @@ import express from 'express';
 import crypto from 'crypto';
 import { pool, query } from '../db/pool.js';
 import { requireAuth, requireAdmin, requirePasswordCurrent } from '../middleware/auth.js';
+import { normalizeNodeMetadataWithFaces, VERIFICATION_FACE_KEYS } from '../lib/node-faces.js';
 
 const router = express.Router();
 const ALLOWED_NODE_TYPES = new Set(['family', 'subfamily', 'shade', 'alias', 'synonym', 'emotion_word', 'common_word', 'neutral_word', 'environment_condition', 'environment_term', 'theme']);
 const ALLOWED_CONFIDENCE = new Set(['high', 'medium', 'low']);
 const ALLOWED_EVIDENCE_TYPES = new Set(['definition', 'dictionary', 'cultural', 'historical', 'scientific', 'artistic', 'observational', 'personal_pattern', 'system_rule']);
+
+function withStoredRouteState(edge) {
+  return {
+    ...edge,
+    state: 'stored',
+    activationReason: null,
+    activationSources: [],
+    activationWeight: null,
+    isPinned: false
+  };
+}
 
 router.get('/graph', async (req, res, next) => {
   try {
@@ -15,11 +27,11 @@ router.get('/graph', async (req, res, next) => {
       query("SELECT * FROM edges WHERE record_status = 'active' ORDER BY id")
     ]);
     const graph = {
-      version: '2.0.0',
+      version: '2.1.0',
       authority: 'nodes_and_edges',
       description: 'Approved Theory of Alignment graph records from PostgreSQL',
-      nodes: nodesResult.rows,
-      edges: edgesResult.rows
+      nodes: nodesResult.rows.map(node => ({ ...node, metadata: normalizeNodeMetadataWithFaces(node.metadata || {}) })),
+      edges: edgesResult.rows.map(withStoredRouteState)
     };
     res.json(graph);
   } catch (error) { next(error); }
@@ -252,7 +264,8 @@ async function addHistory(client, entityType, entityId, action, before, after, a
 
 function normalizeNodeInput(value = {}) {
   const label = String(value.label || '').trim();
-  return { id: slugify(value.id || label), label, type: String(value.type || '').trim(), family: nullableText(value.family), hexColor: nullableText(value.hexColor || value.hex_color), metadata: value.metadata && typeof value.metadata === 'object' ? value.metadata : {} };
+  const metadata = normalizeNodeMetadataWithFaces(value.metadata && typeof value.metadata === 'object' ? value.metadata : {});
+  return { id: slugify(value.id || label), label, type: String(value.type || '').trim(), family: nullableText(value.family), hexColor: nullableText(value.hexColor || value.hex_color), metadata };
 }
 
 function normalizeRelationships(values, sourceId) {
@@ -279,6 +292,10 @@ function validateNodeInput(node) {
   if (!ALLOWED_NODE_TYPES.has(node.type)) throw httpError(400, `Unsupported node type: ${node.type}`);
   if (node.hexColor && !/^#[0-9a-f]{6}$/i.test(node.hexColor)) throw httpError(400, 'Hex color must use #RRGGBB format.');
   if (!String(node.metadata.boundary || '').trim()) throw httpError(400, 'A boundary note is required.');
+  const faceSummary = node.metadata.faceSummary || normalizeNodeMetadataWithFaces(node.metadata).faceSummary;
+  if ((faceSummary.verification?.availableCount || 0) < 2) {
+    throw httpError(400, `Node faces need definition plus at least one more verification face: ${VERIFICATION_FACE_KEYS.filter(key => key !== 'definition').join(', ')}.`);
+  }
 }
 
 function validateRelationship(edge) {

@@ -48,6 +48,8 @@ app.get('/api', (req, res) => {
   res.json({
     status: 'ok',
     message: 'Emotional Translator API online',
+    measurementRule: 'This system measures influence, not meaning.',
+    measurableUnit: 'activationWeight',
     routes: {
       health: '/api/health',
       foundation: '/api/v1/foundation/analyze',

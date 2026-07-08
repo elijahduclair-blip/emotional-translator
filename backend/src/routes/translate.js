@@ -28,6 +28,16 @@ function inputTerms(text) {
   return [...terms].filter(Boolean);
 }
 
+function activeRouteMetadata(reason = 'Active because the current input selected this stored route.') {
+  return {
+    routeState: 'active',
+    activationReason: reason,
+    activationSources: ['search'],
+    activationWeight: 1,
+    isPinned: false
+  };
+}
+
 export async function translate(text, includeDetails = false) {
   const normalized = normalize(text);
   if (!normalized) return { input: text, landing: null, family: null, color: null, confidence: 'low', paths: 0, unresolved: true };
@@ -60,7 +70,15 @@ export async function translate(text, includeDetails = false) {
   routes.forEach(route => {
     if (seen.has(route.target)) return;
     seen.add(route.target);
-    components.push({ id: route.target, label: route.target_label, type: route.target_type, family: route.target_family || familyFromId(route.target), color: route.target_color, relationship: route.type });
+    components.push({
+      id: route.target,
+      label: route.target_label,
+      type: route.target_type,
+      family: route.target_family || familyFromId(route.target),
+      color: route.target_color,
+      relationship: route.type,
+      ...activeRouteMetadata()
+    });
   });
 
   const primary = components[0] || matchedNodes[0];
@@ -78,7 +96,19 @@ export async function translate(text, includeDetails = false) {
     components,
     unresolved: false
   };
-  if (includeDetails) response.details = { matchedNodes, routes };
+  if (includeDetails) {
+    response.details = {
+      matchedNodes,
+      routes: routes.map(route => ({
+        ...route,
+        state: 'active',
+        activationReason: 'Active because the current input matched this stored route now.',
+        activationSources: ['search'],
+        activationWeight: 1,
+        isPinned: false
+      }))
+    };
+  }
   return response;
 }
 

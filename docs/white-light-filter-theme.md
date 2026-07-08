@@ -32,8 +32,7 @@ The examples are theme routes. They are not strict color synonyms.
 This layer sits upstream of color landing. Before the system asks which color a signal routes toward, it can ask what filter is shaping the signal into a theme.
 
 - Climate River: filters behave like atmosphere, weather, rooms, and seasonal conditions.
-- Relationship River: themes show how someone or something appears through relational framing.
-- Identity/Pressure River: multiple themes allow movement, reinvention, exposure, recovery, and pressure without collapsing identity into one label.
+- Relationship River: themes show how a node changes when another node is involved. Relation changes salience, meaning, and visible behavior without replacing the underlying node.
 
 The layer supports the existing rule that meaning is relational. The theme is created by the relation between source, filter, and viewer-facing presentation.
 

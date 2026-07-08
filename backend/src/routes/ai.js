@@ -1,6 +1,8 @@
 import express from 'express';
 import { query } from '../db/pool.js';
 import { translate } from './translate.js';
+import { analyzePatternExtraction, analyzeSelectionClimate } from '../lib/selection-climate.js';
+import { normalizeNodeMetadataWithFaces } from '../lib/node-faces.js';
 
 const router = express.Router();
 const AI_LIMIT_WINDOW_MS = 10 * 60 * 1000;
@@ -9,14 +11,21 @@ const aiRequestWindows = new Map();
 
 export const AI_REFERENCE = Object.freeze({
   name: 'Theory of Alignment Emotional Color Translator',
-  version: '1.0.0',
-  purpose: 'Interpret words and feelings through supported relational color-climate routes.',
+  version: '1.5.0',
+  purpose: 'Interpret words and feelings through a condition engine that activates supported relational color-climate routes.',
   sourceOfTruth: 'Approved PostgreSQL nodes and edges. Personal profiles, research drafts, and proposals are excluded.',
-  defaultStance: 'Read meaning through relation, route, climate, filter, and pressure before assigning an isolated label.',
+  defaultStance: 'Read meaning through structure, stored route, condition source, activation, climate, and pressure before assigning an isolated label.',
   formulas: {
+    conditionEngine: 'node + stored route + condition source -> activation',
+    meaningRead: 'activation + context -> meaning',
+    patternRead: 'repeated activation / meaning -> pattern',
     sharedRead: 'input -> supported route -> color family or mixture -> environment condition -> emotional climate',
+    routeStateRead: 'stored possibility -> context-selected route -> active route',
     themeRead: 'source + filter -> theme',
     compositionRead: 'theme A + theme B -> composed climate',
+    selectionRead: 'selection set -> observable repetition -> inferred preference -> relational climate',
+    patternExtraction: 'selection set -> extracted attributes -> observable pattern -> inferred tendency -> boundary checked climate',
+    activationRead: 'evidence explains why a route exists; condition sources and reasoning explain why it activates now',
     falsifiability: 'If a read cannot name its route, filter, or evidence, mark it weak or unresolved.'
   },
   axes: {
@@ -37,6 +46,9 @@ export const AI_REFERENCE = Object.freeze({
     'Preserve mixed or coexisting climates instead of forcing one answer.',
     'Distinguish graph-supported routes from evocative interpretation.',
     'Treat themes as presentation climates rather than permanent essence.',
+    'Treat not-yet-active routes as stored possibility, not present meaning.',
+    'Explain which condition source made a route active now.',
+    'Separate observable repetition from inference when reading a selection set.',
     'Use unresolved when the graph does not support a route.',
     'State a concise boundary with every interpretive read.'
   ],
@@ -44,6 +56,17 @@ export const AI_REFERENCE = Object.freeze({
 });
 
 router.use('/ai', limitAiRequests);
+
+function withStoredRelationshipState(edge) {
+  return {
+    ...edge,
+    state: 'stored',
+    activationReason: null,
+    activationSources: [],
+    activationWeight: null,
+    isPinned: false
+  };
+}
 
 router.get('/ai/reference', (req, res) => {
   res.json(AI_REFERENCE);
@@ -59,7 +82,43 @@ router.post('/ai/translate', async (req, res, next) => {
       ...result,
       interpretationRule: result.unresolved
         ? 'The approved graph does not currently support a defensible route. Keep the read unresolved.'
-        : 'Explain the supported route before offering evocative interpretation.',
+        : 'Explain the supported stored route, then why that route is active for this input now before offering evocative interpretation.',
+      boundary: AI_REFERENCE.universalBoundary
+    });
+  } catch (error) { next(error); }
+});
+
+router.post('/ai/selection-climate', (req, res, next) => {
+  try {
+    const text = req.body?.text;
+    const selections = req.body?.selections;
+    if (!text && !Array.isArray(selections)) {
+      return res.status(400).json({ error: 'text or selections parameter required' });
+    }
+    const analysis = analyzeSelectionClimate({ text, selections });
+    res.json({
+      ...analysis,
+      interpretationRule: analysis.unresolved
+        ? 'Do not infer a relational climate until at least two supported selections repeat a defensible pattern.'
+        : 'Name the repeated observations first, then infer the preference pattern they support.',
+      boundary: AI_REFERENCE.universalBoundary
+    });
+  } catch (error) { next(error); }
+});
+
+router.post('/ai/pattern-extraction', (req, res, next) => {
+  try {
+    const text = req.body?.text;
+    const selections = req.body?.selections;
+    if (!text && !Array.isArray(selections)) {
+      return res.status(400).json({ error: 'text or selections parameter required' });
+    }
+    const analysis = analyzePatternExtraction({ text, selections });
+    res.json({
+      ...analysis,
+      interpretationRule: analysis.unresolved
+        ? 'Do not infer a pattern climate until the repeated route is observable in at least two supported selections.'
+        : 'Extract repeated attributes first, then name observable patterns, then infer the tendency they support.',
       boundary: AI_REFERENCE.universalBoundary
     });
   } catch (error) { next(error); }
@@ -94,11 +153,12 @@ router.get('/ai/context', async (req, res, next) => {
       : { rows: [] };
     res.json({
       query: searchQuery,
-      matches: nodesResult.rows,
-      relationships: edgesResult.rows,
+      matches: nodesResult.rows.map(node => ({ ...node, metadata: normalizeNodeMetadataWithFaces(node.metadata || {}) })),
+      relationships: edgesResult.rows.map(withStoredRelationshipState),
       matchCount: nodesResult.rows.length,
       connectionStrength: nodesResult.rows.length >= 3 ? 'strong' : nodesResult.rows.length ? 'weak' : 'unresolved',
-      boundary: AI_REFERENCE.universalBoundary
+      boundary: AI_REFERENCE.universalBoundary,
+      activationRule: 'Stored relationships remain possible until current context, reasoning, or manual pinning makes them active.'
     });
   } catch (error) { next(error); }
 });

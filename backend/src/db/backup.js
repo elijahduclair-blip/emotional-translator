@@ -28,7 +28,7 @@ export function backupDatabase() {
     const dbName = url.pathname.slice(1);
     const user = url.username;
     const host = url.hostname;
-    const port = url.port || 5432;
+    const port = url.port || 4180;
     const password = url.password;
 
     const pgDump = process.env.PG_DUMP_PATH || 'C:\\Program Files\\PostgreSQL\\18\\bin\\pg_dump.exe';
@@ -90,7 +90,7 @@ export function restoreDatabase(backupFile) {
     const dbName = url.pathname.slice(1);
     const user = url.username;
     const host = url.hostname;
-    const port = url.port || 5432;
+    const port = url.port || 4180;
     const password = url.password;
 
     console.log(`? Restoring from: ${backupFile}`);

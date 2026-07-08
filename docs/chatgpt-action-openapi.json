@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Theory of Alignment Emotional Color Translator",
-    "description": "Read-only access to approved color-climate translations, compact graph context, and framework rules.",
-    "version": "1.0.0"
+    "description": "Read-only access to approved color-climate translations, foundation structure analysis, compact route context, framework rules, selection-climate reads, pattern extraction, and route-evidence context.",
+    "version": "1.4.0"
   },
   "servers": [
     {
@@ -11,6 +11,60 @@
     }
   ],
   "paths": {
+    "/api/v1/foundation/analyze": {
+      "post": {
+        "operationId": "analyzeFoundationStructure",
+        "summary": "Analyze raw text into structural counts without assigning meaning",
+        "description": "Use this as the first layer when the goal is word structure only. This endpoint returns counts, co-occurrences, Pareto ordering, and repeated structural patterns. It does not assign color, activation, or meaning.",
+        "x-openai-isConsequential": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "maxLength": 50000,
+                    "description": "Raw text to analyze structurally."
+                  },
+                  "options": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "properties": {
+                      "windowSize": {
+                        "type": "integer",
+                        "minimum": 2,
+                        "maximum": 8,
+                        "description": "Co-occurrence lookahead window."
+                      }
+                    }
+                  }
+                },
+                "required": ["text"]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Structure-only foundation analysis",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FoundationAnalysis"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
     "/api/v1/ai/reference": {
       "get": {
         "operationId": "getAlignmentReference",
@@ -73,10 +127,108 @@
         }
       }
     },
+    "/api/v1/ai/selection-climate": {
+      "post": {
+        "operationId": "analyzeSelectionClimate",
+        "summary": "Read a set of selections as a repeated preference pattern",
+        "description": "Use when the input is a cluster of chosen colors, shades, or forms. Name observable repetition first, then infer a relational climate from the repeated pattern.",
+        "x-openai-isConsequential": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "maxLength": 1000,
+                    "description": "A pasted list of selections, separated by commas, plus signs, or new lines."
+                  },
+                  "selections": {
+                    "type": "array",
+                    "description": "Explicit selection list when the caller already has separated values.",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "maxItems": 20
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Observable repetition, inferred preferences, and relational climate boundary",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SelectionClimateResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
+    "/api/v1/ai/pattern-extraction": {
+      "post": {
+        "operationId": "extractPatternClimate",
+        "summary": "Extract repeated attributes and pattern tendencies from a set of selections",
+        "description": "Use when the input is a cluster of chosen colors, shades, or forms and the goal is to separate observable repetition from inferred tendency.",
+        "x-openai-isConsequential": false,
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": false,
+                "properties": {
+                  "text": {
+                    "type": "string",
+                    "maxLength": 1000
+                  },
+                  "selections": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "maxLength": 120
+                    },
+                    "maxItems": 20
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Pattern extraction result with extracted attributes, observations, and boundary-checked tendency",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SelectionClimateResult"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          }
+        }
+      }
+    },
     "/api/v1/ai/context": {
       "get": {
         "operationId": "findAlignmentContext",
-        "summary": "Find compact approved graph context for a word, theme, emotion, or color climate",
+        "summary": "Find compact approved route context for a word, theme, emotion, or color climate",
         "description": "Use when a translation needs supporting nodes, relationships, evidence, theme context, or comparison with neighboring concepts.",
         "x-openai-isConsequential": false,
         "parameters": [
@@ -105,7 +257,7 @@
         ],
         "responses": {
           "200": {
-            "description": "Compact matching nodes and approved relationships",
+            "description": "Compact matching nodes plus approved relationships and route evidence when available",
             "content": {
               "application/json": {
                 "schema": {
@@ -123,6 +275,91 @@
   },
   "components": {
     "schemas": {
+      "FoundationStats": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "totalWords": { "type": "integer" },
+          "distinctWords": { "type": "integer" },
+          "totalCoOccurrences": { "type": "integer" },
+          "windowSize": { "type": "integer" }
+        },
+        "required": ["totalWords", "distinctWords", "totalCoOccurrences", "windowSize"]
+      },
+      "FoundationWordCount": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "word": { "type": "string" },
+          "count": { "type": "integer" },
+          "rank": { "type": "integer" },
+          "share": { "type": "number" }
+        },
+        "required": ["word", "count", "rank", "share"]
+      },
+      "FoundationCoOccurrence": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "word": { "type": "string" },
+          "related": { "type": "string" },
+          "count": { "type": "integer" },
+          "rank": { "type": "integer" },
+          "share": { "type": "number" }
+        },
+        "required": ["word", "related", "count", "rank", "share"]
+      },
+      "FoundationParetoItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "word": { "type": "string" },
+          "count": { "type": "integer" },
+          "rank": { "type": "integer" },
+          "share": { "type": "number" },
+          "cumulativeCount": { "type": "integer" },
+          "cumulativeShare": { "type": "number" }
+        },
+        "required": ["word", "count", "rank", "share", "cumulativeCount", "cumulativeShare"]
+      },
+      "FoundationPattern": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "type": { "type": "string" },
+          "label": { "type": "string" },
+          "evidence": { "type": "string" }
+        },
+        "required": ["type", "label", "evidence"]
+      },
+      "FoundationAnalysis": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "input": { "type": "string" },
+          "engine": { "type": "string", "const": "foundation" },
+          "version": { "type": "string" },
+          "boundary": { "type": "string" },
+          "stats": { "$ref": "#/components/schemas/FoundationStats" },
+          "wordCounts": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/FoundationWordCount" }
+          },
+          "coOccurrences": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/FoundationCoOccurrence" }
+          },
+          "pareto": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/FoundationParetoItem" }
+          },
+          "patterns": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/FoundationPattern" }
+          }
+        },
+        "required": ["input", "engine", "version", "boundary", "stats", "wordCounts", "coOccurrences", "pareto", "patterns"]
+      },
       "AlignmentReference": {
         "type": "object",
         "description": "The stable interpretation contract.",
@@ -158,6 +395,30 @@
           "boundary": { "type": "string" }
         },
         "required": ["query", "matches", "relationships", "matchCount", "connectionStrength", "boundary"]
+      },
+      "SelectionClimateResult": {
+        "type": "object",
+        "properties": {
+          "systemName": { "type": "string" },
+          "inputMode": { "type": "string" },
+          "selections": { "type": "array", "items": { "type": "string" } },
+          "matchedSelections": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+          "extractedAttributes": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+          "patternStages": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+          "observablePatterns": { "type": "array", "items": { "type": "string" } },
+          "inferredPreferences": { "type": "array", "items": { "type": "string" } },
+          "repeatedClimates": { "type": "array", "items": { "type": "string" } },
+          "environmentCondition": { "type": "string" },
+          "filterRead": { "type": "string" },
+          "finalRead": { "type": "string" },
+          "connectionStrength": { "type": "string", "enum": ["strong", "medium", "weak"] },
+          "unresolved": { "type": "boolean" },
+          "unresolvedReason": { "type": "string" },
+          "boundaryChecks": { "type": "array", "items": { "type": "string" } },
+          "interpretationRule": { "type": "string" },
+          "boundary": { "type": "string" }
+        },
+        "required": ["selections", "matchedSelections", "unresolved", "interpretationRule", "boundary"]
       },
       "Error": {
         "type": "object",
