@@ -16,6 +16,7 @@ async function seed() {
     }
 
     const data = JSON.parse(fs.readFileSync(jsonPath, 'utf8').replace(/^\uFEFF/, ''));
+    const seededNodeIds = new Set((data.graph?.nodes || []).map((node) => node.id).filter(Boolean));
 
     if (data.graph?.nodes) {
       console.log(`  ?? Inserting ${data.graph.nodes.length} nodes...`);
@@ -72,12 +73,19 @@ async function seed() {
             JSON.stringify(metadata)
           ]
         );
+        seededNodeIds.add(`theme-${theme.id}`);
       }
     }
 
     if (data.graph?.edges) {
       console.log(`  ?? Inserting ${data.graph.edges.length} edges...`);
+      const skippedEdges = [];
       for (const edge of data.graph.edges) {
+        if (!seededNodeIds.has(edge.source) || !seededNodeIds.has(edge.target)) {
+          skippedEdges.push(edge);
+          continue;
+        }
+
         await query(
           `INSERT INTO edges (id, source, target, type, evidence, confidence) 
            VALUES ($1, $2, $3, $4, $5, $6)
@@ -96,6 +104,13 @@ async function seed() {
             edge.confidence || null
           ]
         );
+      }
+
+      if (skippedEdges.length > 0) {
+        console.warn(`  Skipped ${skippedEdges.length} edges with missing endpoint nodes.`);
+        for (const edge of skippedEdges.slice(0, 10)) {
+          console.warn(`  Missing endpoint edge: ${edge.id || `${edge.source}->${edge.target}:${edge.type}`} (${edge.source} -> ${edge.target})`);
+        }
       }
     }
 
