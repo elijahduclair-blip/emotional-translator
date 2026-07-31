@@ -1,8 +1,10 @@
+import { logRuntimeMetrics } from '../engine/metrics.js';
 import express from 'express';
 import crypto from 'crypto';
 import { pool, query } from '../db/pool.js';
 import { requireAuth, requireAdmin, requirePasswordCurrent } from '../middleware/auth.js';
 import { normalizeNodeMetadataWithFaces, VERIFICATION_FACE_KEYS } from '../lib/node-faces.js';
+
 
 const router = express.Router();
 const ALLOWED_NODE_TYPES = new Set(['family', 'subfamily', 'shade', 'alias', 'synonym', 'emotion_word', 'common_word', 'neutral_word', 'environment_condition', 'environment_term', 'theme']);
@@ -26,14 +28,16 @@ router.get('/graph', async (req, res, next) => {
       query("SELECT * FROM nodes WHERE record_status = 'active' ORDER BY id"),
       query("SELECT * FROM edges WHERE record_status = 'active' ORDER BY id")
     ]);
-    const graph = {
-      version: '2.1.0',
-      authority: 'nodes_and_edges',
-      description: 'Approved Theory of Alignment graph records from PostgreSQL',
-      nodes: nodesResult.rows.map(node => ({ ...node, metadata: normalizeNodeMetadataWithFaces(node.metadata || {}) })),
-      edges: edgesResult.rows.map(withStoredRouteState)
-    };
-    res.json(graph);
+const graph = {
+  version: '2.1.0',
+  authority: 'nodes_and_edges',
+  description: 'Approved Theory of Alignment graph records from PostgreSQL',
+  nodes: nodesResult.rows.map(node => ({ ...node, metadata: normalizeNodeMetadataWithFaces(node.metadata) })),
+  edges: edgesResult.rows.map(withStoredRouteState)
+};
+logRuntimeMetrics(graph);
+
+res.json(graph);
   } catch (error) { next(error); }
 });
 

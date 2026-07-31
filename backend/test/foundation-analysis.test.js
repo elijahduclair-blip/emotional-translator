@@ -29,3 +29,18 @@ test('foundation analysis can widen the co-occurrence window', () => {
   assert.equal(narrowHasGoldIcon, false);
   assert.equal(wideHasGoldIcon, true);
 });
+
+test('foundation analysis adds WordNet lexical evidence without assigning meaning', () => {
+  const result = analyzeFoundationText('gold ritual unknownword');
+  assert.equal(result.wordNet.engine, 'wordnet');
+  assert.equal(result.wordNet.status, 'local_seed');
+  assert.ok(result.wordNet.boundary.includes('lexical evidence'));
+  assert.ok(result.wordNet.matchedWords.some(item => item.word === 'gold'));
+  assert.ok(result.wordNet.matchedWords.some(item => item.word === 'ritual'));
+  assert.ok(result.wordNet.unresolvedWords.includes('unknownword'));
+});
+
+test('foundation analysis can omit WordNet lexical evidence', () => {
+  const result = analyzeFoundationText('gold ritual', { includeWordNet: false });
+  assert.equal(result.wordNet, undefined);
+});

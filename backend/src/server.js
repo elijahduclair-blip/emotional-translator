@@ -1,3 +1,4 @@
+import { logRuntimeMetrics } from './engine/metrics.js';
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -84,15 +85,17 @@ app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`?? Color Translator API running on port ${PORT}`);
-  console.log(`?? Phase 2 features enabled:`);
-  console.log(`   ? Graph governance (/api/v1/graph/proposals)`);
-  console.log(`   ? AI translator (/api/v1/translate)`);
-  console.log(`   ? Foundation analysis (/api/v1/foundation/analyze)`);
-  console.log(`   ? Database backups (npm run backup)`);
-  console.log(`   ? Signed account authentication (/api/v1/auth)`);
-  console.log(`   ? Governed research inbox (/api/v1/research)`);
-  console.log(`   ? Read-only ChatGPT tool contract (/api/v1/ai)`);
+  console.log(`Color Translator API running on port ${PORT}`);
+  console.log('Phase 2 features enabled:');
+  console.log('  Graph governance (/api/v1/graph/proposals)');
+  console.log('  AI translator (/api/v1/translate)');
+  console.log('  Foundation analysis (/api/v1/foundation/analyze)');
+  console.log('  Database backups (npm run backup)');
+  console.log('  Signed account authentication (/api/v1/auth)');
+  console.log('  Governed research inbox (/api/v1/research)');
+  console.log('  Read-only ChatGPT tool contract (/api/v1/ai)');
+
+  logRuntimeMetrics();
 });
 
 // Graceful shutdown

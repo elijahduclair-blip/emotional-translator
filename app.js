@@ -60,15 +60,21 @@ const SHADE_AXIS_POLARITIES = {
 };
 
 const CONDITION_FAMILY_VECTORS = {
-  blue: { x: -92, y: 66, z: 10 },
-  green: { x: -58, y: 72, z: -6 },
-  yellow: { x: 58, y: 86, z: 46 },
-  red: { x: 92, y: 78, z: 80 },
+  blue: { x: -94, y: 64, z: 8 },
+  green: { x: -62, y: 78, z: -18 },
+  yellow: { x: 62, y: 88, z: 18 },
+  red: { x: 94, y: 74, z: 68 },
   black: { x: 0, y: 0, z: -96 },
   white: { x: 0, y: 100, z: 0 }
 };
 
 const PRIMARY_COLOR_ANCHORS = new Set(['blue', 'green', 'yellow', 'red', 'black', 'white']);
+
+const COLOR_SPACE_BOUNDS = Object.freeze({
+  x: Object.freeze({ min: -100, max: 100 }),
+  y: Object.freeze({ min: 0, max: 100 }),
+  z: Object.freeze({ min: -100, max: 100 })
+});
 
 const BRIDGE_FAMILY_RULES = {
   orange: { parents: ['yellow', 'red'], weights: [0.52, 0.48] },
@@ -77,55 +83,6 @@ const BRIDGE_FAMILY_RULES = {
   brown: { parents: ['black', 'red'], weights: [0.56, 0.44] },
   gray: { parents: ['black', 'white'], weights: [0.74, 0.26] }
 };
-
-const DIFFERENTIATION_BANDS = {
-  field: { min: 0, max: 0 },
-  partial: { min: 14, max: 24 },
-  blackBridge: { min: 26, max: 40 },
-  bridge: { min: 44, max: 60 },
-  primary: { min: 68, max: 86 },
-  whiteBridge: { min: 82, max: 94 },
-  white: { min: 100, max: 100 }
-};
-
-function bandRange(name) {
-  return DIFFERENTIATION_BANDS[name] || DIFFERENTIATION_BANDS.bridge;
-}
-
-function bandMidpoint(name) {
-  const band = bandRange(name);
-  return (band.min + band.max) / 2;
-}
-
-function interpolateBand(name, ratio = 0.5) {
-  const band = bandRange(name);
-  const clampedRatio = clamp(ratio, 0, 1);
-  if (band.min === band.max) return band.min;
-  return band.min + (band.max - band.min) * clampedRatio;
-}
-
-function differentiationBandForParents(parents = []) {
-  const normalizedParents = parents.map(parent => normalizeFamilyId(parent)).filter(Boolean);
-  const includesBlack = normalizedParents.includes('black');
-  const includesWhite = normalizedParents.includes('white');
-  if (includesBlack && includesWhite) return 'partial';
-  if (includesBlack) return 'blackBridge';
-  if (includesWhite) return 'whiteBridge';
-  return 'bridge';
-}
-
-function weightedInfluenceRatio(weights = []) {
-  if (!weights.length) return 0.5;
-  if (weights.length === 1) return 0.5;
-  const numeric = weights.map(value => Number(value)).filter(Number.isFinite).map(value => Math.max(0, value));
-  const total = numeric.reduce((sum, value) => sum + value, 0);
-  if (!numeric.length || total <= 0) return 0.5;
-  return numeric.reduce((sum, value, index) => {
-    const normalized = value / total;
-    const position = index / (numeric.length - 1);
-    return sum + position * normalized;
-  }, 0);
-}
 
 const ENVIRONMENT_CONDITIONS = {
   red: {
@@ -297,8 +254,15 @@ const state = {
   personProfile: null,
   surveyPatternText: '',
   pinnedRouteKeys: new Set(),
+  discovery: {
+    selectedKey: '',
+    ignoredKeys: [],
+    boundaryKeys: [],
+    lastAction: ''
+  },
   activeSchemaPackId: 'color',
   selectedId: null,
+  semanticTreeOpenIds: new Set(),
   view: 'families',
   query: '',
   emotionFilter: false,
@@ -514,8 +478,15 @@ async function init() {
     bindEvents();
     render();
   } catch (error) {
-    els.title.textContent = 'Dataset could not load';
-    els.content.innerHTML = `<p class="meta">${escapeHtml(error.message)}. Run a local web server from this folder so the browser can fetch the JSON file.</p>`;
+    console.error('App startup failed', error);
+    const message = error?.message || 'Unknown startup error';
+    const datasetFailure = /Dataset request failed|History index request failed|Failed to fetch|Unexpected token|JSON/i.test(message);
+    els.title.textContent = datasetFailure ? 'Dataset could not load' : 'App startup failed after dataset load';
+    els.content.innerHTML = `<p class="meta">${escapeHtml(message)}. ${
+      datasetFailure
+        ? 'Run a local web server from this folder so the browser can fetch the JSON file.'
+        : 'The dataset file is reachable; this error happened during app startup after loading the dataset.'
+    }</p>`;
   }
 }
 
@@ -631,15 +602,21 @@ function bindEvents() {
   els.authForm?.addEventListener('submit', event => authenticate(event, 'login'));
   els.authCreate?.addEventListener('click', event => authenticate(event, state.auth.configured ? 'register' : 'bootstrap'));
   els.authLogout?.addEventListener('click', logout);
-  els.search.addEventListener('input', event => {
+  document.addEventListener('click', event => {
+    const actionButton = event.target.closest('[data-discovery-action]');
+    if (actionButton) {
+      handleDiscoveryAction(actionButton);
+    }
+  });
+  els.search?.addEventListener('input', event => {
     state.query = event.target.value.trim().toLowerCase();
     rebuildActiveGraph();
     render();
   });
 
-  els.clear.addEventListener('click', () => {
+  els.clear?.addEventListener('click', () => {
     state.query = '';
-    els.search.value = '';
+    if (els.search) els.search.value = '';
     rebuildActiveGraph();
     render();
   });
@@ -726,7 +703,7 @@ function bindEvents() {
     });
   });
 
-  els.fit.addEventListener('click', () => {
+  els.fit?.addEventListener('click', () => {
     if (state.graphMode === '3d') {
       state.three.axisView = 'free';
       applyAxisView('free');
@@ -771,13 +748,13 @@ function bindEvents() {
 
   bindPanelResize();
 
-  els.copy.addEventListener('click', async () => {
+  els.copy?.addEventListener('click', async () => {
     const node = state.nodeById.get(state.selectedId);
     if (!node || !navigator.clipboard) return;
     await navigator.clipboard.writeText(node.label);
   });
 
-  els.canvas.addEventListener('pointerdown', event => {
+  els.canvas?.addEventListener('pointerdown', event => {
     if (state.view === 'word-storage') {
       const point = canvasScreenPoint(event);
       const hit = hitTestWordStorage(point.x, point.y);
@@ -805,7 +782,7 @@ function bindEvents() {
     render();
   });
 
-  els.canvas.addEventListener('pointermove', event => {
+  els.canvas?.addEventListener('pointermove', event => {
     if (state.graphMode === '3d' && state.three.dragging) {
       const dx = event.clientX - state.three.lastPointer.x;
       const dy = event.clientY - state.three.lastPointer.y;
@@ -827,7 +804,7 @@ function bindEvents() {
     drawGraph();
   });
 
-  els.canvas.addEventListener('pointerup', event => {
+  els.canvas?.addEventListener('pointerup', event => {
     if (state.graphMode === '3d') {
       const moved = Math.hypot(event.clientX - state.three.startPointer.x, event.clientY - state.three.startPointer.y);
       state.three.dragging = false;
@@ -846,7 +823,7 @@ function bindEvents() {
     els.canvas.releasePointerCapture(event.pointerId);
   });
 
-  els.canvas.addEventListener('wheel', event => {
+  els.canvas?.addEventListener('wheel', event => {
     if (state.graphMode === '3d') return;
     event.preventDefault();
     const factor = event.deltaY < 0 ? GRAPH_ZOOM_STEP : 1 / GRAPH_ZOOM_STEP;
@@ -907,7 +884,7 @@ function bindPanelResize() {
     window.removeEventListener('pointerup', stop);
   };
 
-  els.resizeHandle.addEventListener('pointerdown', event => {
+  els.resizeHandle?.addEventListener('pointerdown', event => {
     if (state.infoCollapsed) return;
     const detail = document.querySelector('.node-detail');
     startX = event.clientX;
@@ -918,7 +895,7 @@ function bindPanelResize() {
     window.addEventListener('pointerup', stop);
   });
 
-  els.resizeHandle.addEventListener('dblclick', () => {
+  els.resizeHandle?.addEventListener('dblclick', () => {
     document.documentElement.style.setProperty('--info-width', '360px');
     buildLayout();
     drawGraph();
@@ -1181,6 +1158,8 @@ function buildScatterLayout(selected, width, height) {
   const minDegree = Math.min(...degrees);
   const maxDegree = Math.max(...degrees);
   const maxDistance = Math.max(1, ...visibleIds.map(id => distances.get(id) ?? 1));
+  const xRange = SHADE_AXIS_POLARITIES.x.max - SHADE_AXIS_POLARITIES.x.min;
+  const yRange = SHADE_AXIS_POLARITIES.y.max - SHADE_AXIS_POLARITIES.y.min;
   const lanes = new Map();
 
   visibleIds
@@ -1191,7 +1170,9 @@ function buildScatterLayout(selected, width, height) {
       const degree = graphDegree(node.id, visibleSet);
       const distance = distances.get(node.id) ?? maxDistance;
       const degreeRatio = maxDegree === minDegree ? 0.5 : (degree - minDegree) / (maxDegree - minDegree);
-      const distanceRatio = maxDistance <= 0 ? 0 : distance / maxDistance;
+      const structural = resolvedStructuralPositionForNode(node) || { x: 0, y: 50, z: 0 };
+      const xRatio = clamp((structural.x - SHADE_AXIS_POLARITIES.x.min) / xRange, 0, 1);
+      const yRatio = clamp(1 - ((structural.y - SHADE_AXIS_POLARITIES.y.min) / yRange), 0, 1);
       const cluster = topologyClusterKey(node);
       const direction = outgoingIds.has(node.id) ? 'outgoing' : incomingIds.has(node.id) ? 'incoming' : bothIds.has(node.id) ? 'both' : '';
       const laneKey = `${distance}|${cluster}`;
@@ -1200,13 +1181,14 @@ function buildScatterLayout(selected, width, height) {
       const jitter = scatterJitter(node.id, laneIndex);
       const directionBias = distance === 1
         ? direction === 'outgoing'
-          ? plotWidth * 0.27
+          ? plotWidth * 0.08
           : direction === 'incoming'
-            ? -plotWidth * 0.27
+            ? -plotWidth * 0.08
             : 0
         : 0;
-      const x = margin.left + plotWidth * degreeRatio + jitter.x + directionBias;
-      const y = margin.top + plotHeight * distanceRatio + jitter.y;
+      const zBias = (structural.z / Math.max(1, SHADE_AXIS_POLARITIES.z.max)) * (plotWidth * 0.06);
+      const x = margin.left + plotWidth * xRatio + jitter.x + directionBias + zBias;
+      const y = margin.top + plotHeight * yRatio + jitter.y;
 
       state.layout.set(node.id, {
         x: clamp(x, margin.left + 18, width - margin.right - 18),
@@ -4642,6 +4624,262 @@ function addDatabaseEntryToState(result) {
   buildLayout();
 }
 
+const SEMANTIC_TREE_BASE_FAMILIES = new Set(['red', 'yellow', 'green', 'blue', 'black', 'white', 'neutral']);
+
+const SEMANTIC_TREE_BRIDGE_PARENTS = new Map([
+  ['orange', ['yellow', 'red']],
+  ['red-orange', ['red', 'orange']],
+  ['orange-red', ['orange', 'red']],
+  ['yellow-orange', ['yellow', 'orange']],
+  ['orange-yellow', ['orange', 'yellow']],
+  ['yellow-green', ['yellow', 'green']],
+  ['green-yellow', ['green', 'yellow']],
+  ['blue-green', ['blue', 'green']],
+  ['green-blue', ['green', 'blue']],
+  ['teal', ['blue', 'green']],
+  ['blue-purple', ['blue', 'purple']],
+  ['purple-blue', ['purple', 'blue']],
+  ['purple', ['blue', 'red']],
+  ['red-purple', ['red', 'purple']],
+  ['purple-red', ['purple', 'red']],
+  ['pink', ['red', 'white']],
+  ['brown', ['red', 'black']],
+  ['gray', ['black', 'white']],
+  ['grey', ['black', 'white']],
+  ['silver', ['gray', 'white']],
+  ['yellow-brown', ['yellow', 'brown']],
+  ['brown-yellow', ['brown', 'yellow']],
+  ['blue-gray', ['blue', 'gray']],
+  ['gray-blue', ['gray', 'blue']]
+]);
+
+function semanticTreeKey(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[_\s]+/g, '-')
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+}
+
+function flattenSemanticParentValues(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.flatMap(flattenSemanticParentValues);
+  if (typeof value === 'object') {
+    return [
+      value.id,
+      value.nodeId,
+      value.family,
+      value.label,
+      value.name,
+      value.parentA,
+      value.parentB
+    ].filter(Boolean).flatMap(flattenSemanticParentValues);
+  }
+  return String(value)
+    .split(/[,+/|]/)
+    .map(part => part.trim())
+    .filter(Boolean);
+}
+
+function semanticLookupForNodes(nodes) {
+  const byId = new Map();
+  const byKey = new Map();
+  nodes.forEach(node => {
+    byId.set(node.id, node);
+    [
+      node.id,
+      node.label,
+      node.family ? `family-${node.family}` : '',
+      node.type === 'family' ? node.id.replace('family-', '') : ''
+    ].filter(Boolean).forEach(value => byKey.set(semanticTreeKey(value), node.id));
+  });
+  return { byId, byKey };
+}
+
+function semanticParentTokenToId(token, lookup) {
+  const key = semanticTreeKey(token);
+  if (!key) return '';
+  if (lookup.byId.has(token)) return token;
+  if (lookup.byKey.has(key)) return lookup.byKey.get(key);
+  if (lookup.byKey.has(`family-${key}`)) return lookup.byKey.get(`family-${key}`);
+  return '';
+}
+
+function explicitSemanticParentTokens(node) {
+  const meta = node.metadata || {};
+  return flattenSemanticParentValues([
+    node.parents,
+    meta.parents,
+    meta.parent,
+    meta.parentId,
+    meta.parentNode,
+    meta.parentFamily,
+    meta.parentFamilies,
+    meta.baseFamily,
+    meta.baseColor,
+    meta.bridgeParents,
+    meta.parentA,
+    meta.parentB
+  ]);
+}
+
+function inferredSemanticParentTokens(node) {
+  const idKey = semanticTreeKey(node.id.replace(/^(family|subfamily|shade)-/, ''));
+  const labelKey = semanticTreeKey(node.label);
+  const familyKey = semanticTreeKey(node.family);
+  const bridgeParents = SEMANTIC_TREE_BRIDGE_PARENTS.get(idKey)
+    || SEMANTIC_TREE_BRIDGE_PARENTS.get(labelKey)
+    || SEMANTIC_TREE_BRIDGE_PARENTS.get(familyKey);
+
+  if (bridgeParents && !SEMANTIC_TREE_BASE_FAMILIES.has(idKey)) return bridgeParents;
+  if (node.type !== 'family' && node.family) return [`family-${node.family}`];
+  return [];
+}
+
+function semanticParentIds(node, lookup) {
+  const tokens = explicitSemanticParentTokens(node);
+  const inferred = tokens.length ? tokens : inferredSemanticParentTokens(node);
+  return [...new Set(inferred
+    .map(token => semanticParentTokenToId(token, lookup))
+    .filter(parentId => parentId && parentId !== node.id))];
+}
+
+function buildSemanticHierarchy(nodes) {
+  const lookup = semanticLookupForNodes(nodes);
+  const childrenByParent = new Map();
+  const parentIdsByNode = new Map();
+  const nodeRank = { family: 0, subfamily: 1, shade: 2, color: 2, word: 3, emotion: 4 };
+
+  nodes.forEach(node => {
+    const parents = semanticParentIds(node, lookup);
+    parentIdsByNode.set(node.id, parents);
+    parents.forEach(parentId => {
+      if (!childrenByParent.has(parentId)) childrenByParent.set(parentId, []);
+      childrenByParent.get(parentId).push(node.id);
+    });
+  });
+
+  [...childrenByParent.values()].forEach(ids => {
+    ids.sort((a, b) => {
+      const aNode = lookup.byId.get(a);
+      const bNode = lookup.byId.get(b);
+      const aRank = nodeRank[aNode?.type] ?? 9;
+      const bRank = nodeRank[bNode?.type] ?? 9;
+      return aRank - bRank || (aNode?.label || '').localeCompare(bNode?.label || '');
+    });
+  });
+
+  const roots = nodes
+    .filter(node => !(parentIdsByNode.get(node.id) || []).some(parentId => lookup.byId.has(parentId)))
+    .sort((a, b) => (nodeRank[a.type] ?? 9) - (nodeRank[b.type] ?? 9) || a.label.localeCompare(b.label));
+
+  return { lookup, childrenByParent, parentIdsByNode, roots };
+}
+
+function semanticSubtreeHasVisibleNode(nodeId, hierarchy, visibleIds, memo = new Map(), visiting = new Set()) {
+  if (memo.has(nodeId)) return memo.get(nodeId);
+  if (visiting.has(nodeId)) return visibleIds.has(nodeId);
+  visiting.add(nodeId);
+  const hasVisible = visibleIds.has(nodeId)
+    || (hierarchy.childrenByParent.get(nodeId) || []).some(childId => semanticSubtreeHasVisibleNode(childId, hierarchy, visibleIds, memo, visiting));
+  visiting.delete(nodeId);
+  memo.set(nodeId, hasVisible);
+  return hasVisible;
+}
+
+function selectedSemanticAncestorIds(hierarchy) {
+  const ancestors = new Set();
+  const queue = state.selectedId ? [...(hierarchy.parentIdsByNode.get(state.selectedId) || [])] : [];
+  while (queue.length) {
+    const parentId = queue.shift();
+    if (!parentId || ancestors.has(parentId)) continue;
+    ancestors.add(parentId);
+    queue.push(...(hierarchy.parentIdsByNode.get(parentId) || []));
+  }
+  return ancestors;
+}
+
+function renderSemanticTreePanel(items, label) {
+  const visibleIds = new Set(items.map(node => node.id));
+  const treeNodes = state.nodes.filter(nodePassesCategoryFilter);
+  const hierarchy = buildSemanticHierarchy(treeNodes);
+  const roots = hierarchy.roots.filter(node => semanticSubtreeHasVisibleNode(node.id, hierarchy, visibleIds));
+  if (!roots.length) return '';
+
+  const selectedAncestors = selectedSemanticAncestorIds(hierarchy);
+  return `
+    <section class="semantic-tree-panel">
+      <details open>
+        <summary class="semantic-tree-panel-summary">
+          <span>Semantic hierarchy tree</span>
+          <span>${items.length} ${escapeHtml(label)}</span>
+        </summary>
+        <p class="meta semantic-tree-help">Parent-based navigation. Uses stored parents first, then color family and bridge placement rules as fallback.</p>
+        <div class="semantic-tree-body">
+          ${roots.map(root => renderSemanticTreeNode(root, hierarchy, visibleIds, selectedAncestors, 0)).join('')}
+        </div>
+      </details>
+    </section>
+  `;
+}
+
+function renderSemanticTreeNode(node, hierarchy, visibleIds, selectedAncestors, depth, path = new Set()) {
+  if (!node || path.has(node.id)) return '';
+  const nextPath = new Set(path);
+  nextPath.add(node.id);
+  const childIds = (hierarchy.childrenByParent.get(node.id) || [])
+    .filter(childId => !nextPath.has(childId))
+    .filter(childId => semanticSubtreeHasVisibleNode(childId, hierarchy, visibleIds));
+  const hasChildren = childIds.length > 0;
+  const isActive = node.id === state.selectedId;
+  const isOpen = state.semanticTreeOpenIds.has(node.id) || selectedAncestors.has(node.id) || depth < 1;
+  const color = colorForNode(node)?.hex || familyColor(nodeColorKey(node));
+  const parentCount = (hierarchy.parentIdsByNode.get(node.id) || []).length;
+  const summary = `
+    <span class="dot" style="background:${escapeHtml(color)}"></span>
+    <span class="semantic-tree-node-main">
+      <span class="semantic-tree-node-title">${escapeHtml(node.label)}</span>
+      <span class="semantic-tree-node-subtitle">${escapeHtml(nodeTypeInfo(node.type).label)}${parentCount > 1 ? ` · ${parentCount} parents` : ''}</span>
+    </span>
+    ${hasChildren ? `<span class="semantic-tree-count">${childIds.length}</span>` : ''}
+  `;
+
+  if (!hasChildren) {
+    return `
+      <button class="semantic-tree-row ${isActive ? 'is-active' : ''}" type="button" data-node-id="${escapeHtml(node.id)}" style="--tree-depth:${depth}">
+        ${summary}
+      </button>
+    `;
+  }
+
+  return `
+    <details class="semantic-tree-branch" data-tree-node-id="${escapeHtml(node.id)}" ${isOpen ? 'open' : ''} style="--tree-depth:${depth}">
+      <summary class="semantic-tree-summary ${isActive ? 'is-active' : ''}">
+        <span class="semantic-tree-caret">›</span>
+        <span class="semantic-tree-node-label" data-node-id="${escapeHtml(node.id)}">
+          ${summary}
+        </span>
+      </summary>
+      <div class="semantic-tree-children">
+        ${childIds.map(childId => renderSemanticTreeNode(hierarchy.lookup.byId.get(childId), hierarchy, visibleIds, selectedAncestors, depth + 1, nextPath)).join('')}
+      </div>
+    </details>
+  `;
+}
+
+function bindSemanticTreeToggles() {
+  els.list.querySelectorAll('.semantic-tree-branch[data-tree-node-id]').forEach(details => {
+    details.addEventListener('toggle', () => {
+      const nodeId = details.dataset.treeNodeId;
+      if (!nodeId) return;
+      if (details.open) state.semanticTreeOpenIds.add(nodeId);
+      else state.semanticTreeOpenIds.delete(nodeId);
+    });
+  });
+}
+
 function renderFamilyGroupedNodeList(type, label) {
   const types = Array.isArray(type) ? type : [type];
   const items = state.nodes
@@ -4678,7 +4916,7 @@ function renderFamilyGroupedNodeList(type, label) {
     return aRank - bRank || a.localeCompare(b);
   });
 
-  els.list.innerHTML = families.map(family => {
+  els.list.innerHTML = `${renderSemanticTreePanel(items, label)}${families.map(family => {
     const nodes = grouped.get(family) || [];
     const familyNode = state.nodeById.get(`family-${family}`);
     const title = familyNode?.label || titleCase(family);
@@ -4695,14 +4933,19 @@ function renderFamilyGroupedNodeList(type, label) {
         </div>
       </section>
     `;
-  }).join('');
+  }).join('')}`;
 
+  bindSemanticTreeToggles();
   bindListNodeClicks();
 }
 
 function bindListNodeClicks() {
-  els.list.querySelectorAll('.list-item[data-node-id], .shade-point[data-node-id]').forEach(button => {
-    button.addEventListener('click', () => {
+  els.list.querySelectorAll('.list-item[data-node-id], .shade-point[data-node-id], .semantic-tree-row[data-node-id], .semantic-tree-node-label[data-node-id]').forEach(button => {
+    button.addEventListener('click', event => {
+      if (button.classList.contains('semantic-tree-node-label')) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
       state.selectedId = button.dataset.nodeId;
       render();
     });
@@ -4774,11 +5017,10 @@ function renderShadeGraphList() {
   const activeLabel = queryColor ? state.query : queryNode?.label || selected?.label || 'Selected color';
   const activeNode = queryNode || selected || null;
   const position = queryColor
-    ? (activeColor ? shadePosition(activeColor) : null)
+    ? resolvedStructuralPositionForNode(activeNode)
     : (
         displayShadePositionForNode(activeNode)?.position
-        || baselinePlacementForNode(activeNode)?.position
-        || (activeColor ? shadePosition(activeColor, environmentFamiliesForNode(activeNode) || []) : null)
+        || resolvedStructuralPositionForNode(activeNode)
       );
   const comparable = shadeComparableNodes()
     .filter(item => !state.emotionFilter || emotionVisibleNodeIds().has(item.node.id))
@@ -4913,7 +5155,7 @@ function renderNaturalAtlasItem(item) {
   const condition = item.condition;
   const color = colorForNode(item.node) || parseColorInput(familyColor(item.family));
   const shadeInfo = displayShadePositionForNode(item.node);
-  const shade = shadeInfo?.position || baselinePlacementForNode(item.node)?.position || (color ? shadePosition(color, environmentFamiliesForNode(item.node) || []) : null);
+  const shade = shadeInfo?.position || resolvedStructuralPositionForNode(item.node);
   const themeShift = shadeInfo?.themeCondition || null;
   const atlas = shadeInfo?.atlas || null;
   return `
@@ -8686,6 +8928,26 @@ function nodeSupportsAtlasInfluence(node) {
   return Boolean(node && ATLAS_INFLUENCE_NODE_TYPES.has(node.type));
 }
 
+function computedColorVectorFallbackPlacement(node, color = colorForNode(node)) {
+  if (!node || !color) return null;
+  const families = structuralFamiliesForNode(node);
+  const position = clampStructuralPosition(
+    conditionAwareShadePosition(color, families.length ? families : (environmentFamiliesForNode(node) || []))
+  );
+  const parentFamilies = uniqueStrings(
+    families.length
+      ? families
+      : (environmentFamiliesForNode(node) || []).filter(Boolean)
+  );
+  return {
+    kind: 'computed_color_vector',
+    position,
+    parentFamilies,
+    influenceWeights: [],
+    boundary: 'This node is using computed color-vector geometry inside the shared structural space because no stronger explicit parent path was resolved yet.'
+  };
+}
+
 function baselinePlacementForNode(node) {
   if (!node) return null;
   const color = colorForNode(node);
@@ -8731,17 +8993,22 @@ function baselinePlacementForNode(node) {
   const inherited = inheritedPlacementForNode(node, color);
   if (inherited) return inherited;
 
-  return {
-    kind: 'heuristic_fallback',
-    position: shadePosition(color, environmentFamiliesForNode(node) || []),
-    parentFamilies: uniqueStrings((environmentFamiliesForNode(node) || []).flatMap(family => splitFamilyId(family))),
-    influenceWeights: [],
-    boundary: 'This node is falling back to direct color geometry because a stronger bridge or base path was not resolved yet.'
-  };
+  const constrained = familyConstrainedFallbackPlacement(node, color);
+  if (constrained) return constrained;
+
+  return computedColorVectorFallbackPlacement(node, color);
 }
 
 function baseShadePositionForNode(node) {
   return baselinePlacementForNode(node)?.position || null;
+}
+
+function resolvedStructuralPlacementForNode(node) {
+  return baselinePlacementForNode(node) || computedColorVectorFallbackPlacement(node);
+}
+
+function resolvedStructuralPositionForNode(node) {
+  return resolvedStructuralPlacementForNode(node)?.position || null;
 }
 
 function activeThemeConditionProfiles(profile = state.perception?.profile || currentPerceptionProfile()) {
@@ -9017,6 +9284,63 @@ function influencedPositionMap(nodeIds = state.nodes.map(node => node.id)) {
     if (pos) map.set(id, pos);
   });
   return map;
+}
+
+function selectedNeighborhoodDisplayGeometry(positionMap, profile = state.perception?.profile || currentPerceptionProfile()) {
+  if (!state.selectedId || !(positionMap instanceof Map)) return null;
+  const metrics = structuralNeighborhoodMetrics(state.selectedId, profile);
+  const center = positionMap.get(state.selectedId);
+  if (!center) return null;
+
+  const memberIds = metrics.ids.filter(id => id !== state.selectedId && positionMap.has(id));
+  const memberPositions = memberIds
+    .map(id => ({ id, ...positionMap.get(id) }))
+    .filter(pos => Number.isFinite(pos.x) && Number.isFinite(pos.y));
+
+  if (!memberPositions.length) {
+    return {
+      center,
+      radius: (center.radius || 10) * 3.2,
+      metrics,
+      memberIds
+    };
+  }
+
+  const boundaryRadius = memberPositions.reduce((maxDistance, pos) => {
+    const dx = pos.x - center.x;
+    const dy = pos.y - center.y;
+    const distance = Math.sqrt(dx * dx + dy * dy) + (pos.radius || 0);
+    return Math.max(maxDistance, distance);
+  }, center.radius || 0);
+
+  return {
+    center,
+    radius: boundaryRadius + 14,
+    metrics,
+    memberIds
+  };
+}
+
+function drawSelectedNeighborhoodBoundary(positionMap, profile = state.perception?.profile || currentPerceptionProfile()) {
+  const geometry = selectedNeighborhoodDisplayGeometry(positionMap, profile);
+  if (!geometry || !geometry.radius || geometry.radius <= 0) return;
+
+  const selectedNode = state.nodeById.get(state.selectedId);
+  const baseColor = familyColor(selectedNode?.family || nodeColorKey(selectedNode) || 'neutral');
+  const glowColor = hexToRgba(baseColor, 0.12);
+  const strokeColor = hexToRgba(baseColor, 0.34);
+
+  ctx.save();
+  ctx.beginPath();
+  ctx.fillStyle = glowColor;
+  ctx.arc(geometry.center.x, geometry.center.y, geometry.radius, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.setLineDash([8, 6]);
+  ctx.strokeStyle = strokeColor;
+  ctx.lineWidth = 1.8;
+  ctx.stroke();
+  ctx.restore();
 }
 
 function neutralTerms() {
@@ -9586,6 +9910,47 @@ function buildNodeInfoCluster(node, profile = state.perception?.profile || curre
       return `${routeText} ${sourceText} Meaning is emerging from active route travel and the gradients between accumulated experiences, not from the node by itself.`;
     })();
 
+  const activeWeightValues = localActiveEdges
+    .map(edge => Number(edge.__activationWeight))
+    .filter(value => Number.isFinite(value));
+  const averageActivationWeight = activeWeightValues.length
+    ? activeWeightValues.reduce((sum, value) => sum + value, 0) / activeWeightValues.length
+    : null;
+  const peakActivationWeight = activeWeightValues.length
+    ? Math.max(...activeWeightValues)
+    : null;
+  const activeNeighborLabels = uniqueStrings(
+    localActiveEdges
+      .slice(0, 6)
+      .map(edge => {
+        const otherId = edge.source === node.id ? edge.target : edge.source;
+        return state.nodeById.get(otherId)?.label || '';
+      })
+      .filter(Boolean)
+  );
+  const conditionSourceLabels = uniqueStrings(
+    conditionCards
+      .map(card => card.sourceLabel)
+      .filter(Boolean)
+  );
+  const structuralContext = {
+    externalEnvironment: conditionSourceLabels.length
+      ? `Active condition sources surrounding this node now: ${conditionSourceLabels.join(', ')}.`
+      : 'Current search/input field, selected graph view, and local stored-route neighborhood.',
+    exposure: localActiveEdges.length
+      ? `${node.label} is being contacted by ${localActiveEdges.length} active route${localActiveEdges.length === 1 ? '' : 's'}${activeNeighborLabels.length ? ` toward ${activeNeighborLabels.join(', ')}.` : '.'}`
+      : `${node.label} is selected, but no nearby stored route has enough present influence to become active.`,
+    structuralChange: averageActivationWeight == null
+      ? 'No measurable activationWeight has formed yet; stored possibilities remain available but quiet.'
+      : `activationWeight averages ${averageActivationWeight.toFixed(2)} and peaks at ${peakActivationWeight.toFixed(2)}, so route influence is measurable in this local read.`,
+    currentState: `Current state contains ${coreNodeIds.size} core node${coreNodeIds.size === 1 ? '' : 's'}, ${localStoredEdges.length} stored possibilit${localStoredEdges.length === 1 ? 'y' : 'ies'}, and ${localActiveEdges.length} active route${localActiveEdges.length === 1 ? '' : 's'}. Patina is the accumulated local route history visible in this state, not the exposure itself.`,
+    futureBehavior: localActiveEdges.length
+      ? `If conditions remain similar, the next traversal is most likely to follow ${activeNeighborLabels.slice(0, 3).join(', ') || 'the highest activationWeight routes'}.`
+      : 'If stronger evidence, recurrence, or condition pressure appears, stored routes can move from quiet possibility into activation.',
+    revisionBoundary: 'Recompute if condition sources, contradictory evidence, geometry/neighborhood position, route recurrence, or personal/atlas/history influence changes.',
+    unresolved: !localActiveEdges.length
+  };
+
   return {
     mode: themeContext ? 'theme' : 'node',
     node,
@@ -9613,6 +9978,9 @@ function buildNodeInfoCluster(node, profile = state.perception?.profile || curre
     conditionSources: conditionCards,
     historyContext,
     clusterSummary,
+    structuralContext,
+    averageActivationWeight,
+    peakActivationWeight,
     activeMeaningSummary,
     patternSummary,
     coreNodeCount: coreNodeIds.size,
@@ -9778,6 +10146,114 @@ function renderClusterConditions(cluster) {
           </article>
         `).join('')}
       </div>
+    </section>
+  `;
+}
+
+function renderStructuralContextFrame(cluster) {
+  const context = cluster.structuralContext;
+  if (!context) return '';
+
+  return `
+    <section class="detail-section cluster-section">
+      <h3>Context In Structure</h3>
+      <p class="meta">Context is the active structural frame around the selected node. It explains what surrounds the node, what contacts it, what measurable change appears, and when the read must be revised.</p>
+      <div class="graph-rules-grid">
+        <article class="graph-rule-card">
+          <strong>External environment</strong>
+          <p>${escapeHtml(context.externalEnvironment)}</p>
+        </article>
+        <article class="graph-rule-card">
+          <strong>Exposure</strong>
+          <p>${escapeHtml(context.exposure)}</p>
+        </article>
+        <article class="graph-rule-card">
+          <strong>Structural change</strong>
+          <p>${escapeHtml(context.structuralChange)}</p>
+        </article>
+        <article class="graph-rule-card">
+          <strong>Current state (Patina)</strong>
+          <p>${escapeHtml(context.currentState)}</p>
+        </article>
+        <article class="graph-rule-card">
+          <strong>Future behavior</strong>
+          <p>${escapeHtml(context.futureBehavior)}</p>
+        </article>
+        <article class="graph-rule-card">
+          <strong>Revision boundary</strong>
+          <p>${escapeHtml(context.revisionBoundary)}</p>
+        </article>
+      </div>
+      ${context.unresolved ? '<p class="meta"><strong>Unresolved:</strong> current context has not produced enough activationWeight to select a defensible active route.</p>' : ''}
+    </section>
+  `;
+}
+
+function discoveryDisplayLabel(node) {
+  return node?.label || node?.name || nodeColorKey(node) || node?.id || 'Unknown node';
+}
+
+function renderGeometricDiscoveryPanel(node) {
+  const discovery = ensureDiscoveryState();
+  const suggestions = geometricDiscoverySuggestions(node);
+  if (!suggestions.length && !discovery.lastAction) return '';
+
+  const actionLabels = {
+    review: 'Review',
+    bridge: 'Create bridge review',
+    boundary: 'Mark boundary',
+    ignore: 'Ignore'
+  };
+
+  return `
+    <section class="detail-section cluster-section discovery-panel">
+      <h3>Geometric Discovery</h3>
+      <p class="meta">This system measures influence, not meaning. Geometry can suggest review questions, but it cannot create permanent semantic routes by itself.</p>
+      ${discovery.lastAction ? `<p class="discovery-status">${escapeHtml(discovery.lastAction)}</p>` : ''}
+      ${suggestions.length ? `
+        <div class="discovery-list">
+          ${suggestions.map(item => {
+            const selected = discovery.selectedKey === item.key;
+            const sourceLabel = discoveryDisplayLabel(item.source);
+            const targetLabel = discoveryDisplayLabel(item.target);
+            const pillClass = item.candidateType === 'new_node'
+              ? 'new-node'
+              : item.category === 'Possible missing bridge'
+                ? 'bridge'
+                : 'boundary';
+            return `
+              <article class="discovery-card ${selected ? 'is-selected' : ''}">
+                <div class="discovery-card-head">
+                  <strong>${escapeHtml(sourceLabel)} &lt;-&gt; ${escapeHtml(targetLabel)}</strong>
+                  <span class="discovery-pill ${pillClass}">${escapeHtml(item.category)}</span>
+                </div>
+                <div class="discovery-meta-grid">
+                  <span><strong>Distance:</strong> ${escapeHtml(String(item.distance))}</span>
+                  <span><strong>Discovery score:</strong> ${escapeHtml(String(item.score))}</span>
+                  <span><strong>Shared neighbors:</strong> ${escapeHtml(String(item.sharedNeighbors.length))}</span>
+                  <span><strong>Local density:</strong> ${escapeHtml(String(item.localDensity ?? 0))}</span>
+                  <span><strong>Candidate type:</strong> ${escapeHtml(item.candidateType === 'new_node' ? 'new node' : 'bridge')}</span>
+                  <span><strong>Placement sources:</strong> ${escapeHtml(item.placementLabel)}</span>
+                  <span><strong>Current semantic edge:</strong> none</span>
+                  <span><strong>Type compatibility:</strong> ${escapeHtml(`${Math.round(item.typeScore * 100)}%`)}</span>
+                </div>
+                ${selected ? '<p class="discovery-ghost-note">Ghost connection selected: temporary dotted review route only. No stored edge has been created.</p>' : ''}
+                <div class="discovery-actions">
+                  ${Object.entries(actionLabels).map(([action, label]) => `
+                    <button
+                      type="button"
+                      data-discovery-action="${escapeHtml(action)}"
+                      data-discovery-key="${escapeHtml(item.key)}"
+                      data-discovery-source="${escapeHtml(sourceLabel)}"
+                      data-discovery-target="${escapeHtml(targetLabel)}"
+                    >${escapeHtml(label)}</button>
+                  `).join('')}
+                </div>
+              </article>
+            `;
+          }).join('')}
+        </div>
+      ` : '<p class="meta">No nearby unconnected candidates are inside the current discovery radius.</p>'}
     </section>
   `;
 }
@@ -9992,6 +10468,8 @@ function renderDetail() {
     ${renderNodeSchemaSection(node, cluster)}
     ${renderStoredRoutesNearby(cluster)}
     ${renderClusterConditions(cluster)}
+    ${renderStructuralContextFrame(cluster)}
+    ${renderGeometricDiscoveryPanel(node)}
     ${renderHistoryContextSection(cluster)}
     ${shade ? renderShadeDetailBlock(shade) : ''}
     ${environmentCondition ? renderEnvironmentCondition(environmentCondition) : ''}
@@ -10298,9 +10776,16 @@ function renderShadeDetailBlock(shade) {
           <span>X ${pos.x} ${SHADE_AXIS_LABELS.x}; Y ${pos.y} ${SHADE_AXIS_LABELS.y}; Z ${pos.z} ${SHADE_AXIS_LABELS.z}</span>
           ${placement?.kind === 'base_family_anchor' ? `<span>Baseline rule: fixed base-color anchor.</span>` : ''}
           ${placement?.kind === 'bridge_family_anchor' ? `<span>Baseline rule: bridge family placed between two primary anchors.</span>` : ''}
+          ${placement?.kind === 'family_constrained_anchor' ? `<span>Baseline rule: unresolved color stayed constrained to its strongest base-family anchor.</span>` : ''}
+          ${placement?.kind === 'inferred_bridge_path' ? `<span>Baseline rule: unresolved color resolved as an inferred bridge between two anchor families.</span>` : ''}
           ${placement?.kind === 'shade_from_base' ? `<span>Baseline rule: shade inherits from its strongest base-color path.</span>` : ''}
           ${placement?.kind === 'shade_from_bridge' ? `<span>Baseline rule: shade inherits from its strongest bridge path.</span>` : ''}
+          ${placement?.kind === 'shade_from_inferred_base' ? `<span>Baseline rule: shade inherited from an inferred base-family path.</span>` : ''}
+          ${placement?.kind === 'shade_from_inferred_bridge' ? `<span>Baseline rule: shade inherited from an inferred bridge-family path.</span>` : ''}
           ${bridgeParents.length === 2 ? `<span>Bridge rule: ${escapeHtml(bridgeParents[0])} ${(bridgeWeights[0] * 100).toFixed(0)}% <-> ${escapeHtml(bridgeParents[1])} ${(bridgeWeights[1] * 100).toFixed(0)}%.</span>` : ''}
+          ${mix?.geometry ? `<span>Geometry: distance from Black ${mix.geometry.distanceFromBlack.toFixed(1)}; distance from White ${mix.geometry.distanceFromWhite.toFixed(1)}.</span>` : ''}
+          ${mix?.geometry ? `<span>Vector from Black: dX ${mix.geometry.vectorFromBlack.x >= 0 ? '+' : ''}${mix.geometry.vectorFromBlack.x}, dY ${mix.geometry.vectorFromBlack.y >= 0 ? '+' : ''}${mix.geometry.vectorFromBlack.y}, dZ ${mix.geometry.vectorFromBlack.z >= 0 ? '+' : ''}${mix.geometry.vectorFromBlack.z}.</span>` : ''}
+          ${mix?.geometry ? `<span>Neighborhood: radius ${mix.geometry.neighborhoodRadius.toFixed(1)}; nearby nodes ${mix.geometry.neighborhoodCount}; nearest neighbor ${mix.geometry.nearestNeighborDistance.toFixed(1)}; density ${mix.geometry.neighborhoodDensity.toFixed(5)}.</span>` : ''}
           ${placement?.parentNode ? `<span>Inherited through ${escapeHtml(placement.parentNode.label)} before live condition pull.</span>` : ''}
           ${themeShift ? `<span>Base X ${base.x}; Y ${base.y}; Z ${base.z} -> Theme-conditioned X ${themeShift.position.x}; Y ${themeShift.position.y}; Z ${themeShift.position.z}</span>` : ''}
           ${atlas ? `<span>${themeShift ? 'Theme-conditioned' : 'Base'} X ${(themeShift?.position || base).x}; Y ${(themeShift?.position || base).y}; Z ${(themeShift?.position || base).z} -> Atlas-influenced X ${pos.x}; Y ${pos.y}; Z ${pos.z}</span>` : ''}
@@ -10335,13 +10820,30 @@ function shadeInfoForNode(node) {
   if (!color) return null;
   const baseline = baselinePlacementForNode(node);
   const display = displayShadePositionForNode(node);
+  const position = display?.position || baseline?.position || resolvedStructuralPositionForNode(node);
+  const basePosition = display?.base || baseline?.position || resolvedStructuralPositionForNode(node);
+  const whiteAnchor = CONDITION_FAMILY_VECTORS.white;
+  const blackAnchor = CONDITION_FAMILY_VECTORS.black;
+  const neighborhoodMetrics = structuralNeighborhoodMetrics(node.id);
   return {
     color,
-    position: display?.position || baseline?.position || shadePosition(color, environmentFamiliesForNode(node) || []),
-    basePosition: display?.base || baseline?.position || shadePosition(color, environmentFamiliesForNode(node) || []),
+    position,
+    basePosition,
     baselinePlacement: baseline || null,
     themeConditionInfluence: display?.themeCondition || null,
-    atlasInfluence: display?.atlas || null
+    atlasInfluence: display?.atlas || null,
+    geometry: {
+      vectorFromBlack: structuralVector(blackAnchor, position),
+      vectorFromWhite: structuralVector(whiteAnchor, position),
+      distanceFromBlack: structuralDistance(blackAnchor, position),
+      distanceFromWhite: structuralDistance(whiteAnchor, position),
+      neighborhoodRadius: neighborhoodMetrics.radius,
+      neighborhoodCount: neighborhoodMetrics.count,
+      neighborhoodDensity: neighborhoodMetrics.density,
+      nearestNeighborDistance: neighborhoodMetrics.nearestNeighborDistance,
+      neighborhoodVolume: neighborhoodMetrics.volume,
+      neighborhoodBoundaryDistance: neighborhoodMetrics.boundaryDistance
+    }
   };
 }
 
@@ -10356,12 +10858,145 @@ function shadeComparableNodes() {
       return {
         node,
         color,
-        position: display?.position || baseline?.position || shadePosition(color, environmentFamiliesForNode(node) || []),
+        position: display?.position || baseline?.position || resolvedStructuralPositionForNode(node),
         themeConditionInfluence: display?.themeCondition || null,
         atlasInfluence: display?.atlas || null
       };
     })
     .filter(Boolean);
+}
+
+function averageNearestStructuralNeighborDistance(points) {
+  if (!points.length) return 0;
+  if (points.length === 1) return 24;
+  const nearest = points.map((point, index) => {
+    let closest = Infinity;
+    points.forEach((other, otherIndex) => {
+      if (index === otherIndex) return;
+      const distance = structuralDistance(point, other);
+      if (distance < closest) closest = distance;
+    });
+    return Number.isFinite(closest) ? closest : 24;
+  });
+  return nearest.reduce((sum, value) => sum + value, 0) / nearest.length;
+}
+
+function structuralNeighborhoodMetrics(id, profile = state.perception?.profile || currentPerceptionProfile()) {
+  const start = nodePassesCategoryFilter(state.nodeById.get(id)) ? id : firstFilteredNodeId();
+  if (!start) {
+    return {
+      ids: new Set(),
+      radius: 0,
+      count: 0,
+      density: 0,
+      nearestNeighborDistance: 0,
+      volume: 0,
+      boundaryDistance: 0
+    };
+  }
+
+  const selectedNode = state.nodeById.get(start);
+  const selectedPosition =
+    displayShadePositionForNode(selectedNode)?.position
+    || resolvedStructuralPositionForNode(selectedNode);
+  if (!selectedPosition) {
+    return {
+      ids: new Set([start]),
+      radius: 0,
+      count: 0,
+      density: 0,
+      nearestNeighborDistance: 0,
+      volume: 0,
+      boundaryDistance: 0
+    };
+  }
+
+  const limit = state.graphMode === '3d' ? 68 : state.graphMode === 'scatter' ? 78 : 72;
+  const targetCount = state.graphMode === '3d' ? 40 : state.graphMode === 'scatter' ? 48 : 42;
+  const radiusFloor = state.graphMode === '3d' ? 32 : 28;
+  const radiusCeiling = state.graphMode === '3d' ? 78 : 70;
+
+  const candidates = state.nodes
+    .filter(node => nodePassesCategoryFilter(node))
+    .map(node => {
+      const position = displayShadePositionForNode(node)?.position || resolvedStructuralPositionForNode(node);
+      if (!position) return null;
+      return {
+        id: node.id,
+        node,
+        position,
+        distance: structuralDistance(selectedPosition, position),
+        score: nodePerceptionScore(node, profile),
+        degree: graphDegree(node.id)
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) =>
+      a.distance - b.distance
+      || b.score - a.score
+      || b.degree - a.degree
+      || a.id.localeCompare(b.id)
+    );
+
+  if (!candidates.length) {
+    return {
+      ids: new Set([start]),
+      radius: radiusFloor,
+      count: 0,
+      density: 0,
+      nearestNeighborDistance: 0,
+      volume: (4 / 3) * Math.PI * Math.pow(radiusFloor, 3),
+      boundaryDistance: 0
+    };
+  }
+
+  const radiusSeed = candidates[Math.min(targetCount - 1, candidates.length - 1)]?.distance || radiusFloor;
+  const candidatePoints = candidates.map(item => item.position);
+  const neighborSpacing = averageNearestStructuralNeighborDistance(candidatePoints);
+  const structuralRadius = clamp(
+    Math.max(radiusSeed * 1.08, radiusSeed + neighborSpacing * 0.18),
+    radiusFloor,
+    radiusCeiling
+  );
+
+  const ids = new Set([start]);
+  profile.activeConditionIds.forEach(nodeId => {
+    const node = state.nodeById.get(nodeId);
+    if (node && nodePassesCategoryFilter(node)) ids.add(nodeId);
+  });
+  profile.focusNodeIds.forEach(nodeId => {
+    const node = state.nodeById.get(nodeId);
+    if (node && nodePassesCategoryFilter(node)) ids.add(nodeId);
+  });
+
+  candidates.forEach(item => {
+    if (ids.size >= limit) return;
+    const bucket = nodeRouteBucket(item.id, profile);
+    if (bucket && !routeFilterAllows(bucket) && item.id !== start && !profile.activeConditionIds.has(item.id)) return;
+    const insidePrimaryRadius = item.distance <= structuralRadius;
+    const insideSoftRadius = item.distance <= structuralRadius * 1.14 && item.score >= 0.34;
+    if (insidePrimaryRadius || insideSoftRadius || item.id === start) {
+      ids.add(item.id);
+    }
+  });
+
+  const neighborhoodCandidates = candidates.filter(item => item.id !== start && ids.has(item.id));
+  const nearestNeighborDistance = neighborhoodCandidates.length ? neighborhoodCandidates[0].distance : 0;
+  const boundaryDistance = neighborhoodCandidates.length
+    ? Math.max(...neighborhoodCandidates.map(item => item.distance))
+    : 0;
+  const volume = (4 / 3) * Math.PI * Math.pow(structuralRadius, 3);
+  const density = volume > 0 ? neighborhoodCandidates.length / volume : 0;
+
+  return {
+    ids,
+    radius: structuralRadius,
+    count: neighborhoodCandidates.length,
+    density,
+    nearestNeighborDistance,
+    volume,
+    boundaryDistance
+  };
 }
 
 function colorForNode(node) {
@@ -10618,6 +11253,287 @@ function axisRangeSummary(axis) {
   return `${polarity.negative} ${polarity.min} to ${polarity.positive} ${polarity.max}`;
 }
 
+function clampStructuralPosition(position) {
+  if (!position) return null;
+  return {
+    x: Math.round(clamp(position.x, COLOR_SPACE_BOUNDS.x.min, COLOR_SPACE_BOUNDS.x.max)),
+    y: Math.round(clamp(position.y, COLOR_SPACE_BOUNDS.y.min, COLOR_SPACE_BOUNDS.y.max)),
+    z: Math.round(clamp(position.z, COLOR_SPACE_BOUNDS.z.min, COLOR_SPACE_BOUNDS.z.max))
+  };
+}
+
+function structuralVector(from, to) {
+  if (!from || !to) return null;
+  return {
+    x: Number((to.x - from.x).toFixed(2)),
+    y: Number((to.y - from.y).toFixed(2)),
+    z: Number((to.z - from.z).toFixed(2))
+  };
+}
+
+function structuralDistance(from, to) {
+  if (!from || !to) return null;
+  return Number(Math.hypot(
+    to.x - from.x,
+    to.y - from.y,
+    to.z - from.z
+  ).toFixed(2));
+}
+
+const DISCOVERY_RADIUS = 40;
+const DISCOVERY_SCORE_WEIGHTS = Object.freeze({
+  distance: 0.4,
+  neighbors: 0.3,
+  type: 0.2,
+  placement: 0.1
+});
+
+function discoveryClamp(value, min = 0, max = 1) {
+  return Math.max(min, Math.min(max, Number.isFinite(value) ? value : 0));
+}
+
+function ensureDiscoveryState() {
+  if (!state.discovery) {
+    state.discovery = { selectedKey: '', ignoredKeys: [], boundaryKeys: [], lastAction: '' };
+  }
+  if (!Array.isArray(state.discovery.ignoredKeys)) state.discovery.ignoredKeys = [];
+  if (!Array.isArray(state.discovery.boundaryKeys)) state.discovery.boundaryKeys = [];
+  return state.discovery;
+}
+
+function discoveryNodeId(node) {
+  return node?.id || node?.key || nodeColorKey(node);
+}
+
+function discoveryPairKey(aId, bId) {
+  return [aId, bId].filter(Boolean).sort().join('::');
+}
+
+function edgeEndpointId(value) {
+  if (!value) return '';
+  if (typeof value === 'string') return value;
+  return value.id || value.key || '';
+}
+
+function edgeSourceId(edge) {
+  return edgeEndpointId(edge?.source ?? edge?.from ?? edge?.sourceId);
+}
+
+function edgeTargetId(edge) {
+  return edgeEndpointId(edge?.target ?? edge?.to ?? edge?.targetId);
+}
+
+function edgeConnectsDiscovery(edge, aId, bId) {
+  const source = edgeSourceId(edge);
+  const target = edgeTargetId(edge);
+  return (source === aId && target === bId) || (source === bId && target === aId);
+}
+
+function hasDirectSemanticEdge(aId, bId) {
+  return (state.edges || []).some(edge => edgeConnectsDiscovery(edge, aId, bId));
+}
+
+function neighborIdsForDiscovery(nodeId) {
+  const ids = new Set();
+  (state.edges || []).forEach(edge => {
+    const source = edgeSourceId(edge);
+    const target = edgeTargetId(edge);
+    if (source === nodeId && target) ids.add(target);
+    if (target === nodeId && source) ids.add(source);
+  });
+  return ids;
+}
+
+function sharedNeighborIdsForDiscovery(aId, bId) {
+  const a = neighborIdsForDiscovery(aId);
+  const b = neighborIdsForDiscovery(bId);
+  return [...a].filter(id => b.has(id));
+}
+
+function midpointForDiscovery(a, b) {
+  return {
+    x: (a.x + b.x) / 2,
+    y: (a.y + b.y) / 2,
+    z: (a.z + b.z) / 2
+  };
+}
+
+function localDensityForDiscovery(point, excludeIds = new Set(), radius = DISCOVERY_RADIUS) {
+  return (state.nodes || []).reduce((count, node) => {
+    const id = discoveryNodeId(node);
+    if (!id || excludeIds.has(id)) return count;
+    const nodePoint = resolvedDiscoveryPoint(node);
+    if (!nodePoint) return count;
+    const distance = structuralDistance(point, nodePoint);
+    return Number.isFinite(distance) && distance <= radius ? count + 1 : count;
+  }, 0);
+}
+
+function discoveryNodeType(node) {
+  const raw = node?.type || node?.metadata?.nodeType || node?.metadata?.schemaRole || 'unknown';
+  return String(raw).toLowerCase();
+}
+
+function discoveryTypeCompatibility(a, b) {
+  const aType = discoveryNodeType(a);
+  const bType = discoveryNodeType(b);
+  if (aType === bType) return 1;
+  const compatible = [
+    ['family', 'subfamily'],
+    ['family', 'shade'],
+    ['family', 'alias'],
+    ['subfamily', 'shade'],
+    ['subfamily', 'alias'],
+    ['shade', 'alias'],
+    ['emotion_word', 'common_word'],
+    ['environment_condition', 'environment_term'],
+    ['theme_condition', 'theme']
+  ];
+  return compatible.some(([left, right]) =>
+    (aType === left && bType === right) || (aType === right && bType === left)
+  ) ? 0.75 : 0.35;
+}
+
+function placementSourceForDiscovery(node) {
+  const metadata = node?.metadata || {};
+  const source = metadata.placementSource
+    || metadata.coordinateSource
+    || metadata.vectorSource
+    || metadata.geometrySource
+    || metadata.source
+    || '';
+  if (source) return String(source);
+  if (metadata.parentFamilies || metadata.bridgeParents || metadata.influenceWeights) return 'parent constraint';
+  if (node?.x !== undefined || node?.position || metadata.position || metadata.coordinates) return 'coordinate';
+  return 'computed';
+}
+
+function placementIndependenceForDiscovery(a, b) {
+  const aSource = placementSourceForDiscovery(a);
+  const bSource = placementSourceForDiscovery(b);
+  if (aSource === 'computed' && bSource === 'computed') return 0.45;
+  if (aSource === bSource && aSource !== 'coordinate') return 0.6;
+  return 1;
+}
+
+function placementLabelForDiscovery(a, b) {
+  const confidence = placementIndependenceForDiscovery(a, b);
+  if (confidence >= 0.95) return 'independent';
+  if (confidence >= 0.6) return 'partly shared';
+  return 'shared / computed';
+}
+
+function resolvedDiscoveryPoint(node) {
+  if (!node) return null;
+  const direct = resolvedStructuralPositionForNode(node);
+  if (direct) return direct;
+  const metadata = node.metadata || {};
+  const candidate = node.position || node.coordinates || metadata.position || metadata.coordinates;
+  if (candidate && ['x', 'y', 'z'].every(axis => Number.isFinite(Number(candidate[axis])))) {
+    return { x: Number(candidate.x), y: Number(candidate.y), z: Number(candidate.z) };
+  }
+  if (['x', 'y', 'z'].every(axis => Number.isFinite(Number(node[axis])))) {
+    return { x: Number(node.x), y: Number(node.y), z: Number(node.z) };
+  }
+  return null;
+}
+
+function geometricDiscoverySuggestions(selectedNode, options = {}) {
+  const selectedId = discoveryNodeId(selectedNode);
+  const selectedPoint = resolvedDiscoveryPoint(selectedNode);
+  const radius = options.radius || DISCOVERY_RADIUS;
+  if (!selectedId || !selectedPoint) return [];
+  const discovery = ensureDiscoveryState();
+  const ignored = new Set(discovery.ignoredKeys || []);
+  return (state.nodes || [])
+    .filter(node => discoveryNodeId(node) && discoveryNodeId(node) !== selectedId)
+    .map(node => {
+      const nodeId = discoveryNodeId(node);
+      const key = discoveryPairKey(selectedId, nodeId);
+      const point = resolvedDiscoveryPoint(node);
+      if (!point || ignored.has(key) || hasDirectSemanticEdge(selectedId, nodeId)) return null;
+      const distance = structuralDistance(selectedPoint, point);
+      if (!Number.isFinite(distance) || distance > radius) return null;
+      const sharedNeighbors = sharedNeighborIdsForDiscovery(selectedId, nodeId);
+      const distanceScore = discoveryClamp(1 - (distance / radius));
+      const neighborScore = discoveryClamp(sharedNeighbors.length / 5);
+      const typeScore = discoveryTypeCompatibility(selectedNode, node);
+      const placementScore = placementIndependenceForDiscovery(selectedNode, node);
+      const midpoint = midpointForDiscovery(selectedPoint, point);
+      const localDensity = localDensityForDiscovery(midpoint, new Set([selectedId, nodeId]), radius);
+      const score = Number((
+        DISCOVERY_SCORE_WEIGHTS.distance * distanceScore
+        + DISCOVERY_SCORE_WEIGHTS.neighbors * neighborScore
+        + DISCOVERY_SCORE_WEIGHTS.type * typeScore
+        + DISCOVERY_SCORE_WEIGHTS.placement * placementScore
+      ).toFixed(3));
+      const candidateType = sharedNeighbors.length < 2 && localDensity > 4 ? 'new_node' : 'bridge';
+      const category = candidateType === 'new_node'
+        ? 'Possible missing intermediate'
+        : typeScore >= 0.7 && (sharedNeighbors.length > 0 || distanceScore > 0.55)
+          ? 'Possible missing bridge'
+          : 'Useful boundary';
+      return {
+        key,
+        source: selectedNode,
+        target: node,
+        sourceId: selectedId,
+        targetId: nodeId,
+        distance,
+        sharedNeighbors,
+        localDensity,
+        distanceScore,
+        neighborScore,
+        typeScore,
+        placementScore,
+        score,
+        candidateType,
+        category,
+        placementLabel: placementLabelForDiscovery(selectedNode, node)
+      };
+    })
+    .filter(Boolean)
+    .sort((a, b) => b.score - a.score || a.distance - b.distance)
+    .slice(0, options.limit || 5);
+}
+
+function handleDiscoveryAction(button) {
+  const discovery = ensureDiscoveryState();
+  const action = button.dataset.discoveryAction;
+  const key = button.dataset.discoveryKey || '';
+  const source = button.dataset.discoverySource || 'Node A';
+  const target = button.dataset.discoveryTarget || 'Node B';
+  if (!key) return;
+
+  discovery.selectedKey = key;
+  if (action === 'ignore' && !discovery.ignoredKeys.includes(key)) {
+    discovery.ignoredKeys.push(key);
+  }
+  if (action === 'boundary' && !discovery.boundaryKeys.includes(key)) {
+    discovery.boundaryKeys.push(key);
+  }
+
+  const messages = {
+    review: `Reviewing ${source} <-> ${target}. Geometry is evidence only; no route was created.`,
+    bridge: `Bridge review queued for ${source} <-> ${target}. Permanent routes still require evidence review.`,
+    boundary: `${source} <-> ${target} marked as an intentional boundary for this view.`,
+    ignore: `${source} <-> ${target} ignored for this view.`
+  };
+  discovery.lastAction = messages[action] || `Selected ${source} <-> ${target}.`;
+  renderDetail();
+}
+
+function structuralFamiliesForNode(node) {
+  if (!node) return [];
+  return uniqueStrings([
+    normalizeFamilyId(nodeColorKey(node)),
+    ...splitFamilyId(node.family || nodeColorKey(node)).map(normalizeFamilyId),
+    ...(environmentFamiliesForNode(node) || [])
+      .flatMap(family => splitFamilyId(family))
+      .map(normalizeFamilyId)
+  ].filter(Boolean));
+}
+
 function averageConditionVector(families) {
   const normalizedFamilies = uniqueStrings((families || [])
     .flatMap(family => splitFamilyId(family))
@@ -10764,16 +11680,12 @@ function weightedBridgePosition(parents, weights) {
     y: acc.y + vector.y * weights[index],
     z: acc.z + vector.z * weights[index]
   }), { x: 0, y: 0, z: 0 });
-  const normalizedParents = parents.map(parent => normalizeFamilyId(parent));
-  const bridgeBand = differentiationBandForParents(normalizedParents);
-  const weightedRatio = weightedInfluenceRatio(weights);
-  const bridgeY = interpolateBand(bridgeBand, weightedRatio);
 
-  return {
+  return clampStructuralPosition({
     x: Math.round(clamp(weighted.x, -100, 100)),
-    y: Math.round(clamp(bridgeY, 0, 100)),
+    y: Math.round(clamp(weighted.y, 0, 100)),
     z: Math.round(clamp(weighted.z, -100, 100))
-  };
+  });
 }
 
 function bridgePlacementForNode(node) {
@@ -10809,15 +11721,43 @@ function strongestParentNodeForShade(node) {
   return familyNodeByFamily(family);
 }
 
-function outwardFactorForNode(node) {
-  if (!node) return 0.18;
-  if (node.type === 'shade') return 0.28;
-  if (node.type === 'alias') return 0.22;
-  if (node.type === 'synonym') return 0.18;
-  if (node.type === 'common_word' || node.type === 'neutral_word') return 0.3;
-  if (node.type === 'emotion_word') return 0.28;
-  if (node.type === 'environment_condition' || node.type === 'environment_term') return 0.24;
-  return 0.22;
+function explicitPlacementOffsetForNode(node) {
+  const candidates = [
+    node?.metadata?.placementOffset,
+    node?.metadata?.storedOffset,
+    node?.metadata?.offset
+  ];
+  const raw = candidates.find(value => value && typeof value === 'object');
+  if (!raw) {
+    return { x: 0, y: 0, z: 0, source: null };
+  }
+  return {
+    x: Number.isFinite(Number(raw.x)) ? Number(raw.x) : 0,
+    y: Number.isFinite(Number(raw.y)) ? Number(raw.y) : 0,
+    z: Number.isFinite(Number(raw.z)) ? Number(raw.z) : 0,
+    source: raw
+  };
+}
+
+function placementFromParentPath(parentPlacement, node, color, options = {}) {
+  if (!parentPlacement?.position || !node || !color) return null;
+  const bridgeParent = Boolean(options.bridgeParent);
+  const offset = explicitPlacementOffsetForNode(node);
+  const kind = options.kind || (bridgeParent ? 'shade_from_bridge' : 'shade_from_base');
+  return {
+    kind,
+    position: clampStructuralPosition({
+      x: Math.round(clamp(parentPlacement.position.x + offset.x, -100, 100)),
+      y: Math.round(clamp(parentPlacement.position.y + offset.y, 0, 100)),
+      z: Math.round(clamp(parentPlacement.position.z + offset.z, -100, 100))
+    }),
+    parentFamilies: parentPlacement.parentFamilies || [],
+    influenceWeights: parentPlacement.influenceWeights || [],
+    parentNode: options.parentNode || null,
+    boundary: options.boundary || (bridgeParent
+      ? 'Shades inherit their stored baseline placement directly from the strongest bridge path. Only explicit stored offsets may move that baseline.'
+      : 'Shades inherit their stored baseline placement directly from the strongest base-color path. Only explicit stored offsets may move that baseline.')
+  };
 }
 
 function inheritedPlacementForNode(node, color) {
@@ -10825,34 +11765,49 @@ function inheritedPlacementForNode(node, color) {
   const parentPlacement = parentNode ? baselinePlacementForNode(parentNode) : null;
   if (!parentPlacement?.position) return null;
 
-  const heuristic = shadePosition(
-    color,
-    parentPlacement.parentFamilies?.length
-      ? parentPlacement.parentFamilies
-      : (environmentFamiliesForNode(node) || [])
-  );
-  const outward = outwardFactorForNode(node);
-  const inward = 1 - outward;
-  const bridgeParent = parentNode.type === 'subfamily';
-  const shadeYOffset = clamp(
-    (heuristic.y - parentPlacement.position.y) * (bridgeParent ? 0.45 : 0.55),
-    bridgeParent ? -3 : -4,
-    bridgeParent ? 4 : 6
-  );
-  return {
-    kind: bridgeParent ? 'shade_from_bridge' : 'shade_from_base',
-    position: {
-      x: Math.round(clamp(parentPlacement.position.x * inward + heuristic.x * outward, -100, 100)),
-      y: Math.round(clamp(parentPlacement.position.y + shadeYOffset, 0, 100)),
-      z: Math.round(clamp(parentPlacement.position.z * inward + heuristic.z * outward, -100, 100))
-    },
-    parentFamilies: parentPlacement.parentFamilies || [],
-    influenceWeights: parentPlacement.influenceWeights || [],
-    parentNode,
-    boundary: bridgeParent
-      ? 'Shades inherit their baseline placement from the strongest bridge path, then move outward slightly to keep exact shade identity visible.'
-      : 'Shades inherit their baseline placement from the strongest base-color path, then move outward slightly to keep exact shade identity visible.'
+  return placementFromParentPath(parentPlacement, node, color, {
+    bridgeParent: parentNode.type === 'subfamily',
+    parentNode
+  });
+}
+
+function familyConstrainedFallbackPlacement(node, color) {
+  const families = structuralFamiliesForNode(node);
+  const anchorParents = uniqueStrings(families.filter(family => PRIMARY_COLOR_ANCHORS.has(family)));
+  if (!anchorParents.length) return null;
+
+  if (anchorParents.length >= 2) {
+    const parents = anchorParents.slice(0, 2);
+    const bridgePlacement = bridgePlacementFromParents(
+      parents,
+      bridgeInfluenceWeightsForNode(node, parents),
+      'inferred_bridge_path',
+      'This node is being constrained by two base-color anchors, so its stored baseline sits on the bridge path between them before any live condition pull.'
+    );
+    if (!bridgePlacement?.position) return null;
+    if (['family', 'subfamily'].includes(node.type)) return bridgePlacement;
+    return placementFromParentPath(bridgePlacement, node, color, {
+      bridgeParent: true,
+      kind: 'shade_from_inferred_bridge',
+      boundary: 'This node does not have an explicit stored parent node yet, so it inherits from the strongest inferred bridge path before any live condition pull.'
+    });
+  }
+
+  const anchor = familyAnchorVector(anchorParents[0]);
+  if (!anchor) return null;
+  const basePlacement = {
+    kind: 'family_constrained_anchor',
+    position: anchor,
+    parentFamilies: [anchorParents[0]],
+    influenceWeights: [1],
+    boundary: 'This node does not have an explicit stored parent node yet, so it is constrained to its strongest base-color anchor before any live condition pull.'
   };
+  if (node.type === 'family') return basePlacement;
+  return placementFromParentPath(basePlacement, node, color, {
+    bridgeParent: false,
+    kind: 'shade_from_inferred_base',
+    boundary: 'This node does not have an explicit stored parent node yet, so it inherits from its strongest base-color path before any live condition pull.'
+  });
 }
 
 function conditionAwareShadePosition(color, families = []) {
@@ -11778,6 +12733,7 @@ function drawGraph() {
   ctx.save();
   applyGraphViewTransform();
   drawConditionTerritories(runtimePositions, visibleNodeIds, profile, false);
+  drawSelectedNeighborhoodBoundary(runtimePositions, profile);
 
   if (state.graphMode === 'scatter') {
     drawScatterGuides(rect.width, rect.height, visibleNodeIds);
@@ -12005,6 +12961,7 @@ function drawThreeCanvasGraph() {
   const positions = threeCanvasPositions(visibleNodeIds, distances, sizedRect.width, sizedRect.height);
   state.three.projected = positions;
   drawConditionTerritories(positions, visibleSet, profile, true);
+  drawSelectedNeighborhoodBoundary(positions, profile);
   drawThreeRouteSideGuides(positions, sizedRect.width, sizedRect.height);
 
   const visibleEdges = state.perception.visibleEdges = visibleGraphEdges(new Set(visibleNodeIds), profile);
@@ -12032,7 +12989,7 @@ function threeCanvasPositions(ids, distances, width, height) {
   ids.forEach(id => {
     const node = state.nodeById.get(id);
     const color = colorForNode(node) || parseColorInput(familyColor(nodeColorKey(node)));
-    const shade = displayShadePositionForNode(node)?.position || baselinePlacementForNode(node)?.position || shadePosition(color, environmentFamiliesForNode(node) || []);
+    const shade = displayShadePositionForNode(node)?.position || resolvedStructuralPositionForNode(node);
     const x0 = shade.x * 2.2;
     const y0 = (shade.y - yMid) * 1.55;
     const z0 = shade.z * 1.55;
@@ -12294,7 +13251,7 @@ function rebuildThreeScene() {
   visibleNodeIds.forEach(id => {
     const node = state.nodeById.get(id);
     const color = colorForNode(node) || parseColorInput(familyColor(nodeColorKey(node)));
-    const shade = displayShadePositionForNode(node)?.position || baselinePlacementForNode(node)?.position || shadePosition(color, environmentFamiliesForNode(node) || []);
+    const shade = displayShadePositionForNode(node)?.position || resolvedStructuralPositionForNode(node);
     const yMid = (SHADE_AXIS_POLARITIES.y.min + SHADE_AXIS_POLARITIES.y.max) / 2;
     const pos = {
       x: shade.x * 2.15,
@@ -12551,6 +13508,27 @@ function conditionTerritories(positionMap, visibleNodeIds, profile = state.perce
     .filter(Boolean);
 }
 
+function quantileValue(values, fraction = 0.5) {
+  if (!values.length) return 0;
+  const index = Math.min(values.length - 1, Math.max(0, Math.floor((values.length - 1) * fraction)));
+  return values[index];
+}
+
+function averageNearestNeighborDistance(points) {
+  if (!points.length) return 0;
+  if (points.length === 1) return 24;
+  const nearest = points.map((point, index) => {
+    let closest = Infinity;
+    points.forEach((other, otherIndex) => {
+      if (index === otherIndex) return;
+      const distance = Math.hypot(point.x - other.x, point.y - other.y);
+      if (distance < closest) closest = distance;
+    });
+    return Number.isFinite(closest) ? closest : 24;
+  });
+  return nearest.reduce((sum, value) => sum + value, 0) / nearest.length;
+}
+
 function buildConditionTerritory(family, positionMap, visibleNodeIds) {
   const base = ENVIRONMENT_CONDITIONS[family];
   const anchorId = `family-${family}`;
@@ -12562,20 +13540,30 @@ function buildConditionTerritory(family, positionMap, visibleNodeIds) {
     .map(id => ({ id, node: state.nodeById.get(id), pos: positionMap.get(id) }))
     .filter(item => item.node && item.pos && territoryMatchesFamily(item.node, family));
 
-  const maxDistance = influencePoints.reduce((max, item) => {
-    const distance = Math.hypot(item.pos.x - anchor.x, item.pos.y - anchor.y);
-    return Math.max(max, distance);
-  }, 0);
-
   const influenceCount = influencePoints.length;
-  const baseRadius = family === 'blue' ? 92 : family === 'green' ? 86 : 80;
-  const countRadius = Math.sqrt(Math.max(1, influenceCount)) * (family === 'blue' ? 18 : 16);
-  const spreadAdjustment = Math.min(34, maxDistance * 0.08);
-  const radius = clamp(
-    baseRadius + countRadius + spreadAdjustment,
-    baseRadius,
-    family === 'blue' ? 260 : 220
-  );
+  const distances = influencePoints
+    .map(item => Math.hypot(item.pos.x - anchor.x, item.pos.y - anchor.y))
+    .sort((a, b) => a - b);
+  const occupiedRadius = distances.length ? quantileValue(distances, 0.84) : 0;
+  const maxDistance = distances.length ? distances[distances.length - 1] : 0;
+  const nearestOutside = visibleIds
+    .map(id => ({ id, node: state.nodeById.get(id), pos: positionMap.get(id) }))
+    .filter(item => item.node && item.pos && !territoryMatchesFamily(item.node, family))
+    .reduce((closest, item) => {
+      const distance = Math.hypot(item.pos.x - anchor.x, item.pos.y - anchor.y);
+      return Math.min(closest, distance);
+    }, Infinity);
+  const pointCloud = [{ x: anchor.x, y: anchor.y }, ...influencePoints.map(item => ({ x: item.pos.x, y: item.pos.y }))];
+  const localSpacing = averageNearestNeighborDistance(pointCloud);
+  const density = influenceCount
+    ? influenceCount / Math.max(Math.PI * Math.max(occupiedRadius, 18) * Math.max(occupiedRadius, 18), 1)
+    : 0;
+  let radius = occupiedRadius + clamp(localSpacing * 0.72, 10, 34);
+  radius = Math.max(radius, maxDistance + clamp(localSpacing * 0.28, 6, 18));
+  if (Number.isFinite(nearestOutside)) {
+    radius = Math.min(radius, Math.max(28, nearestOutside * 0.94));
+  }
+  radius = clamp(radius, 34, 240);
 
   return {
     family,
@@ -12583,6 +13571,7 @@ function buildConditionTerritory(family, positionMap, visibleNodeIds) {
     radius,
     label: base.condition,
     influenceCount,
+    density,
     style: territoryStyleForFamily(family)
   };
 }
@@ -13284,6 +14273,10 @@ function neighborhood(id, profile = state.perception?.profile || currentPercepti
     return new Set(ranked.slice(0, 70));
   }
 
+  if (state.graphMode !== 'topology') {
+    return structuralNeighborhood(id, profile);
+  }
+
   const start = nodePassesCategoryFilter(state.nodeById.get(id)) ? id : firstFilteredNodeId();
   if (!start) return new Set();
 
@@ -13335,6 +14328,10 @@ function neighborhood(id, profile = state.perception?.profile || currentPercepti
   });
 
   return keep;
+}
+
+function structuralNeighborhood(id, profile = state.perception?.profile || currentPerceptionProfile()) {
+  return structuralNeighborhoodMetrics(id, profile).ids;
 }
 
 function visibleGraphEdges(visibleNodeIds, profile = state.perception?.profile || currentPerceptionProfile()) {

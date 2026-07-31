@@ -1,0 +1,896 @@
+{
+  "version": "0.1.0",
+  "status": "local_seed",
+  "boundary": "WordNet evidence is lexical evidence only: possible senses, synonyms, antonyms, hypernyms, and related forms. It does not assign color, climate, route activation, or meaning.",
+  "entries": {
+    "activation": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "the act or state of becoming active or operative",
+          "synonyms": [
+            "triggering",
+            "starting"
+          ],
+          "antonyms": [
+            "deactivation"
+          ],
+          "hypernyms": [
+            "change",
+            "process"
+          ],
+          "related": [
+            "activate",
+            "active",
+            "route"
+          ],
+          "source": "local-wordnet-seed"
+        }
+      ]
+    },
+    "black": {
+      "senses": [
+        {
+          "partOfSpeech": "adjective",
+          "definition": "having very little or no light; very dark",
+          "synonyms": [
+            "dark",
+            "unlit"
+          ],
+          "antonyms": [
+            "white",
+            "light"
+          ],
+          "hypernyms": [
+            "color",
+            "shade"
+          ],
+          "related": [
+            "darkness",
+            "shadow",
+            "opaque"
+          ],
+          "source": "local-wordnet-seed"
+        }
+      ]
+    },
+    "blue": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "a color resembling a clear sky or deep water",
+          "synonyms": [
+            "azure",
+            "cerulean"
+          ],
+          "antonyms": [],
+          "hypernyms": [
+            "color"
+          ],
+          "related": [
+            "sky",
+            "water",
+            "ocean"
+          ],
+          "source": "local-wordnet-seed"
+        }
+      ]
+    },
+    "condition": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "a state, circumstance, or requirement that affects what can happen",
+          "synonyms": [
+            "state",
+            "circumstance"
+          ],
+          "antonyms": [],
+          "hypernyms": [
+            "factor",
+            "context"
+          ],
+          "related": [
+            "environment",
+            "constraint",
+            "activation"
+          ],
+          "source": "local-wordnet-seed"
+        }
+      ]
+    },
+    "context": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "the surrounding situation, setting, frame, or circumstance that changes how a route is read",
+          "synonyms": [
+            "setting",
+            "background",
+            "frame",
+            "environment",
+            "circumstance"
+          ],
+          "antonyms": [
+            "isolation",
+            "decontextualized"
+          ],
+          "hypernyms": [
+            "environment",
+            "condition",
+            "situation"
+          ],
+          "related": [
+            "condition",
+            "meaning",
+            "activation"
+          ],
+          "source": "local-wordnet-curated",
+          "positioningEvidence": [
+            "hierarchy",
+            "synonym",
+            "opposite"
+          ],
+          "hexRole": "secondary_display_reference",
+          "boundary": "Lexical evidence only. Hierarchies, synonyms, and opposites support positioning influence; HEX/RGB remains secondary display metadata."
+        }
+      ]
+    },
+    "exposure": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "contact with an outside condition or influence",
+          "synonyms": [
+            "contact",
+            "uncovering"
+          ],
+          "antonyms": [
+            "concealment",
+            "shelter"
+          ],
+          "hypernyms": [
+            "event",
+            "interaction"
+          ],
+          "related": [
+            "environment",
+            "surface",
+            "change"
+          ],
+          "source": "local-wordnet-seed"
+        }
+      ]
+    },
+    "gold": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "a yellow precious metal or a gold-colored appearance",
+          "synonyms": [
+            "golden"
+          ],
+          "antonyms": [],
+          "hypernyms": [
+            "metal",
+            "color"
+          ],
+          "related": [
+            "yellow",
+            "precious",
+            "value"
+          ],
+          "source": "local-wordnet-seed"
+        }
+      ]
+    },
+    "green": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "a color associated with grass, leaves, and growing plants",
+          "synonyms": [
+            "verdant"
+          ],
+          "antonyms": [],
+          "hypernyms": [
+            "color"
+          ],
+          "related": [
+            "plant",
+            "growth",
+            "leaf"
+          ],
+          "source": "local-wordnet-seed"
+        }
+      ]
+    },
+    "icon": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "an image, figure, or symbol used to represent something",
+          "synonyms": [
+            "symbol",
+            "image"
+          ],
+          "antonyms": [],
+          "hypernyms": [
+            "representation"
+          ],
+          "related": [
+            "sign",
+            "picture",
+            "object"
+          ],
+          "source": "local-wordnet-seed"
+        }
+      ]
+    },
+    "memory": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "retained information or remembered experience",
+          "synonyms": [
+            "remembrance",
+            "recollection"
+          ],
+          "antonyms": [
+            "forgetting"
+          ],
+          "hypernyms": [
+            "cognition",
+            "record"
+          ],
+          "related": [
+            "history",
+            "experience",
+            "archive"
+          ],
+          "source": "local-wordnet-seed"
+        }
+      ]
+    },
+    "pattern": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "a repeated arrangement or recurring form",
+          "synonyms": [
+            "structure",
+            "design"
+          ],
+          "antonyms": [
+            "randomness"
+          ],
+          "hypernyms": [
+            "arrangement"
+          ],
+          "related": [
+            "repetition",
+            "sequence",
+            "behavior"
+          ],
+          "source": "local-wordnet-seed"
+        }
+      ]
+    },
+    "red": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "a color resembling blood or fire",
+          "synonyms": [
+            "crimson",
+            "scarlet"
+          ],
+          "antonyms": [],
+          "hypernyms": [
+            "color"
+          ],
+          "related": [
+            "blood",
+            "fire",
+            "heat"
+          ],
+          "source": "local-wordnet-seed"
+        }
+      ]
+    },
+    "ritual": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "a repeated formal action or ceremony",
+          "synonyms": [
+            "ceremony",
+            "rite"
+          ],
+          "antonyms": [],
+          "hypernyms": [
+            "practice",
+            "procedure"
+          ],
+          "related": [
+            "repetition",
+            "religion",
+            "custom"
+          ],
+          "source": "local-wordnet-seed"
+        }
+      ]
+    },
+    "route": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "a path or course from one point to another",
+          "synonyms": [
+            "path",
+            "course"
+          ],
+          "antonyms": [],
+          "hypernyms": [
+            "connection"
+          ],
+          "related": [
+            "travel",
+            "direction",
+            "edge"
+          ],
+          "source": "local-wordnet-seed"
+        }
+      ]
+    },
+    "white": {
+      "senses": [
+        {
+          "partOfSpeech": "adjective",
+          "definition": "having maximum lightness or a pale appearance",
+          "synonyms": [
+            "pale",
+            "light"
+          ],
+          "antonyms": [
+            "black",
+            "dark"
+          ],
+          "hypernyms": [
+            "color",
+            "shade"
+          ],
+          "related": [
+            "visible",
+            "clear",
+            "bright"
+          ],
+          "source": "local-wordnet-seed"
+        }
+      ]
+    },
+    "yellow": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "a color resembling sunlight or ripe lemon",
+          "synonyms": [
+            "golden"
+          ],
+          "antonyms": [],
+          "hypernyms": [
+            "color"
+          ],
+          "related": [
+            "sun",
+            "light",
+            "gold"
+          ],
+          "source": "local-wordnet-seed"
+        }
+      ]
+    },
+    "filter": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "a device, rule, or process that screens, refines, or selects what passes through",
+          "synonyms": [
+            "screen",
+            "sieve",
+            "strain",
+            "refine",
+            "select",
+            "sort"
+          ],
+          "antonyms": [
+            "unfiltered",
+            "raw",
+            "pass-through"
+          ],
+          "hypernyms": [
+            "device",
+            "process",
+            "selector"
+          ],
+          "related": [
+            "condition",
+            "boundary",
+            "visibility"
+          ],
+          "source": "local-wordnet-curated",
+          "positioningEvidence": [
+            "hierarchy",
+            "synonym",
+            "opposite"
+          ],
+          "hexRole": "secondary_display_reference",
+          "boundary": "Lexical evidence only. Hierarchies, synonyms, and opposites support positioning influence; HEX/RGB remains secondary display metadata."
+        }
+      ]
+    },
+    "number": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "a count, figure, or quantity used to measure and order something",
+          "synonyms": [
+            "quantity",
+            "count",
+            "numeral",
+            "measure",
+            "figure",
+            "amount"
+          ],
+          "antonyms": [
+            "uncounted",
+            "innumerable"
+          ],
+          "hypernyms": [
+            "measurement",
+            "symbol",
+            "quantity"
+          ],
+          "related": [
+            "order",
+            "ranking",
+            "sequence"
+          ],
+          "source": "local-wordnet-curated",
+          "positioningEvidence": [
+            "hierarchy",
+            "synonym",
+            "opposite"
+          ],
+          "hexRole": "secondary_display_reference",
+          "boundary": "Lexical evidence only. Hierarchies, synonyms, and opposites support positioning influence; HEX/RGB remains secondary display metadata."
+        }
+      ]
+    },
+    "translation": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "the rendering or conversion of meaning, language, or form into another readable form",
+          "synonyms": [
+            "interpretation",
+            "rendering",
+            "version",
+            "conversion",
+            "transposition"
+          ],
+          "antonyms": [
+            "original",
+            "source text"
+          ],
+          "hypernyms": [
+            "communication",
+            "conversion",
+            "interpretation"
+          ],
+          "related": [
+            "language",
+            "meaning",
+            "bridge"
+          ],
+          "source": "local-wordnet-curated",
+          "positioningEvidence": [
+            "hierarchy",
+            "synonym",
+            "opposite"
+          ],
+          "hexRole": "secondary_display_reference",
+          "boundary": "Lexical evidence only. Hierarchies, synonyms, and opposites support positioning influence; HEX/RGB remains secondary display metadata."
+        }
+      ]
+    },
+    "search": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "an act of seeking, querying, scanning, or trying to find something",
+          "synonyms": [
+            "seek",
+            "query",
+            "scan",
+            "hunt",
+            "explore",
+            "find"
+          ],
+          "antonyms": [
+            "ignore",
+            "overlook"
+          ],
+          "hypernyms": [
+            "inquiry",
+            "investigation",
+            "process"
+          ],
+          "related": [
+            "question",
+            "discovery",
+            "selection"
+          ],
+          "source": "local-wordnet-curated",
+          "positioningEvidence": [
+            "hierarchy",
+            "synonym",
+            "opposite"
+          ],
+          "hexRole": "secondary_display_reference",
+          "boundary": "Lexical evidence only. Hierarchies, synonyms, and opposites support positioning influence; HEX/RGB remains secondary display metadata."
+        }
+      ]
+    },
+    "engine": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "a machine, mechanism, or driving system that converts input into motion or output",
+          "synonyms": [
+            "motor",
+            "machine",
+            "mechanism",
+            "drive"
+          ],
+          "antonyms": [
+            "passive system",
+            "load"
+          ],
+          "hypernyms": [
+            "machine",
+            "system",
+            "mechanism"
+          ],
+          "related": [
+            "motion",
+            "force",
+            "output"
+          ],
+          "source": "local-wordnet-curated",
+          "positioningEvidence": [
+            "hierarchy",
+            "synonym",
+            "opposite"
+          ],
+          "hexRole": "secondary_display_reference",
+          "boundary": "Lexical evidence only. Hierarchies, synonyms, and opposites support positioning influence; HEX/RGB remains secondary display metadata."
+        }
+      ]
+    },
+    "project": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "a planned undertaking, task, or designed work carried forward over time",
+          "synonyms": [
+            "plan",
+            "design",
+            "undertaking",
+            "enterprise",
+            "task"
+          ],
+          "antonyms": [
+            "abandonment",
+            "cancellation"
+          ],
+          "hypernyms": [
+            "work",
+            "plan",
+            "activity"
+          ],
+          "related": [
+            "goal",
+            "structure",
+            "development"
+          ],
+          "source": "local-wordnet-curated",
+          "positioningEvidence": [
+            "hierarchy",
+            "synonym",
+            "opposite"
+          ],
+          "hexRole": "secondary_display_reference",
+          "boundary": "Lexical evidence only. Hierarchies, synonyms, and opposites support positioning influence; HEX/RGB remains secondary display metadata."
+        }
+      ]
+    },
+    "input": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "information, signal, material, or stimulus entering a system",
+          "synonyms": [
+            "entry",
+            "intake",
+            "signal",
+            "stimulus",
+            "data",
+            "source"
+          ],
+          "antonyms": [
+            "output"
+          ],
+          "hypernyms": [
+            "information",
+            "signal",
+            "entry"
+          ],
+          "related": [
+            "source",
+            "condition",
+            "exposure"
+          ],
+          "source": "local-wordnet-curated",
+          "positioningEvidence": [
+            "hierarchy",
+            "synonym",
+            "opposite"
+          ],
+          "hexRole": "secondary_display_reference",
+          "boundary": "Lexical evidence only. Hierarchies, synonyms, and opposites support positioning influence; HEX/RGB remains secondary display metadata."
+        }
+      ]
+    },
+    "output": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "the result, product, expression, or response produced by a system",
+          "synonyms": [
+            "result",
+            "product",
+            "yield",
+            "emission",
+            "expression",
+            "response"
+          ],
+          "antonyms": [
+            "input"
+          ],
+          "hypernyms": [
+            "result",
+            "product",
+            "effect"
+          ],
+          "related": [
+            "response",
+            "display",
+            "consequence"
+          ],
+          "source": "local-wordnet-curated",
+          "positioningEvidence": [
+            "hierarchy",
+            "synonym",
+            "opposite"
+          ],
+          "hexRole": "secondary_display_reference",
+          "boundary": "Lexical evidence only. Hierarchies, synonyms, and opposites support positioning influence; HEX/RGB remains secondary display metadata."
+        }
+      ]
+    },
+    "transform": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "to change, convert, alter, or modify something from one state or form into another",
+          "synonyms": [
+            "convert",
+            "change",
+            "alter",
+            "transmute",
+            "modify"
+          ],
+          "antonyms": [
+            "preserve",
+            "remain"
+          ],
+          "hypernyms": [
+            "change",
+            "process",
+            "conversion"
+          ],
+          "related": [
+            "transition",
+            "adaptation",
+            "mutation"
+          ],
+          "source": "local-wordnet-curated",
+          "positioningEvidence": [
+            "hierarchy",
+            "synonym",
+            "opposite"
+          ],
+          "hexRole": "secondary_display_reference",
+          "boundary": "Lexical evidence only. Hierarchies, synonyms, and opposites support positioning influence; HEX/RGB remains secondary display metadata."
+        }
+      ]
+    },
+    "ranking": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "an ordered position, grade, hierarchy, rating, or priority assignment",
+          "synonyms": [
+            "order",
+            "grade",
+            "hierarchy",
+            "rating",
+            "priority",
+            "rank"
+          ],
+          "antonyms": [
+            "equality",
+            "unordered"
+          ],
+          "hypernyms": [
+            "order",
+            "classification",
+            "measurement"
+          ],
+          "related": [
+            "number",
+            "sequence",
+            "comparison"
+          ],
+          "source": "local-wordnet-curated",
+          "positioningEvidence": [
+            "hierarchy",
+            "synonym",
+            "opposite"
+          ],
+          "hexRole": "secondary_display_reference",
+          "boundary": "Lexical evidence only. Hierarchies, synonyms, and opposites support positioning influence; HEX/RGB remains secondary display metadata."
+        }
+      ]
+    },
+    "evidence": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "proof, support, indication, trace, record, or testimony used to justify a route",
+          "synonyms": [
+            "proof",
+            "support",
+            "indication",
+            "trace",
+            "record",
+            "testimony"
+          ],
+          "antonyms": [
+            "disproof",
+            "counterexample"
+          ],
+          "hypernyms": [
+            "information",
+            "support",
+            "record"
+          ],
+          "related": [
+            "reason",
+            "validation",
+            "falsifiability"
+          ],
+          "source": "local-wordnet-curated",
+          "positioningEvidence": [
+            "hierarchy",
+            "synonym",
+            "opposite"
+          ],
+          "hexRole": "secondary_display_reference",
+          "boundary": "Lexical evidence only. Hierarchies, synonyms, and opposites support positioning influence; HEX/RGB remains secondary display metadata."
+        }
+      ]
+    },
+    "time": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "duration, period, interval, sequence, or chronology through which changes accumulate",
+          "synonyms": [
+            "duration",
+            "period",
+            "interval",
+            "sequence",
+            "chronology"
+          ],
+          "antonyms": [
+            "timelessness",
+            "stillness"
+          ],
+          "hypernyms": [
+            "measure",
+            "dimension",
+            "order"
+          ],
+          "related": [
+            "history",
+            "patina",
+            "change"
+          ],
+          "source": "local-wordnet-curated",
+          "positioningEvidence": [
+            "hierarchy",
+            "synonym",
+            "opposite"
+          ],
+          "hexRole": "secondary_display_reference",
+          "boundary": "Lexical evidence only. Hierarchies, synonyms, and opposites support positioning influence; HEX/RGB remains secondary display metadata."
+        }
+      ]
+    },
+    "sequence": {
+      "senses": [
+        {
+          "partOfSpeech": "noun",
+          "definition": "an ordered series, chain, succession, or progression of things over time",
+          "synonyms": [
+            "order",
+            "series",
+            "succession",
+            "chain",
+            "progression"
+          ],
+          "antonyms": [
+            "randomness",
+            "disorder"
+          ],
+          "hypernyms": [
+            "order",
+            "arrangement",
+            "progression"
+          ],
+          "related": [
+            "time",
+            "ranking",
+            "path"
+          ],
+          "source": "local-wordnet-curated",
+          "positioningEvidence": [
+            "hierarchy",
+            "synonym",
+            "opposite"
+          ],
+          "hexRole": "secondary_display_reference",
+          "boundary": "Lexical evidence only. Hierarchies, synonyms, and opposites support positioning influence; HEX/RGB remains secondary display metadata."
+        }
+      ]
+    }
+  },
+  "positioningMath": {
+    "name": "wordnet-positioning-evidence",
+    "version": "1.0.0",
+    "principle": "This system measures influence, not meaning.",
+    "primaryEvidence": [
+      "hierarchy",
+      "synonym",
+      "opposite"
+    ],
+    "secondaryEvidence": [
+      "hex",
+      "rgb"
+    ],
+    "hexRole": "secondary_display_reference",
+    "rule": "Node placement is constrained by lexical hierarchy, synonym proximity, and opposite contrast boundaries. HEX/RGB values render or label color but do not decide semantic position."
+  }
+}

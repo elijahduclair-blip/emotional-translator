@@ -51,11 +51,27 @@ Reference anchors:
 ```text
 White = (0, 100, 0)
 Black = (0, 0, -96)
-Blue  = (-92, 66, 10)
-Red   = (92, 78, 80)
+Blue  = (-94, 64, 8)
+Green = (-62, 78, -18)
+Yellow = (62, 88, 18)
+Red   = (94, 74, 68)
 ```
 
 These are reference coordinates, not just labels.
+
+### Positioning Evidence Rule
+
+This system measures influence, not meaning.
+
+HEX/RGB values are secondary. They can render, label, or export a color, but they do not decide where the node belongs.
+
+Primary positioning evidence comes from WordNet-style lexical structure and stored graph relationships:
+
+- `hierarchy`: parent/child constraint for where a node can sit.
+- `synonym`: proximity evidence for nodes that should sit nearer together.
+- `opposite`: contrast evidence that creates a boundary or exclusion pressure.
+
+Positioning math uses those connections first. A node belongs where its hierarchy, synonyms, opposites, bridge parents, and measured routes place it. Color values remain display metadata unless a later pass explicitly uses them as visual evidence only.
 
 ### Geometry Before Interpretation
 
@@ -134,6 +150,33 @@ Most important correction:
 - the system does **not** start from meaning
 - it starts from **entry pressure**
 - meaning only appears after pressure has become influence, influence has activated routes, and those routes have been read in context
+
+## Context In Structure
+
+Context is the structure around a local read. It is not a mood label and not a free interpretation layer.
+
+```text
+Context =
+External Environment
++ Exposure
++ Structural Change
++ Current State (Patina)
++ Future Behavior
++ Revision Boundary
+```
+
+Context gives the engine the frame needed to decide whether stored possibilities should stay quiet, become context-selected, or become active.
+
+For a node read, context should expose:
+
+- the external environment surrounding the node now
+- the exposure/contact event between the node and that environment
+- the measurable structural change created by the exposure
+- the current state/patina produced by accumulated changes
+- the likely future behavior under similar conditions
+- the revision boundary that would invalidate the active read
+
+Without this structure, the engine can count and connect nodes, but it cannot defend why one route matters now.
 
 ## Structural Humility
 
@@ -440,7 +483,7 @@ The live backend source of truth is the Express service in `backend/`. The separ
 - Association map: a Word bank view that groups direct color words, common-word routes, neutral bridge routes, emotion routes, and reclassified theme words into one organized association atlas.
 - Shade language lane: the Color map now keeps direct shades, exact shade phrases, and synonym-style wording support together so shade naming reads as one connected support system.
 - Neutral words tab: a Word bank view that groups unresolved neutral words by reason while excluding reclassified theme-layer terms.
-- Shade graph: a Word bank tool that converts Hex/RGB values and compares color words on X/Y/Z condition-space axes.
+- Shade graph: a Word bank tool that keeps Hex/RGB values as secondary display/export metadata while comparing color words through hierarchy, synonym, opposite, route, and X/Y/Z coordinate evidence.
 - Natural shade atlas: a Word bank view that groups natural source terms into sky/weather, water/ice, earth/stone, plants, fire/light, body/material, and season/time. Each entry shows source, shade family, environment condition, X/Y/Z position, and graph route; this supports the noun/source plus adjective/condition vocabulary without making nature words strict color synonyms.
 - 3D color web: a graph mode that projects nodes into stable shade-space. X moves cool/blue-green to warm/yellow-red, Y measures **degree of differentiation** from `0 = black field / abstract` to `100 = white / fully differentiated`, and Z moves muted/gray-brown to vivid/pink-orange. The stored Y ladder now reads `black -> gray -> bridge colors -> primary colors -> white`; numbered ticks mark the axes, the Z axis is attached to the graph, the axis-view control aligns the view through Free/X/Y/Z perspectives, drag creates a custom view, and clicking a sphere inspects that node.
 
@@ -528,6 +571,7 @@ Current contract:
   - `coOccurrences`
   - `pareto`
   - `patterns`
+  - optional `wordNet`
 
 Boundary:
 
@@ -536,6 +580,18 @@ Boundary:
 - Foundation does not produce cluster summaries
 - Foundation does not activate routes
 - Foundation does not produce semantic meaning
+- WordNet evidence inside Foundation is lexical evidence only
+
+WordNet evidence can support structure-first language work:
+
+- possible senses
+- synonyms
+- antonyms
+- hypernyms
+- related forms
+- unresolved words
+
+It does not assign color, climate, activation, route meaning, or identity. It gives later layers better language evidence to inspect, but the Foundation layer still stops before translation and before the Condition Engine.
 
 If a running environment returns `404` for `/api/v1/foundation/analyze`, that means the deployed or local process is older than repo truth or the wrong backend instance is being hit.
 
@@ -671,3 +727,58 @@ Behavior checks:
 - Personal profile tab renders local entries and can seed from local stress terms.
 - Function words such as `because` stay unresolved.
 - 3D color web renders nonblank nodes and edges, supports Free/X/Y/Z axis-facing views, supports drag rotation into a custom view, and keeps node selection working by click.
+
+## Geometric Discovery
+
+This system measures influence, not meaning.
+
+Geometric Discovery is a review layer over the structural space. It looks for unconnected node pairs that are close in the graph geometry and asks whether that closeness is a possible missing bridge, a useful boundary, or coincidence.
+
+It must not create permanent graph truth automatically.
+
+For every pair of nodes without a stored semantic route, the engine can:
+
+1. Measure geometric distance.
+2. Check shared neighbors.
+3. Check compatible node types.
+4. Check whether placements came from independent evidence.
+5. Rank the pair as a candidate.
+6. Require review before any permanent route is created.
+
+Distance is normalized inside the discovery radius:
+
+```text
+D(A,B) = 1 - d(A,B) / r
+```
+
+Candidate score:
+
+```text
+S(A,B) = wdD(A,B) + wnN(A,B) + wtT(A,B) + wpP(A,B)
+
+Default weights:
+wd = 0.4
+wn = 0.3
+wt = 0.2
+wp = 0.1
+```
+
+Where:
+
+- `D` is normalized geometric proximity: `1 - d(A,B) / r`.
+- `N` is shared-neighbor support: `min(1, shared_neighbors / 5)`.
+- `T` is tier/type compatibility.
+- `P` is placement-source independence.
+
+Candidate type:
+
+```text
+if shared_neighbors < 2 and local_density > 4:
+  candidate = new_node
+else:
+  candidate = bridge
+```
+
+`new_node` means the local geometry may be pointing to a missing intermediate concept. `bridge` means the local geometry may be pointing to a missing route between existing concepts.
+
+The first interface is the Discovery panel in the selected-node cluster. A selected suggestion may show a temporary dotted ghost connection, but only as review evidence. The reviewer decides whether the candidate becomes a bridge, a boundary, or an ignored coincidence.

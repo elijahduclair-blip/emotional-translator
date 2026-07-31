@@ -59,11 +59,45 @@ Reference anchors:
 ```text
 White = (0, 100, 0)
 Black = (0, 0, -96)
-Blue  = (-92, 66, 10)
-Red   = (92, 78, 80)
+Blue  = (-94, 64, 8)
+Green = (-62, 78, -18)
+Yellow = (62, 88, 18)
+Red   = (94, 74, 68)
 ```
 
 These are reference coordinates, not just labels.
+
+Bridge geometry rule:
+
+```text
+base colors = fixed anchors
+bridge colors = weighted position between two anchor parents
+shades = inherit from their strongest base/bridge parent path
+```
+
+Examples:
+
+```text
+orange = between yellow and red
+purple = between blue and red
+pink = between red and white
+brown = between black and red
+gray = between black and white
+```
+
+### Positioning Evidence Rule
+
+This system measures influence, not meaning.
+
+HEX/RGB values are secondary. They can render, label, or export a color, but they do not decide where the node belongs.
+
+Primary positioning evidence comes from WordNet-style lexical structure and stored graph relationships:
+
+- `hierarchy`: parent/child constraint for where a node can sit.
+- `synonym`: proximity evidence for nodes that should sit nearer together.
+- `opposite`: contrast evidence that creates a boundary or exclusion pressure.
+
+Positioning math uses those connections first. A node belongs where its hierarchy, synonyms, opposites, bridge parents, and measured routes place it. Color values remain display metadata unless a later pass explicitly uses them as visual evidence only.
 
 ### Geometry Before Interpretation
 
@@ -139,6 +173,73 @@ Definition:
 - `activationWeight` = the measurable amount of present influence pressing a stored route toward visible activation
 - it is route-level, not essence-level
 - meaning happens after `activationWeight` meets context and gradient travel
+
+## Context In Structure
+
+Use context as a structural frame, not as decoration.
+
+```text
+Context =
+External Environment
++ Exposure
++ Structural Change
++ Current State (Patina)
++ Future Behavior
++ Revision Boundary
+```
+
+When reading a node, ask:
+
+- What external environment surrounds this node?
+- What exposure/contact is happening?
+- What structural change is measurable?
+- What current state or patina has accumulated?
+- What future behavior becomes more likely if conditions continue?
+- What would make this read change?
+
+The assistant should not treat context as subjective certainty. Context is the local structure that explains why a stored route is active now.
+
+## WordNet Lexical Evidence
+
+Foundation may return a `wordNet` block.
+
+Use it as lexical evidence only:
+
+- possible senses
+- synonyms
+- antonyms
+- hypernyms
+- related forms
+- unresolved words
+
+Placement rule for assistants:
+
+Do not infer color meaning or placement from HEX alone. Prefer stored hierarchy, synonym, opposite, route, and coordinate evidence. HEX/RGB is secondary display/export metadata.
+
+Do not use WordNet as a color assignment engine.
+
+Do not use WordNet as a meaning engine.
+
+Do not treat a synonym as a confirmed route by itself.
+
+Correct use:
+
+```text
+word counted
+    ->
+WordNet lexical evidence
+    ->
+possible route candidates
+    ->
+translation / condition layers decide later
+```
+
+Boundary:
+
+```text
+WordNet supports language structure.
+It does not assign color, climate, activation, or meaning.
+```
 
 ## Structural Humility
 
@@ -647,10 +748,10 @@ Shades = inherit position through their strongest base-or-bridge path
 Stored base family coordinates:
 
 ```text
-blue   = (-92, 66, 10)
-green  = (-58, 72, -6)
-yellow = (58, 86, 46)
-red    = (92, 78, 80)
+blue   = (-94, 64, 8)
+green  = (-62, 78, -18)
+yellow = (62, 88, 18)
+red    = (94, 74, 68)
 black  = (0, 0, -96)
 white  = (0, 100, 0)
 ```
@@ -672,11 +773,11 @@ Where:
 Stored bridge family coordinates:
 
 ```text
-orange = (74, 52, 62)  parents: yellow + red
-purple = (-15, 51, 39) parents: blue + red
-pink   = (39, 89, 34)  parents: red + white
-brown  = (40, 32, -19) parents: black + red
-gray   = (0, 17, -71)  parents: black + white
+orange = (77, 81, 42)  parents: yellow + red
+purple = (-15, 68, 33) parents: blue + red
+pink   = (39, 89, 29)  parents: red + white
+brown  = (41, 33, -25) parents: black + red
+gray   = (0, 26, -71)  parents: black + white
 ```
 
 Expanded atlas shade coordinates:
@@ -960,3 +1061,48 @@ This proves the emotion.
 ```
 
 The system should feel like a map, not a verdict.
+
+## Geometric Discovery Rule
+
+This system measures influence, not meaning.
+
+When using the color web as a reference, geometric closeness must be treated as candidate evidence only. Do not claim a semantic route exists just because two nodes are close.
+
+Report suggestions as review questions:
+
+- possible missing bridge
+- useful boundary
+- coincidence or ignore
+
+Discovery scoring may use:
+
+```text
+D(A,B) = 1 - d(A,B) / r
+S(A,B) = wdD(A,B) + wnN(A,B) + wtT(A,B) + wpP(A,B)
+
+Default weights:
+wd = 0.4
+wn = 0.3
+wt = 0.2
+wp = 0.1
+```
+
+Where:
+
+- `D` is normalized proximity.
+- `N` is shared-neighbor support: `min(1, shared_neighbors / 5)`.
+- `T` is tier/type compatibility.
+- `P` is independent placement confidence.
+
+Candidate type:
+
+```text
+if shared_neighbors < 2 and local_density > 4:
+  candidate = new_node
+else:
+  candidate = bridge
+```
+
+`new_node` means the geometry may be asking for a missing intermediate concept. `bridge` means the geometry may be asking for a reviewed route between existing concepts.
+
+Use route language only after stored route evidence or explicit review supports it. Geometry can expose a question; it cannot answer the question alone.

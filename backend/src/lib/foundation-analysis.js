@@ -1,3 +1,5 @@
+import { buildWordNetEvidence } from './wordnet-evidence.js';
+
 function tokenizeText(value) {
   return String(value || '')
     .split(/[^a-z0-9-]+/i)
@@ -120,8 +122,9 @@ export function analyzeFoundationText(text, options = {}) {
   }));
   const pareto = buildPareto(wordCountsBase, totalWords);
   const patterns = detectPatterns({ wordCounts, coOccurrences, pareto, totalWords, distinctWords });
+  const wordNet = options.includeWordNet === false ? undefined : buildWordNetEvidence(tokens);
 
-  return {
+  const result = {
     stats: {
       totalWords,
       distinctWords,
@@ -133,6 +136,9 @@ export function analyzeFoundationText(text, options = {}) {
     pareto,
     patterns
   };
+
+  if (wordNet) result.wordNet = wordNet;
+  return result;
 }
 
 export { tokenizeText };

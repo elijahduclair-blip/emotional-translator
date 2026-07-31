@@ -55,11 +55,45 @@ Reference anchors:
 ```text
 White = (0, 100, 0)
 Black = (0, 0, -96)
-Blue  = (-92, 66, 10)
-Red   = (92, 78, 80)
+Blue  = (-94, 64, 8)
+Green = (-62, 78, -18)
+Yellow = (62, 88, 18)
+Red   = (94, 74, 68)
 ```
 
 These are reference coordinates, not just labels.
+
+Bridge geometry rule:
+
+```text
+base colors = fixed anchors
+bridge colors = weighted position between two anchor parents
+shades = inherit from their strongest base/bridge parent path
+```
+
+Examples:
+
+```text
+orange = between yellow and red
+purple = between blue and red
+pink = between red and white
+brown = between black and red
+gray = between black and white
+```
+
+### Positioning Evidence Rule
+
+This system measures influence, not meaning.
+
+HEX/RGB values are secondary. They can render, label, or export a color, but they do not decide where the node belongs.
+
+Primary positioning evidence comes from WordNet-style lexical structure and stored graph relationships:
+
+- `hierarchy`: parent/child constraint for where a node can sit.
+- `synonym`: proximity evidence for nodes that should sit nearer together.
+- `opposite`: contrast evidence that creates a boundary or exclusion pressure.
+
+Positioning math uses those connections first. A node belongs where its hierarchy, synonyms, opposites, bridge parents, and measured routes place it. Color values remain display metadata unless a later pass explicitly uses them as visual evidence only.
 
 ### Geometry Before Interpretation
 
@@ -219,6 +253,31 @@ Plain statement:
 ```text
 This system measures influence, not meaning.
 ```
+
+## Context In Structure
+
+Context is not a loose note around the graph. It is the active structural frame that tells the system what is surrounding a node, what is contacting it, what measurable change appears, and when the current read must be revised.
+
+```text
+Context =
+External Environment
++ Exposure
++ Structural Change
++ Current State (Patina)
++ Future Behavior
++ Revision Boundary
+```
+
+This means a node does not become readable by itself. It becomes readable when its stored routes are measured inside a current context structure.
+
+Context answers:
+
+- what environment is pressing on the node
+- what exposure/contact is happening now
+- what structural change can be measured
+- what current state has accumulated
+- what future behavior becomes more likely
+- what would force the read to be recomputed
 
 ## External / Internal Cycle
 
@@ -439,10 +498,10 @@ Z-axis = Muted (Gray-Brown) <-> Vivid (Pink-Orange)
 Stored base family coordinates:
 
 ```text
-blue   = (-92, 66, 10)
-green  = (-58, 72, -6)
-yellow = (58, 86, 46)
-red    = (92, 78, 80)
+blue   = (-94, 64, 8)
+green  = (-62, 78, -18)
+yellow = (62, 88, 18)
+red    = (94, 74, 68)
 black  = (0, 0, -96)
 white  = (0, 100, 0)
 ```
@@ -456,11 +515,11 @@ These are the fixed anchors of the stored map:
 Stored bridge family coordinates:
 
 ```text
-orange = (74, 52, 62)  parents: yellow + red
-purple = (-15, 51, 39) parents: blue + red
-pink   = (39, 89, 34)  parents: red + white
-brown  = (40, 32, -19) parents: black + red
-gray   = (0, 17, -71)  parents: black + white
+orange = (77, 81, 42)  parents: yellow + red
+purple = (-15, 68, 33) parents: blue + red
+pink   = (39, 89, 29)  parents: red + white
+brown  = (41, 33, -25) parents: black + red
+gray   = (0, 26, -71)  parents: black + white
 ```
 
 Expanded atlas shade coordinates:
@@ -741,6 +800,7 @@ Foundation does not assign color, meaning, cluster summaries, or active routes. 
 - co-occurrence counts
 - Pareto ordering
 - repeated structural patterns
+- optional WordNet lexical evidence
 
 The core shape is:
 
@@ -757,7 +817,13 @@ The core shape is:
     { "word": "gold", "related": "ritual", "count": 7 }
   ],
   "pareto": [],
-  "patterns": []
+  "patterns": [],
+  "wordNet": {
+    "engine": "wordnet",
+    "status": "local_seed",
+    "matchedWords": [],
+    "unresolvedWords": []
+  }
 }
 ```
 
@@ -810,17 +876,32 @@ Response shape:
   "wordCounts": [],
   "coOccurrences": [],
   "pareto": [],
-  "patterns": []
+  "patterns": [],
+  "wordNet": {
+    "engine": "wordnet",
+    "version": "0.1.0",
+    "status": "local_seed",
+    "boundary": "WordNet evidence is lexical evidence only: possible senses, synonyms, antonyms, hypernyms, and related forms. It does not assign color, climate, route activation, or meaning.",
+    "stats": {
+      "matchedWords": 0,
+      "unresolvedWords": 0
+    },
+    "matchedWords": [],
+    "unresolvedWords": []
+  }
 }
 ```
 
 Boundary:
 
 - **Foundation returns structure only.**
+- WordNet evidence is lexical evidence only
 - color assignment belongs to the graph / translator layer
 - activation belongs to the condition engine
 - meaning belongs to the read that emerges after activation
 - `topCluster`, family landings, active routes, and semantic summaries do not belong to this endpoint
+
+WordNet gives the foundation layer a controlled language reference. It can say a counted word has possible senses, synonyms, antonyms, hypernyms, or related forms. It cannot decide the color, climate, or meaning of that word. Those decisions belong to later layers after routes, conditions, and activationWeight are evaluated.
 
 Foundation session contract:
 
@@ -1129,6 +1210,59 @@ npm.cmd test
 ```
 
 Windows Task Scheduler runs `Emotional Translator Daily Backup` at 2:00 AM each day while the Windows user is signed in. The job writes PostgreSQL dumps and logs beneath `C:\Users\eli\Desktop\api\backups`, and removes dumps older than 30 days.
+
+## Geometric Discovery
+
+This system measures influence, not meaning.
+
+Geometric Discovery is a review layer. It looks for unconnected node pairs that are close in structural space and asks whether the proximity is a possible missing bridge, a useful boundary, or coincidence. It never creates permanent routes automatically.
+
+For every pair of nodes without a stored semantic route, the engine can:
+
+1. Measure geometric distance.
+2. Check shared neighbors.
+3. Check compatible node types.
+4. Check whether placements came from independent evidence.
+5. Rank the pair as a candidate.
+6. Require review before any permanent route is created.
+
+Distance is normalized inside the discovery radius:
+
+```text
+D(A,B) = 1 - d(A,B) / r
+```
+
+Candidate score:
+
+```text
+S(A,B) = wdD(A,B) + wnN(A,B) + wtT(A,B) + wpP(A,B)
+
+Default weights:
+wd = 0.4
+wn = 0.3
+wt = 0.2
+wp = 0.1
+```
+
+Where:
+
+- `D` is normalized geometric proximity: `1 - d(A,B) / r`.
+- `N` is shared-neighbor support: `min(1, shared_neighbors / 5)`.
+- `T` is tier/type compatibility.
+- `P` is placement-source independence.
+
+Candidate type:
+
+```text
+if shared_neighbors < 2 and local_density > 4:
+  candidate = new_node
+else:
+  candidate = bridge
+```
+
+`new_node` means the local geometry may be pointing to a missing intermediate concept. `bridge` means the local geometry may be pointing to a missing route between existing concepts.
+
+Geometric closeness creates candidate evidence, not graph truth. A reviewed suggestion may become a bridge, an intentional boundary, or an ignored coincidence.
 
 Theory notes:
 
