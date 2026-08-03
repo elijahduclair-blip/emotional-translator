@@ -6,7 +6,9 @@ const sharedEnvironment = {
   ...process.env,
   CODEX_API_URL: process.env.CODEX_API_URL || 'http://127.0.0.1:3000',
   MIRROR_RUNTIME_PORT: process.env.MIRROR_RUNTIME_PORT || '3100',
-  RUNTIME_SERVICE_TOKEN: process.env.RUNTIME_SERVICE_TOKEN || 'mirror-platform-local'
+  RUNTIME_SERVICE_TOKEN: process.env.RUNTIME_SERVICE_TOKEN || 'mirror-platform-local',
+  LOCAL_MODEL_URL: process.env.LOCAL_MODEL_URL || 'http://127.0.0.1:11434',
+  LOCAL_MODEL_NAME: process.env.LOCAL_MODEL_NAME || 'qwen3:4b-instruct'
 };
 
 const services = [
@@ -68,3 +70,4 @@ process.on('SIGTERM', () => stop(0));
 console.log('[mirror-platform] Codex API: http://127.0.0.1:3000');
 console.log('[mirror-platform] ChromaBridge: http://127.0.0.1:4173');
 console.log('[mirror-platform] Emotional Translator: http://127.0.0.1:3100');
+console.log(`[mirror-platform] Local reasoning model: ${sharedEnvironment.LOCAL_MODEL_NAME} at ${sharedEnvironment.LOCAL_MODEL_URL}`);

@@ -10,8 +10,11 @@ export class MirrorRuntimeService {
       constitutionPath: config?.constitutionPath,
       enablePersistence: config?.enablePersistence ?? true,
       enableCodexGraphRead: config?.enableCodexGraphRead ?? true,
+      enableLocalModel: config?.enableLocalModel ?? true,
       codexApiUrl: config?.codexApiUrl,
       codexServiceToken: config?.codexServiceToken,
+      localModelUrl: config?.localModelUrl,
+      localModelName: config?.localModelName,
     });
   }
 
@@ -25,6 +28,13 @@ export class MirrorRuntimeService {
 
   getStatus(): RuntimeStatus {
     return this.runtime.getStatus();
+  }
+
+  async getHealth() {
+    return {
+      status: this.runtime.getStatus(),
+      localModel: await this.runtime.getLocalModelStatus()
+    };
   }
 
   getRuntime(): MirrorRuntime {

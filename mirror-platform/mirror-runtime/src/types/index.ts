@@ -38,8 +38,11 @@ export interface MirrorRuntimeConfig {
   constitutionPath?: string;
   enablePersistence?: boolean;
   enableCodexGraphRead?: boolean;
+  enableLocalModel?: boolean;
   codexApiUrl?: string;
   codexServiceToken?: string;
+  localModelUrl?: string;
+  localModelName?: string;
 }
 
 export interface CodexGraphRead {

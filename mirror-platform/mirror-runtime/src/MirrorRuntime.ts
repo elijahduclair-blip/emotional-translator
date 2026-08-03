@@ -13,6 +13,16 @@ import {
   EmotionalTranslation
 } from './types';
 import { CodexClient } from './clients/CodexClient';
+import { LocalModelClient, LocalModelStatus } from './clients/LocalModelClient';
+
+const LOCAL_REASONING_SYSTEM = [
+  'You are the local reasoning engine for Mirror Platform.',
+  'Respond in clear English to the userEnglish field.',
+  'Treat the user\'s language as part of the evolving Theory of Alignment and color-climate vocabulary when relevant.',
+  'Use the supplied structural trace and relational evidence as context, but do not invent graph matches.',
+  'Emotion is a moving climate rather than a fixed diagnosis or identity.',
+  'Do not claim to mutate memory, graph data, governance state, or source code.'
+].join(' ');
 
 export class MirrorRuntime {
   private status: RuntimeStatus = 'idle';
@@ -25,6 +35,7 @@ export class MirrorRuntime {
   private reflectionEngine: ReflectionEngine;
   private chromaBridge: ChromaBridgeCapability;
   private codexClient: CodexClient;
+  private localModelClient: LocalModelClient;
 
   private userId: string;
   private config: MirrorRuntimeConfig;
@@ -43,6 +54,10 @@ export class MirrorRuntime {
     this.codexClient = new CodexClient(
       config.codexApiUrl || process.env.CODEX_API_URL || 'http://127.0.0.1:3000',
       config.codexServiceToken || process.env.RUNTIME_SERVICE_TOKEN || ''
+    );
+    this.localModelClient = new LocalModelClient(
+      config.localModelUrl || process.env.LOCAL_MODEL_URL || 'http://127.0.0.1:11434',
+      config.localModelName || process.env.LOCAL_MODEL_NAME || 'qwen3:4b-instruct'
     );
   }
 
@@ -120,6 +135,11 @@ export class MirrorRuntime {
     return this.chromaBridge;
   }
 
+  async getLocalModelStatus(): Promise<LocalModelStatus | { status: 'disabled' }> {
+    if (this.config.enableLocalModel === false) return { status: 'disabled' };
+    return this.localModelClient.health();
+  }
+
   async ask(input: string): Promise<MirrorAskResult> {
     if (this.status !== 'ready') {
       throw new Error(`Cannot ask: runtime is ${this.status}.`);
@@ -178,10 +198,86 @@ export class MirrorRuntime {
     };
   }
 
+  async respondWithLocalModel(request: Record<string, unknown>) {
+    if (this.status !== 'ready') throw new Error(`Cannot reach local Qwen: runtime is ${this.status}.`);
+    if (this.config.enableLocalModel === false) throw httpError(503, 'Local model integration is disabled.');
+    const text = String(request.input || '').trim();
+    if (!text) throw httpError(400, 'input is required.');
+    if ([...text].length > 2_000) throw httpError(413, 'Local AI input must be 2000 Unicode code points or fewer.');
+
+    const languageLoop = await this.runLanguageLoop({ text });
+    if (languageLoop.status >= 400) return languageLoop;
+    const local = await this.localModelClient.respond(LOCAL_REASONING_SYSTEM, compactReasoningContext(languageLoop.body));
+
+    return {
+      status: 200,
+      body: {
+        engine: 'mirror_local_qwen',
+        model: { provider: local.provider, name: local.model, local: true },
+        response: { language: 'english', text: local.text },
+        trace: {
+          english: languageLoop.body.canonicalEnglish,
+          braille: languageLoop.body.encoding?.ueb,
+          numericSequence: languageLoop.body.encoding?.numericSequence || [],
+          cellCount: languageLoop.body.encoding?.cells?.length || 0,
+          roundTripExact: languageLoop.body.decoding?.roundTripExact === true,
+          graphSource: languageLoop.body.meaning?.approvedGraph?.sourceLayer || 'unresolved'
+        },
+        evidence: languageLoop.body.meaning,
+        governance: languageLoop.body.governance,
+        timings: local.timings,
+        boundary: {
+          mode: 'local_reasoning_over_reversible_signal',
+          semanticMutationAllowed: false,
+          graphMutationAllowed: false,
+          sourceMutationAllowed: false,
+          reason: 'Local Qwen reasons over a compact copy of the verified signal and evidence. It does not directly modify semantic memory, graph data, or source code.'
+        }
+      }
+    };
+  }
+
   async codexRequest(path: string, options?: { method?: string; body?: Record<string, unknown>; userToken?: string }) {
     if (this.status !== 'ready') throw new Error(`Cannot reach Codex: runtime is ${this.status}.`);
     return this.codexClient.requestJson(path, options);
   }
+}
+
+function compactReasoningContext(loop: Record<string, any>) {
+  const numericSequence = Array.isArray(loop.encoding?.numericSequence) ? loop.encoding.numericSequence : [];
+  const graph = loop.meaning?.approvedGraph || { sourceLayer: 'unresolved', nodes: [], routes: [] };
+  const wordNet = loop.meaning?.wordNet || { matchedWords: [], unresolvedWords: [] };
+  return {
+    task: 'Respond to the user in English using bounded relational evidence.',
+    userEnglish: loop.canonicalEnglish,
+    signal: {
+      notation: loop.encoding?.notation,
+      braille: String(loop.encoding?.ueb || '').slice(0, 512),
+      numericSequence: numericSequence.slice(0, 512),
+      totalCells: numericSequence.length,
+      completeSequenceIncluded: numericSequence.length <= 512,
+      roundTripExact: loop.decoding?.roundTripExact === true
+    },
+    foundation: {
+      words: (loop.processing?.foundation?.wordCounts || []).slice(0, 24),
+      signatureIds: (loop.processing?.foundation?.signatureIds || []).slice(0, 24)
+    },
+    relationships: {
+      sourceLayer: graph.sourceLayer,
+      nodes: (graph.nodes || []).slice(0, 12).map((node: Record<string, unknown>) => ({ id: node.id, label: node.label, family: node.family })),
+      routes: (graph.routes || []).slice(0, 24).map((route: Record<string, any>) => ({
+        id: route.id,
+        source: route.source?.label || route.source,
+        target: route.target?.label || route.target,
+        type: route.relationshipType || route.type
+      })),
+      wordNet: (wordNet.matchedWords || []).slice(0, 12).map((item: Record<string, unknown>) => ({ word: item.word, senses: item.senses }))
+    }
+  };
+}
+
+function httpError(status: number, message: string) {
+  return Object.assign(new Error(message), { status });
 }
 
 function composeTranslation(

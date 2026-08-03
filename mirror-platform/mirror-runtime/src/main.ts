@@ -5,7 +5,11 @@ async function main() {
   const service = new MirrorRuntimeService({
     userId: 'system-default',
     enablePersistence: process.env.MIRROR_ENABLE_PERSISTENCE !== 'false',
-    enableCodexGraphRead: process.env.MIRROR_ENABLE_CODEX_GRAPH_READ !== 'false'
+    enableCodexGraphRead: process.env.MIRROR_ENABLE_CODEX_GRAPH_READ !== 'false',
+    enableLocalModel: process.env.MIRROR_ENABLE_LOCAL_MODEL !== 'false',
+    codexServiceToken: process.env.RUNTIME_SERVICE_TOKEN || (process.env.NODE_ENV === 'production' ? '' : 'mirror-platform-local'),
+    localModelUrl: process.env.LOCAL_MODEL_URL || 'http://127.0.0.1:11434',
+    localModelName: process.env.LOCAL_MODEL_NAME || 'qwen3:4b-instruct'
   });
   const port = Number(process.env.MIRROR_RUNTIME_PORT || 3100);
   const server = createMirrorHttpServer(service);

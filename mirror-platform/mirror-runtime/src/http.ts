@@ -22,7 +22,7 @@ export function createMirrorHttpServer(service: MirrorRuntimeService) {
       }
 
       if (request.method === 'GET' && path === '/health') {
-        return sendJson(response, 200, { status: service.getStatus() });
+        return sendJson(response, 200, await service.getHealth());
       }
 
       if (request.method === 'POST' && path === '/ask') {
@@ -32,6 +32,11 @@ export function createMirrorHttpServer(service: MirrorRuntimeService) {
 
         const result = await service.getRuntime().ask(input);
         return sendJson(response, 200, result);
+      }
+
+      if (request.method === 'POST' && path === '/local-ai/respond') {
+        requireSameOriginMutation(request);
+        return proxyResult(response, await service.getRuntime().respondWithLocalModel(await readJson(request, MAX_FOUNDATION_BODY_BYTES)));
       }
 
       if (request.method === 'POST' && path === '/foundation/letters/analyze') {
@@ -44,6 +49,20 @@ export function createMirrorHttpServer(service: MirrorRuntimeService) {
       if (request.method === 'POST' && path === '/foundation/language-loop') {
         requireSameOriginMutation(request);
         return proxyResult(response, await service.getRuntime().runLanguageLoop(await readJson(request, MAX_FOUNDATION_BODY_BYTES)));
+      }
+
+      if (request.method === 'POST' && path === '/foundation/training/dataset') {
+        requireSameOriginMutation(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/foundation/training/dataset', {
+          method: 'POST', body: await readJson(request, MAX_FOUNDATION_BODY_BYTES)
+        }));
+      }
+
+      if (request.method === 'POST' && path === '/foundation/training/color-atlas') {
+        requireSameOriginMutation(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/foundation/training/color-atlas', {
+          method: 'POST', body: await readJson(request, MAX_FOUNDATION_BODY_BYTES)
+        }));
       }
 
       if (request.method === 'POST' && path === '/foundation/letters/compare') {

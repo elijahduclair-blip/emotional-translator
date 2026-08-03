@@ -25,6 +25,35 @@ describe('Mirror Platform vertical slice', () => {
 
   it('connects HTTP ask to ChromaBridge evaluation and Codex save', async () => {
     let receivedEvaluation: Record<string, unknown> | undefined;
+    let receivedLocalContext: Record<string, any> | undefined;
+    const localModel = createServer(async (request, response) => {
+      const chunks: Buffer[] = [];
+      for await (const chunk of request) chunks.push(Buffer.from(chunk));
+      const body = JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
+      if (request.url === '/api/tags') {
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ models: [{ name: 'qwen3:4b-instruct' }] }));
+        return;
+      }
+      if (request.url === '/api/chat') {
+        receivedLocalContext = JSON.parse(body.messages[1].content);
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({
+          model: 'qwen3:4b-instruct',
+          message: { content: 'Reflection is moving as an open climate.' },
+          done: true,
+          total_duration: 1_000_000_000,
+          load_duration: 1_000_000,
+          prompt_eval_count: 32,
+          eval_count: 9
+        }));
+        return;
+      }
+      response.writeHead(404).end();
+    });
+    await listen(localModel);
+    const localModelAddress = localModel.address();
+    if (!localModelAddress || typeof localModelAddress === 'string') throw new Error('Local model test server did not bind.');
     const codex = createServer(async (request, response) => {
       const chunks: Buffer[] = [];
       for await (const chunk of request) chunks.push(Buffer.from(chunk));
@@ -54,6 +83,41 @@ describe('Mirror Platform vertical slice', () => {
           decoding: { english: body.text, roundTripExact: true },
           meaning: { approvedGraph: { sourceLayer: 'unresolved', nodes: [], routes: [] }, wordNet: { matchedWords: [] } },
           boundary: { mode: 'reversible_signal_with_relational_evidence', encodingCreatesMeaning: false, semanticMutationAllowed: false }
+        }));
+        return;
+      }
+      if (request.url === '/api/v1/foundation/training/dataset') {
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({
+          engine: 'mirror_training_dataset_generator',
+          version: '1.0.0',
+          format: 'chat_jsonl',
+          sourceCount: body.inputs.length,
+          recordCount: body.inputs.length * 4,
+          tokenVocabulary: Array.from({ length: 64 }, (_, mask) => ({ token: `<B${String(mask).padStart(2, '0')}>`, mask })),
+          jsonlBytes: 1024,
+          validation: { valid: true, samples: [] },
+          records: body.inputs.flatMap((input: string) => ['english_to_structural', 'structural_to_english', 'ordered_foundation', 'relational_grounding'].map(task => ({ task, messages: [], metadata: { verified: true, input } }))),
+          boundary: { modelWeightsChanged: false, semanticMutationAllowed: false }
+        }));
+        return;
+      }
+      if (request.url === '/api/v1/foundation/training/color-atlas') {
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({
+          engine: 'mirror_color_atlas_training_converter',
+          version: '1.0.0',
+          format: 'chat_jsonl',
+          source: { document: 'ChromaBridge Export example.pdf', pageCount: 4, sha256: 'source-hash' },
+          sourceRecordCount: 95,
+          selection: { offset: 0, limit: 95, returned: 95 },
+          tierCounts: { base: 15, bridge: 11, shade: 69 },
+          recordCount: 380,
+          tokenVocabulary: Array.from({ length: 64 }, (_, mask) => ({ token: `<B${String(mask).padStart(2, '0')}>`, mask })),
+          jsonlBytes: 1024,
+          validation: { valid: true, sourceRowsAccountedFor: 95, samples: [] },
+          records: [{ task: 'color_atlas_name_to_record', messages: [], metadata: { task: 'color_atlas_name_to_record', verified: true } }],
+          boundary: { modelWeightsChanged: false, semanticMutationAllowed: false, canonicalAnchorMutationAllowed: false }
         }));
         return;
       }
@@ -166,7 +230,9 @@ describe('Mirror Platform vertical slice', () => {
     const service = new MirrorRuntimeService({
       userId: 'test-user',
       codexApiUrl: `http://127.0.0.1:${codexAddress.port}`,
-      codexServiceToken: 'test-service-token'
+      codexServiceToken: 'test-service-token',
+      localModelUrl: `http://127.0.0.1:${localModelAddress.port}`,
+      localModelName: 'qwen3:4b-instruct'
     });
     await service.start();
     const mirror = createMirrorHttpServer(service);
@@ -190,6 +256,63 @@ describe('Mirror Platform vertical slice', () => {
       expect(shell).toContain('id="moduleGovernance"');
       expect(shell).toContain('Submit assembled module to Governance');
       expect(shell).toContain('Reversible language loop');
+      expect(shell).toContain('Your local AI / Qwen3 reasoning');
+      expect(shell).toContain('Verified training dataset');
+      expect(shell).toContain('Convert current color atlas');
+      expect(shell).toContain('record.metadata.task');
+
+      const health = await fetch(`http://127.0.0.1:${mirrorAddress.port}/health`);
+      const healthBody = await health.json() as { localModel: { status: string; model: string } };
+      expect(healthBody.localModel.status).toBe('ready');
+      expect(healthBody.localModel.model).toBe('qwen3:4b-instruct');
+
+      const localAi = await fetch(`http://127.0.0.1:${mirrorAddress.port}/local-ai/respond`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin' },
+        body: JSON.stringify({ input: 'Reflection moves through silver climate.' })
+      });
+      const localAiBody = await localAi.json() as {
+        model: { name: string; local: boolean };
+        response: { language: string; text: string };
+        trace: { roundTripExact: boolean };
+        boundary: { semanticMutationAllowed: boolean };
+      };
+      expect(localAi.status).toBe(200);
+      expect(localAiBody.model).toEqual({ provider: 'ollama', name: 'qwen3:4b-instruct', local: true });
+      expect(localAiBody.response).toEqual({ language: 'english', text: 'Reflection is moving as an open climate.' });
+      expect(localAiBody.trace.roundTripExact).toBe(true);
+      expect(localAiBody.boundary.semanticMutationAllowed).toBe(false);
+      expect(receivedLocalContext?.userEnglish).toBe('Reflection moves through silver climate.');
+      expect(receivedLocalContext?.signal.numericSequence.length).toBeGreaterThan(0);
+
+      const trainingDataset = await fetch(`http://127.0.0.1:${mirrorAddress.port}/foundation/training/dataset`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin' },
+        body: JSON.stringify({ inputs: ['CAT', 'BAT'] })
+      });
+      const trainingBody = await trainingDataset.json() as { recordCount: number; validation: { valid: boolean }; boundary: { modelWeightsChanged: boolean } };
+      expect(trainingDataset.status).toBe(200);
+      expect(trainingBody.recordCount).toBe(8);
+      expect(trainingBody.validation.valid).toBe(true);
+      expect(trainingBody.boundary.modelWeightsChanged).toBe(false);
+
+      const atlasDataset = await fetch(`http://127.0.0.1:${mirrorAddress.port}/foundation/training/color-atlas`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin' },
+        body: '{}'
+      });
+      const atlasBody = await atlasDataset.json() as {
+        sourceRecordCount: number;
+        recordCount: number;
+        validation: { valid: boolean; sourceRowsAccountedFor: number };
+        boundary: { modelWeightsChanged: boolean; canonicalAnchorMutationAllowed: boolean };
+      };
+      expect(atlasDataset.status).toBe(200);
+      expect(atlasBody.sourceRecordCount).toBe(95);
+      expect(atlasBody.recordCount).toBe(380);
+      expect(atlasBody.validation).toEqual({ valid: true, sourceRowsAccountedFor: 95, samples: [] });
+      expect(atlasBody.boundary.modelWeightsChanged).toBe(false);
+      expect(atlasBody.boundary.canonicalAnchorMutationAllowed).toBe(false);
 
       const languageLoop = await fetch(`http://127.0.0.1:${mirrorAddress.port}/foundation/language-loop`, {
         method: 'POST',
@@ -330,6 +453,7 @@ describe('Mirror Platform vertical slice', () => {
       await close(mirror);
       await service.stop();
       await close(codex);
+      await close(localModel);
     }
   });
 });

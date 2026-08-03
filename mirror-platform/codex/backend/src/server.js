@@ -59,6 +59,7 @@ app.use((req, res, next) => {
 app.use('/api/v1/foundation/analyze', limitPublicAnalysis);
 app.use('/api/v1/foundation/letters', limitPublicAnalysis);
 app.use('/api/v1/foundation/language-loop', limitPublicAnalysis);
+app.use('/api/v1/foundation/training', limitPublicAnalysis);
 app.use('/api/v1/foundation/braille-runtime', limitPublicAnalysis);
 app.use('/api/v1/translate', limitPublicAnalysis);
 
@@ -74,6 +75,8 @@ app.get('/api', (req, res) => {
       foundation: '/api/v1/foundation/analyze',
       foundationLetters: '/api/v1/foundation/letters/analyze',
       languageLoop: '/api/v1/foundation/language-loop',
+      trainingDataset: '/api/v1/foundation/training/dataset',
+      colorAtlasTrainingDataset: '/api/v1/foundation/training/color-atlas',
       brailleRuntime: {
         compile: '/api/v1/foundation/braille-runtime/compile',
         assemble: '/api/v1/foundation/braille-runtime/assemble'
@@ -121,6 +124,8 @@ app.listen(PORT, () => {
   console.log('  Foundation analysis (/api/v1/foundation/analyze)');
   console.log('  Ordered letter accountability (/api/v1/foundation/letters)');
   console.log('  Reversible language loop (/api/v1/foundation/language-loop)');
+  console.log('  Verified local-AI training dataset (/api/v1/foundation/training/dataset)');
+  console.log('  ChromaBridge color-atlas training dataset (/api/v1/foundation/training/color-atlas)');
   console.log('  Braille Runtime Language (/api/v1/foundation/braille-runtime/compile, /assemble)');
   console.log('  WordNet lexical lookup (/api/v1/wordnet/lookup)');
   console.log('  Braille mathematics (/api/v1/braille/math)');

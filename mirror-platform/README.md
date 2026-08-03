@@ -13,6 +13,8 @@ MirrorRuntime.ask(input)
 - `chromabridge/` is the constitutional and semantic governance layer.
 - `mirror-runtime/` is the reasoning/runtime service.
 
+Mirror Runtime can also use a locally hosted Qwen3 model as its conversational reasoning engine. The local request remains orchestrated through the three services: Codex produces the reversible English → UEB → six-bit trace and approved relational evidence, ChromaBridge preserves the non-mutating boundary, and Qwen3 returns the English response. The same-origin endpoint is `POST /local-ai/respond` with `{ "input": "..." }`.
+
 The imported ChromaBridge PDF is kept in a fourth logical layer inside Codex:
 
 - `knowledge_nodes` and `knowledge_edges` contain shared color vocabulary, coordinates, hierarchy, synonyms, and antonyms.
@@ -65,6 +67,12 @@ Public lessons and translation do not require an account. Verified accounts sync
 
 The sixth room preserves each word as an ordered Unicode-letter signature. Repeated occurrences reference one reusable signature, while every original surface form and occurrence remains in sequence. Each code point is also represented by four reversible six-bit `StructuralCell` values. These cells are computational structure only: they are not Braille, do not inherit Braille meaning, and never activate color or graph semantics. Explicit comparison reports substitutions, insertions, and deletions without converting them into identity or emotional meaning.
 
+The Foundation room can also generate verified JSONL training examples for a future local Qwen model. `POST /api/v1/foundation/training/dataset` accepts `{ "inputs": ["CAT", "BAT"] }` (up to 12 English passages) and returns a fixed 64-token six-bit vocabulary plus four deterministic records per passage: English-to-structure, structure-to-English, ordered-letter accountability, and relational grounding. Every record is produced from the existing deterministic language loop and rejected if its English round trip or structural-cell alignment fails. The same-origin Mirror Runtime facade is `POST /foundation/training/dataset`; the room can preview and download the records as JSONL.
+
+`POST /api/v1/foundation/training/color-atlas` converts the reviewed four-page `ChromaBridge Export example.pdf` source into four verified lessons for each of its 95 rows (380 records total). The committed source manifest preserves the PDF SHA-256, page, row, and extraction confidence; three visually repaired bridge rows remain marked `medium`. Coordinate-neighbor facts use deterministic Euclidean distance only. Imported `base` tiers never become canonical compass anchors, and empty parent or semantic-label fields remain empty. The same-origin facade is `POST /foundation/training/color-atlas`, exposed by **Convert current color atlas** in the Foundation room.
+
+This endpoint prepares data only. It does not train a model, change model weights, assign emotional meaning, mutate the Color Atlas, or alter Braille/Nemeth notation.
+
 The same room also contains the bounded Braille Runtime Language compiler. It preserves an English conditional instruction, produces a Grade 1 UEB transcription, encodes the comparison through the verified Nemeth subset, derives exact sortable six-bit Braille masks, and attaches existing Foundation signature references. Version one accepts only allowlisted proposal/evaluation actions; it cannot modify source files or execute generated code.
 
 The next-stage module assembler accepts only a met proposal plus the explicit `approved` assembly decision. It selects a frozen handler from the runtime registry and returns a deterministic, inspectable review draft. Assembly does not execute generated JavaScript, persist evidence, or commit a graph mutation; an actual commit remains in the existing administrator review workflow.
@@ -103,6 +111,16 @@ SMTP_PASS=replace-me
 SMTP_FROM=Mirror Platform <no-reply@example.com>
 ```
 
+Local Qwen defaults for Mirror Runtime are:
+
+```dotenv
+MIRROR_ENABLE_LOCAL_MODEL=true
+LOCAL_MODEL_URL=http://127.0.0.1:11434
+LOCAL_MODEL_NAME=qwen3:4b-instruct
+```
+
+With Ollama installed, `ollama pull qwen3:4b-instruct` installs the expected local weights. `GET /health` reports whether the configured model is available; the browser never calls Ollama directly.
+
 The root development command supplies `mirror-platform-local` as the local token when no token is configured. For non-local environments, always set an explicit secret.
 
 For a UI-only fallback preview without Codex or PostgreSQL, start Mirror Runtime with `MIRROR_ENABLE_CODEX_GRAPH_READ=false` and `MIRROR_ENABLE_PERSISTENCE=false`. The normal `pnpm dev` path keeps both integrations enabled.
@@ -112,6 +130,7 @@ Services:
 - Codex API: `http://127.0.0.1:3000`
 - ChromaBridge UI: `http://127.0.0.1:4173`
 - Combined Emotional Translator and Mirror Runtime: `http://127.0.0.1:3100`
+- Local Qwen3 through Ollama: `http://127.0.0.1:11434`
 
 Exercise the complete slice after the services are ready:
 

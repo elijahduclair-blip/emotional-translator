@@ -143,6 +143,54 @@ test('language loop returns English through UEB and exact machine cells', async 
   assert.ok(['approved_graph', 'unresolved'].includes(body.meaning.approvedGraph.sourceLayer));
 });
 
+test('training dataset route creates bounded verified chat records without training the model', async () => {
+  const response = await fetch(`${API_ROOT}/api/v1/foundation/training/dataset`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ inputs: ['CAT', 'BAT'] })
+  });
+  const body = await response.json();
+  assert.equal(response.status, 200);
+  assert.equal(body.engine, 'mirror_training_dataset_generator');
+  assert.equal(body.sourceCount, 2);
+  assert.equal(body.recordCount, 8);
+  assert.equal(body.tokenVocabulary.length, 64);
+  assert.equal(body.validation.valid, true);
+  assert.equal(body.records.every(record => record.metadata.verified === true), true);
+  assert.equal(body.boundary.modelWeightsChanged, false);
+  assert.equal(body.boundary.semanticMutationAllowed, false);
+
+  const oversized = await fetch(`${API_ROOT}/api/v1/foundation/training/dataset`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ inputs: Array.from({ length: 13 }, (_, index) => `sample ${index}`) })
+  });
+  assert.equal(oversized.status, 413);
+});
+
+test('color-atlas training route converts PDF rows with compact source provenance', async () => {
+  const response = await fetch(`${API_ROOT}/api/v1/foundation/training/color-atlas`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ offset: 15, limit: 2 })
+  });
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.engine, 'mirror_color_atlas_training_converter');
+  assert.equal(body.sourceRecordCount, 95);
+  assert.equal(body.selection.returned, 2);
+  assert.equal(body.recordCount, 8);
+  assert.equal(body.validation.valid, true);
+  assert.equal(body.records[0].metadata.sourceRef.document, 'ChromaBridge Export example.pdf');
+  assert.equal(body.records[0].metadata.sourceRef.page, 1);
+  assert.equal(body.records[0].metadata.sourceRef.row, 16);
+  assert.equal(body.boundary.canonicalAnchorMutationAllowed, false);
+  assert.equal(body.boundary.semanticMutationAllowed, false);
+  assert.equal(body.boundary.graphMutationAllowed, false);
+  assert.equal(body.boundary.modelWeightsChanged, false);
+});
+
 test.after(() => {
   server?.kill();
 });

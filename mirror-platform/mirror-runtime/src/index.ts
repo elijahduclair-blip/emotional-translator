@@ -1,6 +1,7 @@
 export { MirrorRuntime } from './MirrorRuntime';
 export { MirrorRuntimeService } from './services/mirror-runtime.service';
 export { CodexClient, type SavedEvaluation } from './clients/CodexClient';
+export { LocalModelClient, type LocalModelResponse, type LocalModelStatus } from './clients/LocalModelClient';
 export * from './types';
 export { Constitution } from './subsystems/Constitution';
 export { ConversationEngine } from './subsystems/ConversationEngine';

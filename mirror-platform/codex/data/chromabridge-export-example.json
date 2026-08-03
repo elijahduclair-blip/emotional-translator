@@ -1,0 +1,31 @@
+{
+  "kind": "chromabridge_color_atlas_training_source",
+  "version": "1.0.0",
+  "source": {
+    "document": "ChromaBridge Export example.pdf",
+    "title": "ChromaBridge Export 2026-07-14 22:09",
+    "sha256": "886f00fc15bbe68a2994278d18a4117aa0faf545e88d389869feb60922839d76",
+    "pageCount": 4,
+    "reviewedPages": [1, 2, 3, 4],
+    "extractionMethod": "pdf_table_with_visual_repairs",
+    "repairedRows": [
+      { "page": 1, "row": 21, "reason": "Bridge name overflowed into the Hex column." },
+      { "page": 1, "row": 22, "reason": "Bridge name overflowed into the Hex column." },
+      { "page": 1, "row": 25, "reason": "Bridge name overflowed into the Hex column." }
+    ]
+  },
+  "recordCount": 95,
+  "pageFiles": [
+    "chromabridge-export-example/page-1.json",
+    "chromabridge-export-example/page-2.json",
+    "chromabridge-export-example/page-3.json",
+    "chromabridge-export-example/page-4.json"
+  ],
+  "boundary": {
+    "mode": "imported_reference_knowledge",
+    "canonicalAnchorMutationAllowed": false,
+    "semanticMutationAllowed": false,
+    "graphMutationAllowed": false,
+    "reason": "The PDF source records colors and coordinates. Its base tier does not redefine the approved nine-anchor compass."
+  }
+}

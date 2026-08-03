@@ -4,6 +4,8 @@ import { analyzeFoundationText } from '../lib/foundation-analysis.js';
 import { compileBrailleRuntimeInstruction } from '../lib/braille-runtime-language.js';
 import { assembleBrailleRuntimeModule } from '../lib/braille-runtime-module.js';
 import { runStructuralLanguageLoop } from '../lib/language-loop.js';
+import { buildVerifiedTrainingDataset, normalizeTrainingInputs } from '../lib/training-dataset.js';
+import { buildColorAtlasTrainingDataset } from '../lib/color-atlas-training-dataset.js';
 import {
   LETTER_ACCOUNTABILITY_VERSION,
   analyzeLetterAccountability,
@@ -85,6 +87,31 @@ router.post('/foundation/language-loop', async (req, res, next) => {
         wordNet: loop.lexicalEvidence
       }
     });
+  } catch (error) { next(error); }
+});
+
+router.post('/foundation/training/dataset', async (req, res, next) => {
+  try {
+    const inputs = normalizeTrainingInputs(req.body?.inputs);
+    const samples = [];
+    for (const text of inputs) {
+      const loop = runStructuralLanguageLoop(text);
+      const approvedGraph = await readApprovedMeaning(loop.terms);
+      samples.push({
+        loop,
+        meaning: { approvedGraph, wordNet: loop.lexicalEvidence }
+      });
+    }
+    res.json(buildVerifiedTrainingDataset(samples));
+  } catch (error) { next(error); }
+});
+
+router.post('/foundation/training/color-atlas', (req, res, next) => {
+  try {
+    res.json(buildColorAtlasTrainingDataset({
+      offset: req.body?.offset,
+      limit: req.body?.limit
+    }));
   } catch (error) { next(error); }
 });
 

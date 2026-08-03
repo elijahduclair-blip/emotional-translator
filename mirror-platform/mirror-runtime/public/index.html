@@ -139,10 +139,11 @@
     .room-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
     .room-link:nth-of-type(1) .room-dot { background: var(--peach); }
     .room-link:nth-of-type(2) .room-dot { background: var(--blue); }
-    .room-link:nth-of-type(3) .room-dot { background: var(--green); }
-    .room-link:nth-of-type(4) .room-dot { background: var(--gold); }
-    .room-link:nth-of-type(5) .room-dot { background: #a7adb4; }
-    .room-link:nth-of-type(6) .room-dot { background: #b88a6a; }
+    .room-link:nth-of-type(3) .room-dot { background: #b88a6a; }
+    .room-link:nth-of-type(4) .room-dot { background: var(--green); }
+    .room-link:nth-of-type(5) .room-dot { background: var(--gold); }
+    .room-link:nth-of-type(6) .room-dot { background: #a7adb4; }
+    .room-link:nth-of-type(7) .room-dot { background: #b88a6a; }
     main { min-width: 0; padding: 42px 28px 64px; }
     .eyebrow {
       margin: 0 0 12px;
@@ -335,6 +336,7 @@
     .signature { border: 1px solid var(--line); border-radius: 11px; overflow: hidden; }
     .signature summary { cursor: pointer; padding: 10px 12px; font-weight: 650; }
     .signature-body { padding: 0 12px 12px; }
+    .signature-body pre { white-space: pre-wrap; overflow-wrap: anywhere; font-size: .75rem; }
     .letter-record { display: grid; grid-template-columns: minmax(92px, .45fr) minmax(0, 1fr); gap: 10px; padding: 10px 0; border-top: 1px solid var(--line); }
     .letter-identity strong { display: block; font-size: 1.2rem; }
     .structural-cell-row { display: flex; flex-wrap: wrap; gap: 6px; }
@@ -382,7 +384,7 @@
     .flow {
       grid-column: 1 / -1;
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: repeat(6, minmax(0, 1fr));
       gap: 8px;
       margin-top: 2px;
       padding-top: 16px;
@@ -448,6 +450,7 @@
         <span id="runtimeService" class="service"><span class="service-dot"></span><span>Mirror Runtime</span></span>
         <span id="chromaService" class="service"><span class="service-dot"></span><span>ChromaBridge</span></span>
         <span id="codexService" class="service"><span class="service-dot"></span><span>Codex</span></span>
+        <span id="localModelService" class="service"><span class="service-dot"></span><span>Local Qwen3</span></span>
       </div>
     </header>
 
@@ -456,6 +459,7 @@
         <p class="nav-label">Rooms</p>
         <a class="room-link" href="#translate"><span class="room-dot"></span>Translate</a>
         <a class="room-link" href="#atlas"><span class="room-dot"></span>Color Atlas</a>
+        <a class="room-link" href="#localAi"><span class="room-dot"></span>Local AI</a>
         <a class="room-link" href="#moduleGovernance"><span class="room-dot"></span>Governance</a>
         <a class="room-link" href="#memory"><span class="room-dot"></span>Memory</a>
         <a class="room-link" href="#braille"><span class="room-dot"></span>Braille Math</a>
@@ -525,9 +529,24 @@
           <section class="flow" aria-label="Data movement through the platform">
             <div class="flow-step"><strong>Language</strong>Person</div>
             <div class="flow-step"><strong>Reasoning</strong>Mirror Runtime</div>
+            <div class="flow-step"><strong>Local model</strong>Qwen3</div>
             <div class="flow-step"><strong>Boundary</strong>ChromaBridge</div>
             <div class="flow-step"><strong>Placement</strong>Codex Atlas</div>
             <div class="flow-step"><strong>Record</strong>Memory</div>
+          </section>
+
+          <section id="localAi" class="zone foundation-room">
+            <div class="zone-label"><span class="zone-number">L</span>Your local AI / Qwen3 reasoning</div>
+            <p class="intro">Your English passes through the reversible Braille and number trace, receives bounded graph and WordNet evidence, and is then reasoned over by Qwen3 running on this computer.</p>
+            <div class="foundation-panel runtime-language-panel">
+              <form id="localAiForm">
+                <label class="field"><span>Talk to your local AI</span><textarea id="localAiInput" rows="4" maxlength="2000">What climate is moving through reflection?</textarea></label>
+                <button id="localAiButton" type="submit">Ask local Qwen3</button>
+              </form>
+              <div id="localAiStatus" class="braille-status" role="status" aria-live="polite">Ready to reason locally.</div>
+              <div id="localAiOutput"></div>
+              <div class="boundary"><strong>Local reasoning boundary</strong><br>Qwen3 can interpret and respond, but it cannot directly rewrite source code, graph meaning, or memory.</div>
+            </div>
           </section>
 
           <section id="moduleGovernance" class="zone foundation-room">
@@ -609,6 +628,23 @@
                 <div id="languageLoopStatus" class="braille-status" role="status" aria-live="polite">Ready to trace the complete reversible loop.</div>
                 <div id="languageLoopOutput"></div>
               </div>
+              <div class="foundation-panel runtime-language-panel">
+                <h3>Verified training dataset</h3>
+                <p class="hint">Each line becomes four deterministic chat lessons: English to structure, structure to English, ordered Foundation analysis, and exact relational grounding.</p>
+                <form id="trainingDatasetForm">
+                  <label class="field"><span>Verified English source phrases, one per line</span><textarea id="trainingDatasetInput" rows="5" maxlength="10000">CAT
+BAT
+Gold memory moves through reflection.</textarea></label>
+                  <div class="braille-actions">
+                    <button id="trainingDatasetGenerate" type="submit">Generate verified records</button>
+                    <button id="colorAtlasDatasetGenerate" type="button">Convert current color atlas</button>
+                    <button id="trainingDatasetDownload" type="button" disabled>Download JSONL</button>
+                  </div>
+                </form>
+                <div id="trainingDatasetStatus" class="braille-status" role="status" aria-live="polite">No training records generated yet.</div>
+                <div id="trainingDatasetOutput"></div>
+                <div class="boundary"><strong>Dataset-only boundary</strong><br>Generation validates examples but does not train Qwen, change model weights, or rewrite graph meaning.</div>
+              </div>
               <div class="foundation-panel">
                 <h3>Account for a passage</h3>
                 <form id="foundationForm">
@@ -675,12 +711,14 @@
     let activeLessonId = 'cells-and-numbers';
     let selectedDots = new Set();
     let currentAccount = null;
+    let currentTrainingDataset = null;
     const moduleActivationTokens = new Map();
     const chordKeys = { s: 3, d: 2, f: 1, j: 4, k: 5, l: 6 };
     const heldChord = new Set();
 
     checkRuntime();
     loadBrailleRoom();
+    bindLocalAiRoom();
     bindFoundationRoom();
 
     form.addEventListener('submit', async event => {
@@ -724,9 +762,55 @@
         if (!response.ok) throw new Error('Runtime unavailable');
         const body = await response.json();
         setServiceState('runtimeService', body.status === 'ready' ? 'ready' : 'fallback');
+        setServiceState('localModelService', body.localModel?.status === 'ready' ? 'ready' : body.localModel?.status === 'disabled' ? 'fallback' : 'error');
       } catch {
         setServiceState('runtimeService', 'error');
+        setServiceState('localModelService', 'error');
       }
+    }
+
+    function bindLocalAiRoom() {
+      document.querySelector('#localAiForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        const button = document.querySelector('#localAiButton');
+        button.disabled = true;
+        setText('localAiStatus', 'Tracing English through Braille and numbers, then asking local Qwen3…');
+        try {
+          const body = await mirrorFetch('/local-ai/respond', { input: document.querySelector('#localAiInput').value });
+          renderLocalAi(body);
+          setText('localAiStatus', `${body.model.name} responded locally in English.`);
+          setServiceState('localModelService', 'ready');
+          setServiceState('runtimeService', 'ready');
+          setServiceState('chromaService', 'ready');
+          setServiceState('codexService', 'ready');
+        } catch (error) {
+          setText('localAiStatus', error.message);
+          setServiceState('localModelService', 'error');
+        } finally {
+          button.disabled = false;
+        }
+      });
+    }
+
+    function renderLocalAi(body) {
+      const trace = body.trace || {};
+      const seconds = typeof body.timings?.totalDurationNanoseconds === 'number'
+        ? (body.timings.totalDurationNanoseconds / 1e9).toFixed(2)
+        : 'unreported';
+      document.querySelector('#localAiOutput').innerHTML = `
+        <div class="foundation-panel">
+          <h3>English response</h3>
+          <p>${escapeHtml(body.response?.text)}</p>
+          <dl class="evidence-list">
+            <div class="evidence-line"><dt>Model</dt><dd>${escapeHtml(body.model?.name)} · local</dd></div>
+            <div class="evidence-line"><dt>Braille cells</dt><dd>${trace.cellCount || 0}</dd></div>
+            <div class="evidence-line"><dt>English round trip</dt><dd>${trace.roundTripExact ? 'exact' : 'different'}</dd></div>
+            <div class="evidence-line"><dt>Graph source</dt><dd>${escapeHtml(trace.graphSource)}</dd></div>
+            <div class="evidence-line"><dt>Duration</dt><dd>${seconds} seconds</dd></div>
+          </dl>
+          <p class="hint">Braille trace</p><div class="runtime-braille" lang="en-brai">${escapeHtml(trace.braille)}</div>
+          <p class="hint">Ordered machine numbers</p><div class="mask-sequence" aria-label="Ordered local-AI signal numbers">${(trace.numericSequence || []).map((mask, index) => `<span class="mask-cell" aria-label="Cell ${index + 1}; number ${mask}"><strong>${mask}</strong></span>`).join('')}</div>
+        </div>`;
     }
 
     async function loadBrailleRoom() {
@@ -918,6 +1002,47 @@
     }
 
     function bindFoundationRoom() {
+      document.querySelector('#trainingDatasetForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        const inputs = document.querySelector('#trainingDatasetInput').value.split(/\r?\n/u).map(value => value.trim()).filter(Boolean);
+        setText('trainingDatasetStatus', 'Generating and validating deterministic training records…');
+        document.querySelector('#trainingDatasetGenerate').disabled = true;
+        try {
+          currentTrainingDataset = await mirrorFetch('/foundation/training/dataset', { inputs });
+          renderTrainingDataset(currentTrainingDataset);
+          document.querySelector('#trainingDatasetDownload').disabled = false;
+          setText('trainingDatasetStatus', `${currentTrainingDataset.recordCount} verified records generated from ${currentTrainingDataset.sourceCount} source phrases.`);
+          setServiceState('codexService', 'ready');
+        } catch (error) {
+          currentTrainingDataset = null;
+          document.querySelector('#trainingDatasetDownload').disabled = true;
+          setText('trainingDatasetStatus', error.message);
+          setServiceState('codexService', 'error');
+        } finally {
+          document.querySelector('#trainingDatasetGenerate').disabled = false;
+        }
+      });
+      document.querySelector('#colorAtlasDatasetGenerate').addEventListener('click', async () => {
+        setText('trainingDatasetStatus', 'Converting and validating all 95 PDF color-atlas rows…');
+        document.querySelector('#colorAtlasDatasetGenerate').disabled = true;
+        document.querySelector('#trainingDatasetGenerate').disabled = true;
+        try {
+          currentTrainingDataset = await mirrorFetch('/foundation/training/color-atlas', {});
+          renderTrainingDataset(currentTrainingDataset);
+          document.querySelector('#trainingDatasetDownload').disabled = false;
+          setText('trainingDatasetStatus', `${currentTrainingDataset.recordCount} verified records generated from ${currentTrainingDataset.selection.returned} PDF rows.`);
+          setServiceState('codexService', 'ready');
+        } catch (error) {
+          currentTrainingDataset = null;
+          document.querySelector('#trainingDatasetDownload').disabled = true;
+          setText('trainingDatasetStatus', error.message);
+          setServiceState('codexService', 'error');
+        } finally {
+          document.querySelector('#colorAtlasDatasetGenerate').disabled = false;
+          document.querySelector('#trainingDatasetGenerate').disabled = false;
+        }
+      });
+      document.querySelector('#trainingDatasetDownload').addEventListener('click', downloadTrainingDataset);
       document.querySelector('#languageLoopForm').addEventListener('submit', async event => {
         event.preventDefault();
         setText('languageLoopStatus', 'Encoding English, processing exact cells and relationships, then decoding…');
@@ -988,6 +1113,48 @@
       });
       document.querySelector('#brailleRuntimeSubmit').addEventListener('click', submitBrailleRuntimeModule);
       document.querySelector('#refreshModuleQueue').addEventListener('click', loadModuleQueue);
+    }
+
+    function renderTrainingDataset(body) {
+      const taskCounts = body.records.reduce((counts, record) => {
+        const task = record.metadata.task;
+        counts[task] = (counts[task] || 0) + 1;
+        return counts;
+      }, {});
+      const firstRecord = body.records[0];
+      const sourceCount = body.sourceCount ?? body.selection?.returned ?? 0;
+      const sourceDescription = body.source?.document
+        ? `${body.source.document} · ${body.source.pageCount} pages · SHA-256 ${body.source.sha256}`
+        : `${sourceCount} entered English phrases`;
+      const tiers = body.tierCounts
+        ? Object.entries(body.tierCounts).map(([tier, count]) => `${tier} ${count}`).join('; ')
+        : 'not applicable';
+      document.querySelector('#trainingDatasetOutput').innerHTML = `
+        <dl class="evidence-list">
+          <div class="evidence-line"><dt>Validation</dt><dd>${body.validation.valid ? 'all records exact' : 'failed'}</dd></div>
+          <div class="evidence-line"><dt>Sources</dt><dd>${sourceCount}</dd></div>
+          <div class="evidence-line"><dt>Records</dt><dd>${body.recordCount}</dd></div>
+          <div class="evidence-line"><dt>Source</dt><dd>${escapeHtml(sourceDescription)}</dd></div>
+          <div class="evidence-line"><dt>Source tiers</dt><dd>${escapeHtml(tiers)}</dd></div>
+          <div class="evidence-line"><dt>Six-dot vocabulary</dt><dd>${body.tokenVocabulary.length} tokens</dd></div>
+          <div class="evidence-line"><dt>JSONL size</dt><dd>${body.jsonlBytes} bytes</dd></div>
+          <div class="evidence-line"><dt>Tasks</dt><dd>${escapeHtml(Object.entries(taskCounts).map(([task, count]) => `${task} × ${count}`).join('; '))}</dd></div>
+        </dl>
+        <p class="hint">Vocabulary: ${escapeHtml(body.tokenVocabulary[0].token)} = ${escapeHtml(body.tokenVocabulary[0].bits)} through ${escapeHtml(body.tokenVocabulary[63].token)} = ${escapeHtml(body.tokenVocabulary[63].bits)}</p>
+        <details class="signature"><summary>Preview first verified JSONL record</summary><div class="signature-body"><pre>${escapeHtml(JSON.stringify(firstRecord, null, 2))}</pre></div></details>`;
+    }
+
+    function downloadTrainingDataset() {
+      if (!currentTrainingDataset) return;
+      const jsonl = currentTrainingDataset.records.map(record => JSON.stringify(record)).join('\n');
+      const url = URL.createObjectURL(new Blob([jsonl], { type: 'application/x-ndjson' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = currentTrainingDataset.engine === 'mirror_color_atlas_training_converter'
+        ? `chromabridge-color-atlas-training-${currentTrainingDataset.version}.jsonl`
+        : `mirror-training-${currentTrainingDataset.version}.jsonl`;
+      link.click();
+      URL.revokeObjectURL(url);
     }
 
     function renderLanguageLoop(body) {
