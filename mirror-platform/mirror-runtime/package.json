@@ -1,0 +1,36 @@
+{
+  "name": "mirror-runtime-service",
+  "version": "1.0.0",
+  "description": "Mirror Runtime Service - Constitutional AI Host",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/main.js",
+    "dev": "npx ts-node src/main.ts",
+    "dev:quickstart": "npx ts-node src/examples/quickstart.ts",
+    "test": "npx vitest",
+    "test:watch": "npx vitest --watch",
+    "test:coverage": "npx vitest --coverage",
+    "clean": "rmdir /s /q dist"
+  },
+  "keywords": [
+    "mirror",
+    "runtime",
+    "constitutional-ai",
+    "persona",
+    "semantic"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@vitest/coverage-v8": "^0.34.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.0.0",
+    "vitest": "^0.34.0"
+  },
+  "dependencies": {
+    "@mirror-platform/chromabridge-sdk": "workspace:*"
+  }
+}

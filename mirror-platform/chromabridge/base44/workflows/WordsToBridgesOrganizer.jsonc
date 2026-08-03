@@ -1,0 +1,66 @@
+{
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "*/5 * * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "words_to_bridges_organizer",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "connect_words": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "connectWordsToConcepts",
+            "args": {
+              "batch_start": 0,
+              "batch_size": 8
+            }
+          },
+          "then": "check_done",
+          "x-base44": {
+            "title": "Connect words to bridges",
+            "description": "Link word-tier nodes to closest bridges"
+          }
+        }
+      },
+      {
+        "check_done": {
+          "switch": [
+            {
+              "when": "${ .connect_words.done == true }",
+              "then": "end"
+            },
+            {
+              "when": "${ true }",
+              "then": "end"
+            }
+          ],
+          "x-base44": {
+            "title": "Check if done",
+            "description": "Stop if all words connected"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Every 5 minutes, the Librarian connects word-tier nodes to their closest bridge concepts via WordNet semantic matching.",
+  "name": "Words to Bridges Organizer"
+}

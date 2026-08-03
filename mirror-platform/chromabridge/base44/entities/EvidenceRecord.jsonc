@@ -1,0 +1,84 @@
+{
+  "name": "EvidenceRecord",
+  "type": "object",
+  "title": "Evidence Record",
+  "properties": {
+    "source_type": {
+      "type": "string",
+      "title": "Source Type",
+      "description": "How the observation was captured",
+      "enum": [
+        "direct_statement",
+        "reported_behavior",
+        "observed_behavior",
+        "explicit_correction",
+        "external_record"
+      ],
+      "default": "direct_statement"
+    },
+    "content": {
+      "type": "string",
+      "title": "Content",
+      "description": "The raw text of what was observed"
+    },
+    "observed_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Observed At",
+      "description": "When the observation occurred"
+    },
+    "context_ids": {
+      "type": "array",
+      "title": "Context IDs",
+      "description": "Conversation or session IDs where this was observed",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "reliability": {
+      "type": "number",
+      "title": "Reliability",
+      "description": "How reliable is the source of this evidence (0.0 to 1.0)",
+      "default": 0.8
+    },
+    "interpretation_confidence": {
+      "type": "number",
+      "title": "Interpretation Confidence",
+      "description": "How confident the system is that it understood the observation correctly (0.0 to 1.0)",
+      "default": 0.8
+    },
+    "temporality": {
+      "type": "string",
+      "title": "Temporality",
+      "description": "Whether this observation is momentary, situational, recurring, or unknown",
+      "enum": [
+        "momentary",
+        "situational",
+        "recurring",
+        "unknown"
+      ],
+      "default": "unknown"
+    },
+    "provenance_conversation_id": {
+      "type": "string",
+      "title": "Provenance Conversation ID",
+      "description": "The conversation this evidence originated from"
+    },
+    "provenance_message_id": {
+      "type": "string",
+      "title": "Provenance Message ID",
+      "description": "The specific message this evidence originated from"
+    },
+    "raw_payload": {
+      "type": "string",
+      "title": "Raw Payload",
+      "description": "Optional JSON string of the full original message/context for forensic inspection"
+    }
+  },
+  "required": [
+    "content",
+    "source_type",
+    "observed_at"
+  ]
+}

@@ -1,0 +1,193 @@
+{
+  "name": "PersonalNode",
+  "type": "object",
+  "title": "Personal Node",
+  "description": "A node in the persona's personal library \u2014 the user's own Active Memory. Distinct from the global ColorNode substrate maintained by the Librarian. Each PersonalNode belongs to a single UserProfile (the persona it serves) and is owned by the user who created it. Personal libraries are per-user: a user sees only their own PersonalNodes. The persona (PersonaAgent) owns this library \u2014 it creates personal bridges, shades, and trait bridges here, optionally derived from global ColorNodes via source_global_node_id. The Librarian never writes here; it maintains only the global substrate.",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Name"
+    },
+    "hex": {
+      "type": "string",
+      "title": "Hex Color",
+      "default": "#888888"
+    },
+    "x": {
+      "type": "number",
+      "title": "Abstract\u2013Concrete",
+      "description": "Abstract (-255) to Concrete (255)",
+      "default": 0
+    },
+    "y": {
+      "type": "number",
+      "title": "General\u2013Specific",
+      "description": "General (0) to Specific (255)",
+      "default": 0
+    },
+    "z": {
+      "type": "number",
+      "title": "Passive\u2013Active",
+      "description": "Passive (-255) to Active (255)",
+      "default": 0
+    },
+    "parents": {
+      "type": "array",
+      "title": "Hierarchy (Parents)",
+      "description": "Names of parent nodes \u2014 may reference global ColorNode names or other PersonalNode names",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "synonyms": {
+      "type": "array",
+      "title": "Synonyms",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "opposites": {
+      "type": "array",
+      "title": "Opposites",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "tier": {
+      "type": "string",
+      "title": "Tier",
+      "enum": [
+        "persona",
+        "base",
+        "bridge",
+        "shade",
+        "words"
+      ],
+      "default": "shade"
+    },
+    "bridge_transition": {
+      "type": "string",
+      "title": "Bridge Transition",
+      "enum": [
+        "persona-base",
+        "base-shade",
+        "shade-words"
+      ]
+    },
+    "semantic_labels": {
+      "type": "array",
+      "title": "Semantic Labels",
+      "description": "Persona trait strings and descriptors applied to this personal node",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "profile_id": {
+      "type": "string",
+      "title": "Profile ID",
+      "description": "The UserProfile (persona) this personal node belongs to"
+    },
+    "source_global_node_id": {
+      "type": "string",
+      "title": "Source Global Node ID",
+      "description": "If this personal node was derived from or references a node in the global ColorNode substrate, the ID of that global node"
+    },
+    "is_trait": {
+      "type": "boolean",
+      "title": "Is Trait Bridge",
+      "description": "True if this personal node is a trait bridge promoted from the persona's semantic_labels",
+      "default": false
+    },
+    "favorite": {
+      "type": "boolean",
+      "title": "Favorite",
+      "default": false
+    },
+    "memory_status": {
+      "type": "string",
+      "title": "Memory Status",
+      "enum": [
+        "active",
+        "archived"
+      ],
+      "default": "active"
+    },
+    "last_accessed_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Last Accessed At"
+    },
+    "access_count": {
+      "type": "number",
+      "title": "Access Count",
+      "default": 0
+    },
+    "insight": {
+      "type": "string",
+      "title": "Insight",
+      "description": "Provenance \u2014 why the persona created or promoted this personal node (the conversation theme, recurring pattern, or evidence that brought it forward)"
+    }
+  },
+  "required": [
+    "name",
+    "hex",
+    "x",
+    "y",
+    "z",
+    "profile_id"
+  ],
+  "rls": {
+    "read": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "create": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "created_by_id": "{{user.id}}"
+        },
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        }
+      ]
+    }
+  }
+}

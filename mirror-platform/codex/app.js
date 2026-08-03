@@ -491,22 +491,14 @@ async function init() {
 }
 
 async function loadTranslatorDataset() {
-  const atlasResponse = await fetch('data/color-synonyms.json', { cache: 'no-store' });
+  const [atlasResponse, historyResponse] = await Promise.all([
+    fetch('data/color-synonyms.json'),
+    fetch('data/history-index.json')
+  ]);
   if (!atlasResponse.ok) throw new Error(`Dataset request failed: ${atlasResponse.status}`);
+  if (!historyResponse.ok) throw new Error(`History index request failed: ${historyResponse.status}`);
   const localData = await atlasResponse.json();
-
-  try {
-    const historyResponse = await fetch('data/history-index.json', { cache: 'no-store' });
-    if (historyResponse.ok) {
-      localData.historyIndex = await historyResponse.json();
-    } else {
-      console.warn(`Optional history index request failed: ${historyResponse.status}`);
-      localData.historyIndex = { eras: [], entries: [] };
-    }
-  } catch (historyError) {
-    console.warn('Optional history index failed to load.', historyError);
-    localData.historyIndex = { eras: [], entries: [] };
-  }
+  localData.historyIndex = await historyResponse.json();
 
   try {
     const apiGraph = await fetchJsonWithTimeout(`${API_BASE_URL}/v1/graph`, API_TIMEOUT_MS);
@@ -4499,21 +4491,10 @@ async function governanceRequest(url, method, body, successText, reloadGraph = f
 }
 
 async function reloadDatabaseGraph() {
+  const apiGraph = await fetchJsonWithTimeout(`${API_BASE_URL}/v1/graph`, 5000);
   const localResponse = await fetch('data/color-synonyms.json', { cache: 'no-store' });
   const localData = await localResponse.json();
-  let apiGraph = { nodes: [], edges: [] };
-  let apiGraphCount = 0;
-
-  try {
-    apiGraph = await fetchJsonWithTimeout(`${API_BASE_URL}/v1/graph`, 5000);
-    apiGraphCount = apiGraph.nodes?.length || 0;
-    localData.graph = mergeApiGraph(localData.graph, apiGraph);
-    state.dataSource.label = `Database connected · ${apiGraphCount} nodes`;
-  } catch (error) {
-    console.warn('Database graph unavailable; using local dataset.', error);
-    state.dataSource.label = `Local dataset · ${localData.graph?.nodes?.length || 0} nodes`;
-  }
-
+  localData.graph = mergeApiGraph(localData.graph, apiGraph);
   applyEnvironmentConditionGraph(localData.graph);
   normalizeGraphNodeMetadata(localData.graph);
   state.data = localData;
@@ -4521,7 +4502,8 @@ async function reloadDatabaseGraph() {
   state.baseEdges = localData.graph.edges;
   rebuildActiveGraph();
   state.dataSource.databaseNodeIds = new Set((apiGraph.nodes || []).map(node => node.id));
-  state.dataSource.apiGraphCount = apiGraphCount;
+  state.dataSource.apiGraphCount = apiGraph.nodes?.length || 0;
+  state.dataSource.label = `Database connected · ${state.dataSource.apiGraphCount} nodes`;
   buildLayout();
 }
 

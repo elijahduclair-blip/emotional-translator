@@ -1,0 +1,58 @@
+{
+  "name": "MaintenanceLog",
+  "type": "object",
+  "properties": {
+    "run_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Run Timestamp",
+      "description": "When the maintenance cycle completed"
+    },
+    "trigger": {
+      "type": "string",
+      "title": "Trigger",
+      "description": "What initiated this run (scheduled, manual, etc.)",
+      "default": "scheduled"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "success",
+        "partial",
+        "failed"
+      ],
+      "default": "success"
+    },
+    "summary": {
+      "type": "string",
+      "title": "Librarian Summary",
+      "description": "The final summary text returned by the Librarian agent"
+    },
+    "conversation_id": {
+      "type": "string",
+      "title": "Conversation ID"
+    },
+    "node_count": {
+      "type": "number",
+      "title": "Node Count",
+      "description": "Total ColorNode records at time of run",
+      "default": 0
+    },
+    "edge_count": {
+      "type": "number",
+      "title": "Edge Count",
+      "description": "Total TrajectoryEdge records at time of run",
+      "default": 0
+    },
+    "rounds_completed": {
+      "type": "number",
+      "title": "Rounds Completed",
+      "default": 0
+    }
+  },
+  "required": [
+    "run_at",
+    "status"
+  ]
+}

@@ -1,0 +1,54 @@
+{
+  "name": "Concept Node Sync",
+  "description": "Automatically syncs every ColorNode create, update, and delete to a persistent Google Sheet, keeping external records always current.",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "concept_node_sync",
+      "version": "2.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "sync_node": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncConceptToSheet",
+            "args": {
+              "event_type": "${ .trigger.event_type }",
+              "entity_id": "${ .trigger.entity_id }",
+              "node": {
+                "id": "${ .trigger.entity_id }",
+                "name": "${ .trigger.data.name }",
+                "hex": "${ .trigger.data.hex }",
+                "tier": "${ .trigger.data.tier }",
+                "x": "${ .trigger.data.x }",
+                "y": "${ .trigger.data.y }",
+                "z": "${ .trigger.data.z }",
+                "parents": "${ .trigger.data.parents }",
+                "semantic_labels": "${ .trigger.data.semantic_labels }"
+              }
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Sync to Google Sheets",
+            "description": "Create, update, or delete row"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "entity",
+      "events": [
+        "create",
+        "update",
+        "delete"
+      ],
+      "entity_name": "ColorNode"
+    }
+  }
+}

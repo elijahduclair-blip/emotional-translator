@@ -1,0 +1,59 @@
+{
+  "name": "Automated Discovery Scan",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "auto_discovery_scan",
+      "version": "1.2",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_scan": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "runDiscovery",
+            "args": {}
+          },
+          "then": "sync_candidates",
+          "x-base44": {
+            "title": "Run discovery scan",
+            "description": "Scan all nodes for candidates"
+          }
+        }
+      },
+      {
+        "sync_candidates": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncDiscoveryToSheet",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Sync to Google Sheets",
+            "description": "Append new candidates to permanent log"
+          }
+        }
+      }
+    ]
+  },
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 */6 * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "description": "Runs the discovery engine every 6 hours to find new semantic relationship candidates, then appends all unsynced strong candidates to a persistent Google Sheets log."
+}

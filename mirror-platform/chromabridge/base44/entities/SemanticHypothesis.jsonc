@@ -1,0 +1,134 @@
+{
+  "name": "SemanticHypothesis",
+  "type": "object",
+  "title": "Semantic Hypothesis",
+  "properties": {
+    "proposition": {
+      "type": "string",
+      "title": "Proposition",
+      "description": "The claim this hypothesis asserts \u2014 e.g. 'The user is analytical'"
+    },
+    "category": {
+      "type": "string",
+      "title": "Category",
+      "description": "What kind of claim this is \u2014 determines the burden of evidence",
+      "enum": [
+        "identity",
+        "preference",
+        "goal",
+        "belief",
+        "habit",
+        "emotion",
+        "relationship",
+        "worldview"
+      ],
+      "default": "preference"
+    },
+    "supporting_evidence_ids": {
+      "type": "array",
+      "title": "Supporting Evidence",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "counter_evidence_ids": {
+      "type": "array",
+      "title": "Counter Evidence",
+      "description": "Evidence that contradicts or weakens this hypothesis",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "status": {
+      "type": "string",
+      "title": "Lifecycle Status",
+      "enum": [
+        "observed",
+        "interpreted",
+        "candidate",
+        "contested",
+        "supported",
+        "persistent",
+        "historical",
+        "archived"
+      ],
+      "default": "observed"
+    },
+    "interpretation_confidence": {
+      "type": "number",
+      "title": "Interpretation Confidence",
+      "description": "How confident the system understood the observation correctly (0.0 to 1.0)",
+      "default": 0.5
+    },
+    "source_reliability": {
+      "type": "number",
+      "title": "Source Reliability",
+      "description": "Aggregate reliability of the evidence sources (0.0 to 1.0)",
+      "default": 0.5
+    },
+    "cross_context_consistency": {
+      "type": "number",
+      "title": "Cross-Context Consistency",
+      "description": "How consistent across different conversations (0.0 to 1.0)",
+      "default": 0.0
+    },
+    "repetition_strength": {
+      "type": "number",
+      "title": "Repetition Strength",
+      "description": "How many times this has been independently observed (normalized 0.0 to 1.0)",
+      "default": 0.0
+    },
+    "temporal_stability": {
+      "type": "number",
+      "title": "Temporal Stability",
+      "description": "How long this has persisted over time (0.0 to 1.0)",
+      "default": 0.0
+    },
+    "contradiction_pressure": {
+      "type": "number",
+      "title": "Contradiction Pressure",
+      "description": "How much opposing evidence exists (0.0 to 1.0, higher = more contested)",
+      "default": 0.0
+    },
+    "user_confirmation_strength": {
+      "type": "number",
+      "title": "User Confirmation Strength",
+      "description": "Whether the user has explicitly confirmed this (0.0 to 1.0)",
+      "default": 0.0
+    },
+    "aggregate_confidence": {
+      "type": "number",
+      "title": "Aggregate Confidence",
+      "description": "Composite confidence score derived from the epistemic dimensions",
+      "default": 0.0
+    },
+    "promotion_policy_id": {
+      "type": "string",
+      "title": "Promotion Policy ID",
+      "description": "The epistemic policy that governs this hypothesis's promotion threshold",
+      "default": "default"
+    },
+    "persistent_concept_id": {
+      "type": "string",
+      "title": "Persistent Concept ID",
+      "description": "If promoted, the ID of the PersistentConcept this hypothesis created"
+    },
+    "profile_id": {
+      "type": "string",
+      "title": "Profile ID",
+      "description": "The UserProfile this hypothesis belongs to"
+    },
+    "last_evaluated_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Last Evaluated At"
+    }
+  },
+  "required": [
+    "proposition",
+    "category",
+    "status"
+  ]
+}

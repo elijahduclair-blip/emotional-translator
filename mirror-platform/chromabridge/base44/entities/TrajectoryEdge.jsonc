@@ -1,0 +1,59 @@
+{
+  "name": "TrajectoryEdge",
+  "type": "object",
+  "properties": {
+    "from_node_id": {
+      "type": "string",
+      "title": "From Node ID"
+    },
+    "from_node_name": {
+      "type": "string",
+      "title": "From Node Name"
+    },
+    "to_node_id": {
+      "type": "string",
+      "title": "To Node ID"
+    },
+    "to_node_name": {
+      "type": "string",
+      "title": "To Node Name"
+    },
+    "edge_type": {
+      "type": "string",
+      "title": "Edge Type",
+      "enum": [
+        "causal",
+        "temporal",
+        "conditional",
+        "transitional",
+        "developmental"
+      ],
+      "default": "causal"
+    },
+    "confidence": {
+      "type": "number",
+      "title": "Confidence",
+      "description": "0.0 to 1.0",
+      "default": 1.0
+    },
+    "condition": {
+      "type": "string",
+      "title": "Condition",
+      "description": "Optional condition expression (e.g. 'season = spring')"
+    },
+    "trajectory_id": {
+      "type": "string",
+      "title": "Trajectory ID",
+      "description": "Optional reference to a saved Trajectory entity"
+    },
+    "notes": {
+      "type": "string",
+      "title": "Notes"
+    }
+  },
+  "required": [
+    "from_node_id",
+    "to_node_id",
+    "edge_type"
+  ]
+}

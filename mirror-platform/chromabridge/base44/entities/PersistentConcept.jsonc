@@ -1,0 +1,193 @@
+{
+  "name": "PersistentConcept",
+  "type": "object",
+  "title": "Persistent Concept",
+  "description": "A concept that has earned structural influence in the Semantic Substrate. Only hypotheses that pass the Epistemic Policy create PersistentConcepts. This entity is a disposable materialized projection of the concept event stream \u2014 every semantic field is reproducible from events.",
+  "properties": {
+    "proposition": {
+      "type": "string",
+      "title": "Proposition",
+      "description": "The stable claim \u2014 e.g. 'Analytical Architect'"
+    },
+    "category": {
+      "type": "string",
+      "title": "Category",
+      "enum": [
+        "identity",
+        "preference",
+        "goal",
+        "belief",
+        "habit",
+        "emotion",
+        "relationship",
+        "worldview"
+      ],
+      "default": "preference"
+    },
+    "confidence": {
+      "type": "number",
+      "title": "Confidence",
+      "description": "Current aggregate confidence (0.0 to 1.0) \u2014 how well supported the concept currently is",
+      "default": 0.0
+    },
+    "stability": {
+      "type": "number",
+      "title": "Stability",
+      "description": "How resistant to rapid change (0.0 to 1.0) \u2014 distinct from confidence: a concept can be high-confidence low-stability when newly formed",
+      "default": 0.0
+    },
+    "salience": {
+      "type": "number",
+      "title": "Salience",
+      "description": "Persistent base salience \u2014 how relevant to current interactions (0.0 to 1.0). Context-conditioned salience is derived in the snapshot, not stored here.",
+      "default": 0.5
+    },
+    "lifecycle_status": {
+      "type": "string",
+      "title": "Lifecycle Status",
+      "description": "Canonical lifecycle position \u2014 where the concept is in its existence. Event-derived: only changed by promoted, split, merged, superseded, archived, and legacy_concept_baselined events.",
+      "enum": [
+        "emerging",
+        "active",
+        "transitioning",
+        "superseded",
+        "archived"
+      ],
+      "default": "emerging"
+    },
+    "epistemic_condition": {
+      "type": "string",
+      "title": "Epistemic Condition",
+      "description": "Derived condition \u2014 how the system currently regards the concept's support and movement. Computed by deriveEpistemicCondition from confidence trajectory, stability, active conflicts, and pending transitions. Not independently written.",
+      "enum": [
+        "stable",
+        "evolving",
+        "contested",
+        "transitioning",
+        "uncertain"
+      ],
+      "default": "uncertain"
+    },
+    "supporting_hypothesis_ids": {
+      "type": "array",
+      "title": "Supporting Hypotheses",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "active_conflict_ids": {
+      "type": "array",
+      "title": "Active Conflicts",
+      "description": "Hypothesis IDs that are currently contesting this concept",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "competing_concept_ids": {
+      "type": "array",
+      "title": "Competing Concept IDs",
+      "description": "Other PersistentConcepts that are in tension or competition with this concept",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "confidence_history": {
+      "type": "array",
+      "title": "Confidence History",
+      "description": "Derived semantic projection \u2014 trajectory of confidence samples reconstructed from confidence_adjusted events. Cached for performance; reproducible from the event stream.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "number"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cause": {
+            "type": "string"
+          },
+          "evidence_id": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "pending_transition_ids": {
+      "type": "array",
+      "title": "Pending Transition IDs",
+      "description": "IDs of transitions awaiting resolution (clarifications, splits, merges)",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "pending_transition_types": {
+      "type": "array",
+      "title": "Pending Transition Types",
+      "description": "Parallel array to pending_transition_ids \u2014 the type of each pending transition. Used by deriveEpistemicCondition to distinguish structural transitions (split/merge/supersede/archive) from clarifications.",
+      "items": {
+        "type": "string",
+        "enum": [
+          "split",
+          "merge",
+          "supersede",
+          "archive",
+          "clarify"
+        ]
+      },
+      "default": []
+    },
+    "valid_from": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Valid From",
+      "description": "When this concept became persistent"
+    },
+    "supersedes_concept_id": {
+      "type": "string",
+      "title": "Supersedes Concept ID",
+      "description": "If this replaced an older concept, the ID of the deprecated one"
+    },
+    "profile_id": {
+      "type": "string",
+      "title": "Profile ID",
+      "description": "The UserProfile this concept belongs to"
+    },
+    "color_node_id": {
+      "type": "string",
+      "title": "Color Node ID",
+      "description": "If linked to the semantic graph, the ColorNode this concept represents"
+    },
+    "superseded_by_concept_id": {
+      "type": "string",
+      "title": "Superseded By Concept ID",
+      "description": "If this concept was replaced by a newer one, the ID of the replacement"
+    },
+    "supersedes_concept_ids": {
+      "type": "array",
+      "title": "Supersedes Concept IDs",
+      "description": "Concepts that this concept has replaced",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "last_stream_version": {
+      "type": "number",
+      "title": "Last Stream Version",
+      "description": "Operational metadata \u2014 the stream version of the last event applied to this projection. Enables optimistic concurrency. Not a semantic field.",
+      "default": 0
+    }
+  },
+  "required": [
+    "proposition",
+    "category",
+    "lifecycle_status"
+  ]
+}

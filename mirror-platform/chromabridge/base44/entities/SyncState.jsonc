@@ -1,0 +1,27 @@
+{
+  "name": "SyncState",
+  "type": "object",
+  "properties": {
+    "sheet_id": {
+      "type": "string",
+      "title": "Google Sheet ID"
+    },
+    "sheet_url": {
+      "type": "string",
+      "title": "Google Sheet URL"
+    },
+    "purpose": {
+      "type": "string",
+      "title": "Purpose",
+      "enum": [
+        "concept_log",
+        "discovery_log"
+      ],
+      "default": "concept_log"
+    }
+  },
+  "required": [
+    "sheet_id",
+    "purpose"
+  ]
+}

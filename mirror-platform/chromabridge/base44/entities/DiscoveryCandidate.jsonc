@@ -1,0 +1,117 @@
+{
+  "name": "DiscoveryCandidate",
+  "type": "object",
+  "properties": {
+    "node_a_id": {
+      "type": "string",
+      "title": "Node A ID"
+    },
+    "node_a_name": {
+      "type": "string",
+      "title": "Node A Name"
+    },
+    "node_a_hex": {
+      "type": "string",
+      "title": "Node A Color"
+    },
+    "node_b_id": {
+      "type": "string",
+      "title": "Node B ID"
+    },
+    "node_b_name": {
+      "type": "string",
+      "title": "Node B Name"
+    },
+    "node_b_hex": {
+      "type": "string",
+      "title": "Node B Color"
+    },
+    "distance": {
+      "type": "number",
+      "title": "Distance"
+    },
+    "shared_neighbors": {
+      "type": "number",
+      "title": "Shared Neighbors"
+    },
+    "local_density": {
+      "type": "number",
+      "title": "Local Density"
+    },
+    "score": {
+      "type": "number",
+      "title": "Score"
+    },
+    "type": {
+      "type": "string",
+      "title": "Candidate Type",
+      "enum": [
+        "bridge",
+        "new_node",
+        "territory_mismatch",
+        "dense_pocket"
+      ],
+      "default": "bridge"
+    },
+    "status": {
+      "type": "string",
+      "title": "Status",
+      "enum": [
+        "pending",
+        "accepted",
+        "dismissed"
+      ],
+      "default": "pending"
+    },
+    "synced": {
+      "type": "boolean",
+      "title": "Synced to Sheets",
+      "default": false
+    },
+    "insight": {
+      "type": "string",
+      "title": "Insight",
+      "description": "Human-readable discovery question"
+    },
+    "cluster_centroid_x": {
+      "type": "number",
+      "title": "Cluster Centroid X"
+    },
+    "cluster_centroid_y": {
+      "type": "number",
+      "title": "Cluster Centroid Y"
+    },
+    "cluster_centroid_z": {
+      "type": "number",
+      "title": "Cluster Centroid Z"
+    },
+    "cluster_radius": {
+      "type": "number",
+      "title": "Cluster Radius"
+    },
+    "cluster_density": {
+      "type": "number",
+      "title": "Cluster Density"
+    },
+    "cluster_variance": {
+      "type": "number",
+      "title": "Cluster Variance"
+    },
+    "cluster_overlap_pct": {
+      "type": "number",
+      "title": "Cluster Overlap %"
+    },
+    "nearest_territory_distance": {
+      "type": "number",
+      "title": "Nearest Territory Distance"
+    },
+    "cluster_blend_hex": {
+      "type": "string",
+      "title": "Cluster Blend Color"
+    }
+  },
+  "required": [
+    "score",
+    "type"
+  ]
+}

@@ -1,0 +1,220 @@
+{
+  "name": "ColorNode",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Name"
+    },
+    "hex": {
+      "type": "string",
+      "title": "Hex Color",
+      "default": "#888888"
+    },
+    "x": {
+      "type": "number",
+      "title": "Abstract\u2013Concrete",
+      "description": "Abstract (-255) to Concrete (255)",
+      "default": 0
+    },
+    "y": {
+      "type": "number",
+      "title": "General\u2013Specific",
+      "description": "General (0) to Specific (255)",
+      "default": 0
+    },
+    "z": {
+      "type": "number",
+      "title": "Passive\u2013Active",
+      "description": "Passive (-255) to Active (255)",
+      "default": 0
+    },
+    "parents": {
+      "type": "array",
+      "title": "Hierarchy (Parents)",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "synonyms": {
+      "type": "array",
+      "title": "Synonyms",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "opposites": {
+      "type": "array",
+      "title": "Opposites",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "tier": {
+      "type": "string",
+      "title": "Tier",
+      "enum": [
+        "persona",
+        "base",
+        "bridge",
+        "shade",
+        "words"
+      ],
+      "default": "shade"
+    },
+    "semantic_labels": {
+      "type": "array",
+      "title": "Semantic Labels",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "parent_anchor_id": {
+      "type": "string",
+      "title": "Parent Anchor ID",
+      "description": "ID of the nearest canonical base anchor"
+    },
+    "anchor_bearing": {
+      "type": "array",
+      "title": "Anchor Bearing",
+      "description": "Unit directional vector from parent anchor to this node",
+      "items": {
+        "type": "number"
+      },
+      "default": []
+    },
+    "lexical_path": {
+      "type": "array",
+      "title": "Lexical Index Path",
+      "description": "Variable-length circular coordinate path for lexical lookup (angles in degrees, one per letter)",
+      "items": {
+        "type": "number"
+      },
+      "default": []
+    },
+    "domain_id": {
+      "type": "string",
+      "title": "Domain ID",
+      "description": "ID of the system-detected semantic domain partition this node belongs to"
+    },
+    "is_intersection": {
+      "type": "boolean",
+      "title": "Is Intersection",
+      "description": "True if this node is within proximity of 2+ domains (cross-domain bridge)",
+      "default": false
+    },
+    "symbolic_address": {
+      "type": "string",
+      "title": "Symbolic Address",
+      "description": "Base-26 address (A-Z digits) encoding domain prefix and within-domain index. Evolves with domain recalculation."
+    },
+    "favorite": {
+      "type": "boolean",
+      "title": "Favorite",
+      "default": false
+    },
+    "visibility": {
+      "type": "string",
+      "title": "Visibility",
+      "description": "Whether this node is shared publicly or kept as a private draft",
+      "enum": [
+        "public",
+        "private"
+      ],
+      "default": "public"
+    },
+    "inherited_address": {
+      "type": "string",
+      "title": "Inherited Address",
+      "description": "Pure base-26 coordinate address: Anchor.XX.YY.ZZ \u2014 encodes spatial position using +256 offset. Compositional: shared prefix = spatial proximity."
+    },
+    "address_dissonance": {
+      "type": "number",
+      "title": "Address Dissonance",
+      "description": "Distance between the node's current coordinates and the coordinates decoded from its inherited_address. Non-zero means the node has drifted from its assigned address.",
+      "default": 0
+    },
+    "last_accessed_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Last Accessed At",
+      "description": "Timestamp of the most recent user interaction with this node. Used by the Silent Pruning cycle to determine memory entropy."
+    },
+    "memory_status": {
+      "type": "string",
+      "title": "Memory Status",
+      "description": "Active nodes appear in the graph (the Crust and Mantle). Archived nodes are silently pruned from the visible graph but remain in storage \u2014 they resurface when searched or re-activated.",
+      "enum": [
+        "active",
+        "archived"
+      ],
+      "default": "active"
+    },
+    "access_count": {
+      "type": "number",
+      "title": "Access Count",
+      "description": "Cumulative number of times this node has been selected, viewed, or referenced. Higher count = stronger memory reinforcement.",
+      "default": 0
+    },
+    "is_trait": {
+      "type": "boolean",
+      "title": "Is Trait Bridge",
+      "description": "True if this bridge node was promoted from a UserProfile semantic_label. Trait bridges serve as structural indices into the user's Active Memory \u2014 the Librarian uses them to find nodes associated with this persona trait.",
+      "default": false
+    },
+    "bridge_transition": {
+      "type": "string",
+      "title": "Bridge Transition",
+      "description": "For bridge-tier nodes, indicates which major-tier transition this bridge serves. 'persona-base' = bridges persona to base anchors (traits that describe base nodes). 'base-shade' = bridges base anchors to shade variants. 'shade-words' = bridges shades to word-level synsets.",
+      "enum": [
+        "persona-base",
+        "base-shade",
+        "shade-words"
+      ]
+    },
+    "trait_profile_id": {
+      "type": "string",
+      "title": "Trait Profile ID",
+      "description": "If is_trait is true, the ID of the UserProfile this trait bridge belongs to."
+    },
+    "trait_associations": {
+      "type": "array",
+      "title": "Trait Associations",
+      "description": "Persona trait strings linked to this node. When this node is a 'persona' tier node, these trait strings define the cognitive identity it represents and serve as memory association keys for the Librarian. For other tiers, listing a trait here means the node participates in that persona's Active Memory cluster.",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "persona_node_id": {
+      "type": "string",
+      "title": "Persona Node ID",
+      "description": "If this node belongs to a persona tier cluster, the ID of the persona-tier ColorNode it is associated with. Used by the Librarian to traverse persona-scoped memory partitions."
+    },
+    "shape_trait": {
+      "type": "string",
+      "title": "Shape Trait",
+      "description": "The cognitive shape-trait category assigned to this node (Stability, Structure, Balance, Movement, Directionality, Complexity, Uniqueness). Determines the physics force this node exerts on the 3D cognitive field: gravity, current, or refraction.",
+      "enum": [
+        "Stability",
+        "Structure",
+        "Balance",
+        "Movement",
+        "Directionality",
+        "Complexity",
+        "Uniqueness"
+      ]
+    }
+  },
+  "required": [
+    "name",
+    "hex",
+    "x",
+    "y",
+    "z"
+  ]
+}

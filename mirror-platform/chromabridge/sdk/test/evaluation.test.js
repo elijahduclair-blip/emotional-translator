@@ -1,0 +1,28 @@
+const test = require('node:test');
+const assert = require('node:assert/strict');
+const { evaluate } = require('../src');
+
+test('evaluation remains a proposal and traces natural climate cues', () => {
+  const result = evaluate({
+    text: 'Ember motion beside silver revision',
+    userId: 'test-user'
+  });
+
+  assert.equal(result.status, 'proposed');
+  assert.equal(result.boundary.semanticMutationAllowed, false);
+  assert.deepEqual(result.climateSignals.map(signal => signal.family), ['ember', 'silver']);
+  assert.equal(result.evidence.observation, 'Ember motion beside silver revision');
+  assert.equal(result.translation.climateName, 'Ember beside Silver');
+  assert.match(result.translation.relationalRead, /coexist/i);
+});
+
+test('evaluation rejects empty observations', () => {
+  assert.throws(() => evaluate({ text: ' ' }), /non-empty text/);
+});
+
+test('evaluation keeps unmatched language unresolved', () => {
+  const result = evaluate({ text: 'Something is changing, but I do not have a name for it.' });
+  assert.equal(result.translation.climateName, 'Unresolved climate');
+  assert.equal(result.translation.primaryClimate, null);
+  assert.match(result.translation.relationalRead, /open atmosphere/i);
+});

@@ -1,0 +1,8 @@
+packages:
+  - codex/backend
+  - chromabridge
+  - chromabridge/sdk
+  - mirror-runtime
+allowBuilds:
+  core-js: true
+  esbuild: true

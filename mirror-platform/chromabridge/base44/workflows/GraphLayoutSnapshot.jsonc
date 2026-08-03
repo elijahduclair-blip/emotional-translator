@@ -1,0 +1,45 @@
+{
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "graph_layout_snapshot",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "export_snapshot": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "exportToSheets",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Export snapshot",
+            "description": "Save graph to Google Sheets"
+          }
+        }
+      }
+    ]
+  },
+  "description": "Exports a timestamped snapshot of all ColorNode coordinates, colors, and hierarchy to a new Google Sheet every 24 hours for backup purposes.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "interval",
+      "cron_expression": null,
+      "one_time_date": null,
+      "timezone": "UTC",
+      "interval_value": 24,
+      "interval_unit": "hours",
+      "interval_anchor": null,
+      "ends_type": "after_count",
+      "ends_on_date": null,
+      "ends_after_count": 90
+    }
+  },
+  "name": "Graph Layout Snapshot"
+}

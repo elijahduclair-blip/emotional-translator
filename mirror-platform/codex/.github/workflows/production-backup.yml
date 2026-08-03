@@ -1,0 +1,35 @@
+name: Production Database Backup
+
+on:
+  schedule:
+    - cron: '17 7 * * *'
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate database secret
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::PRODUCTION_DATABASE_URL is missing. Add it under repository Settings > Secrets and variables > Actions."
+            exit 1
+          fi
+      - name: Create encrypted-transport PostgreSQL dump
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+        run: |
+          mkdir backups
+          docker run --rm \
+            -e DATABASE_URL \
+            -v "$PWD/backups:/backups" \
+            postgres:18-alpine \
+            sh -c 'pg_dump "$DATABASE_URL" --no-owner --no-privileges --file "/backups/alignment-$(date -u +%Y-%m-%dT%H-%M-%SZ).sql"'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: production-database-backup-${{ github.run_id }}
+          path: backups/*.sql
+          retention-days: 30

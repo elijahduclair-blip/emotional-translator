@@ -1,0 +1,79 @@
+{
+  "description": "Every 15 minutes: cleanses the base tier, re-verifies structural links via connectAllToBases, then syncs affected nodes to Google Sheets.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "*/15 * * * *",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "name": "Structure Verify and Sync",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "structure_verify_and_sync",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "cleanse_base_tier": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "cleanseBaseTier",
+            "args": {}
+          },
+          "then": "connect_to_bases",
+          "x-base44": {
+            "title": "Cleanse base tier",
+            "description": "Demote polluted base nodes, fix anchors"
+          }
+        }
+      },
+      {
+        "connect_to_bases": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "connectAllToBases",
+            "args": {
+              "batch_size": 4,
+              "batch_start": 0
+            }
+          },
+          "then": "sync_affected",
+          "x-base44": {
+            "title": "Re-verify structural links",
+            "description": "Connect unlinked nodes to all bases"
+          }
+        }
+      },
+      {
+        "sync_affected": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "syncAffectedNodes",
+            "args": {
+              "window_minutes": 16,
+              "max_sync": 50
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Sync affected nodes",
+            "description": "Push updated nodes to Google Sheets"
+          }
+        }
+      }
+    ]
+  }
+}

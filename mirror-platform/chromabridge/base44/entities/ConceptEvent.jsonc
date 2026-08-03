@@ -1,0 +1,112 @@
+{
+  "name": "ConceptEvent",
+  "type": "object",
+  "title": "Concept Event",
+  "description": "Event-sourced record of a state transition on a PersistentConcept. The authoritative history \u2014 the current projection is derived by reducing these events. Every semantic field on the projection must be reproducible from this event stream.",
+  "properties": {
+    "concept_id": {
+      "type": "string",
+      "title": "Concept ID",
+      "description": "The PersistentConcept this event applies to"
+    },
+    "profile_id": {
+      "type": "string",
+      "title": "Profile ID",
+      "description": "The UserProfile this event belongs to"
+    },
+    "event_type": {
+      "type": "string",
+      "title": "Event Type",
+      "description": "The kind of state transition. The event stream is the authoritative source of truth \u2014 the projection is derived by reducing events.",
+      "enum": [
+        "promoted",
+        "confidence_adjusted",
+        "stability_adjusted",
+        "salience_adjusted",
+        "conflict_opened",
+        "conflict_resolved",
+        "split",
+        "merged",
+        "superseded",
+        "archived",
+        "clarify",
+        "hold_uncertainty",
+        "legacy_concept_baselined",
+        "legacy_supersession_linked"
+      ]
+    },
+    "schema_version": {
+      "type": "string",
+      "title": "Schema Version",
+      "description": "Version of the event payload schema \u2014 enables replay under old policy versions",
+      "default": "1"
+    },
+    "payload": {
+      "type": "object",
+      "title": "Event Payload",
+      "description": "Type-specific data for this transition. Rich forensic fields: previousValue, newValue, delta, causeType, evidenceIds, hypothesisIds, decisionId, policyVersion. For promoted events: initialConfidence, initialStability, initialSalience, initialLifecycleStatus, proposition, category, profileId, sourceHypothesisIds, competingConceptIds, validFrom, promotionThreshold.",
+      "additionalProperties": true
+    },
+    "stream_version": {
+      "type": "number",
+      "title": "Stream Version",
+      "description": "Sequential version number within the concept's event stream. Starts at 1. Enables optimistic concurrency \u2014 directives must match the concept's last_stream_version to be applied.",
+      "default": 0
+    },
+    "decision_id": {
+      "type": "string",
+      "title": "Decision ID",
+      "description": "ID of the State Decision that authorized this event. Null for ingestion-time events."
+    },
+    "policy_version": {
+      "type": "string",
+      "title": "Policy Version",
+      "description": "The epistemic policy version under which this decision was made",
+      "default": "1"
+    },
+    "rationale_codes": {
+      "type": "array",
+      "title": "Rationale Codes",
+      "description": "Machine-readable codes explaining why this transition was made",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "evidence_ids": {
+      "type": "array",
+      "title": "Evidence IDs",
+      "description": "Evidence records that triggered this transition",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "hypothesis_ids": {
+      "type": "array",
+      "title": "Hypothesis IDs",
+      "description": "Hypotheses that triggered this transition",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "idempotency_key": {
+      "type": "string",
+      "title": "Idempotency Key",
+      "description": "Unique key to prevent duplicate event application. Computed from decision_id + concept_id + event_type."
+    },
+    "applied_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Applied At",
+      "description": "When this event was applied to the concept"
+    }
+  },
+  "required": [
+    "concept_id",
+    "profile_id",
+    "event_type",
+    "applied_at"
+  ]
+}

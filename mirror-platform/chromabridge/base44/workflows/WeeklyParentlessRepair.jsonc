@@ -1,0 +1,64 @@
+{
+  "description": "Every Monday at 3am: identifies ColorNodes lacking parents, seeds WordNet hierarchies for them, then connects remaining parentless nodes to shade concepts.",
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "weekly_parentless_repair",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "seed_hierarchies": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "seedWordNetHierarchy",
+            "args": {
+              "parentless_only": true
+            }
+          },
+          "then": "connect_shades",
+          "x-base44": {
+            "title": "Seed WordNet hierarchies",
+            "description": "Add parents to parentless nodes"
+          }
+        }
+      },
+      {
+        "connect_shades": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "connectParentlessToShades",
+            "args": {
+              "batch_size": 15,
+              "max_links": 5
+            }
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Connect to shades",
+            "description": "Repair remaining parentless nodes"
+          }
+        }
+      }
+    ]
+  },
+  "name": "Weekly Parentless Repair",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "recurring",
+      "cron_expression": "0 3 * * 1",
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": null,
+      "interval_unit": null,
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  }
+}

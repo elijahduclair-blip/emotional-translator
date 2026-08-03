@@ -1,0 +1,91 @@
+{
+  "name": "TraitTrackingLog",
+  "type": "object",
+  "properties": {
+    "profile_id": {
+      "type": "string",
+      "title": "Profile ID",
+      "description": "ID of the UserProfile this snapshot belongs to"
+    },
+    "snapshot_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Snapshot Timestamp",
+      "description": "When this trait distribution was recorded"
+    },
+    "distribution": {
+      "type": "array",
+      "title": "Shape-Trait Distribution",
+      "description": "Snapshot of how many nodes/shapes fall into each trait category at this point in time",
+      "items": {
+        "type": "object",
+        "properties": {
+          "trait": {
+            "type": "string"
+          },
+          "shape": {
+            "type": "string"
+          },
+          "count": {
+            "type": "number"
+          },
+          "force": {
+            "type": "string"
+          }
+        }
+      },
+      "default": []
+    },
+    "dominant_force": {
+      "type": "string",
+      "title": "Dominant Force",
+      "description": "The dominant physics force at this snapshot (gravity, current, or refraction)",
+      "enum": [
+        "gravity",
+        "current",
+        "refraction"
+      ]
+    },
+    "force_counts": {
+      "type": "object",
+      "title": "Force Counts",
+      "description": "Total count per force group",
+      "properties": {
+        "gravity": {
+          "type": "number",
+          "default": 0
+        },
+        "current": {
+          "type": "number",
+          "default": 0
+        },
+        "refraction": {
+          "type": "number",
+          "default": 0
+        }
+      }
+    },
+    "total_nodes": {
+      "type": "number",
+      "title": "Total Nodes",
+      "description": "Total number of nodes considered at snapshot time",
+      "default": 0
+    },
+    "trigger": {
+      "type": "string",
+      "title": "Trigger",
+      "description": "What initiated this snapshot",
+      "enum": [
+        "manual",
+        "scheduled",
+        "profile_update"
+      ],
+      "default": "manual"
+    }
+  },
+  "required": [
+    "profile_id",
+    "snapshot_at",
+    "dominant_force"
+  ]
+}

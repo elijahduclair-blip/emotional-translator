@@ -1,0 +1,763 @@
+{
+  "source": "Wikipedia first-pass emotion influence cabinet",
+  "version": "1.0.0",
+  "boundary": "This file stores orientation notes about how emotions tend to influence attention, behavior, physiology, and social response. It is additive context only. It does not change graph rules or create graph truth by itself.",
+  "method": "Influence is captured as repeatable effect language that can later be measured through repetition, proximity, and recurrence beside other concepts.",
+  "emotions": [
+    {
+      "term": "fear",
+      "aliases": [
+        "afraid"
+      ],
+      "wikipediaTitle": "Fear",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Fear",
+      "sourceLayer": "wikipedia",
+      "summary": "Fear is an unpleasant emotional state arising in response to perceived danger or threat.",
+      "influenceSignals": [
+        "threat",
+        "danger",
+        "alertness",
+        "fight or flight",
+        "freeze",
+        "uncertainty",
+        "avoidance",
+        "preparation"
+      ],
+      "behavioralInfluence": [
+        "can trigger escape, defensive action, or freezing",
+        "pushes attention toward survival-relevant routes"
+      ],
+      "cognitiveInfluence": [
+        "narrows attention toward threat",
+        "makes possible harm more salient",
+        "supports anticipatory scanning"
+      ],
+      "physiologicalInfluence": [
+        "raises heart rate and breathing",
+        "increases muscle tension and stress activation"
+      ],
+      "socialInfluence": [
+        "can increase guardedness and withdrawal",
+        "can make warning signals more meaningful"
+      ]
+    },
+    {
+      "term": "anger",
+      "aliases": [
+        "angry"
+      ],
+      "wikipediaTitle": "Anger",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Anger",
+      "sourceLayer": "wikipedia",
+      "summary": "Anger is an intense emotional state involving a strong response to perceived provocation, hurt, or threat.",
+      "influenceSignals": [
+        "provocation",
+        "hurt",
+        "threat",
+        "blame",
+        "action",
+        "risk",
+        "stereotyping",
+        "outsider distrust"
+      ],
+      "behavioralInfluence": [
+        "pushes toward immediate action",
+        "can intensify confrontation and aggressive response"
+      ],
+      "cognitiveInfluence": [
+        "reduces careful risk assessment",
+        "can increase blame and stereotype-based reading",
+        "makes danger feel smaller and action feel more possible"
+      ],
+      "physiologicalInfluence": [
+        "raises heart rate and blood pressure",
+        "elevates stress-hormone activation"
+      ],
+      "socialInfluence": [
+        "can reduce trust toward others",
+        "can harden group boundaries"
+      ]
+    },
+    {
+      "term": "joy",
+      "aliases": [
+        "joyful"
+      ],
+      "wikipediaTitle": "Joy",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Joy",
+      "sourceLayer": "wikipedia",
+      "summary": "Joy is a state that allows intense, lasting happiness and contentment, often connected to well-being, success, or good fortune.",
+      "influenceSignals": [
+        "well-being",
+        "contentment",
+        "gratitude",
+        "connection",
+        "interest web",
+        "health",
+        "creative possibility"
+      ],
+      "behavioralInfluence": [
+        "supports approach, sharing, and continued engagement",
+        "can encourage repeated return to positive experiences"
+      ],
+      "cognitiveInfluence": [
+        "helps experiences feel worth repeating",
+        "can widen interest and strengthen positive association webs"
+      ],
+      "physiologicalInfluence": [
+        "improves mood and well-being",
+        "is associated with beneficial health effects"
+      ],
+      "socialInfluence": [
+        "can strengthen connection to people, objects, and activities",
+        "helps positive encounters become sticky and repeatable"
+      ]
+    },
+    {
+      "term": "sadness",
+      "aliases": [
+        "sad"
+      ],
+      "wikipediaTitle": "Sadness",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Sadness",
+      "sourceLayer": "wikipedia",
+      "summary": "Sadness is emotional pain associated with loss, helplessness, disappointment, despair, and sorrow.",
+      "influenceSignals": [
+        "loss",
+        "despair",
+        "helplessness",
+        "withdrawal",
+        "quiet",
+        "lethargy",
+        "crying"
+      ],
+      "behavioralInfluence": [
+        "can slow movement and reduce outward activity",
+        "can increase withdrawal from others"
+      ],
+      "cognitiveInfluence": [
+        "keeps loss and disadvantage near the center of attention",
+        "can make absence and disappointment feel more present"
+      ],
+      "physiologicalInfluence": [
+        "is associated with low energy and slowed expression",
+        "can show up through crying and reduced vocal intensity"
+      ],
+      "socialInfluence": [
+        "can reduce participation",
+        "can shift communication toward slower, quieter expression"
+      ]
+    },
+    {
+      "term": "anxiety",
+      "aliases": [
+        "anxious",
+        "worried"
+      ],
+      "wikipediaTitle": "Anxiety",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Anxiety",
+      "sourceLayer": "wikipedia",
+      "summary": "Anxiety is an unpleasant emotion marked by inner turmoil, dread, and anticipation of future threat.",
+      "influenceSignals": [
+        "future threat",
+        "dread",
+        "rumination",
+        "restlessness",
+        "muscle tension",
+        "withdrawal",
+        "concentration problems",
+        "watching for danger"
+      ],
+      "behavioralInfluence": [
+        "can increase avoidance and protective withdrawal",
+        "can create restless monitoring behavior"
+      ],
+      "cognitiveInfluence": [
+        "keeps future risk highly active",
+        "supports rumination and expectation of negative outcomes",
+        "can reduce concentration"
+      ],
+      "physiologicalInfluence": [
+        "often includes tension, fatigue, breath disruption, and nausea",
+        "can disturb sleep and body regulation"
+      ],
+      "socialInfluence": [
+        "can make situations feel more menacing than they are",
+        "can reinforce cautious or hesitant participation"
+      ]
+    },
+    {
+      "term": "hope",
+      "aliases": [
+        "hopeful"
+      ],
+      "wikipediaTitle": "Hope",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Hope",
+      "sourceLayer": "wikipedia",
+      "summary": "Hope is an optimistic state of mind built around expected positive outcomes and anticipated possibility.",
+      "influenceSignals": [
+        "optimism",
+        "positive outcome",
+        "goal",
+        "pathway",
+        "confidence",
+        "survival",
+        "creative possibility",
+        "forward movement"
+      ],
+      "behavioralInfluence": [
+        "supports continued effort under difficulty",
+        "keeps movement going when outcomes are not yet secured"
+      ],
+      "cognitiveInfluence": [
+        "links desire to anticipated pathway",
+        "opens problem-solving and future-oriented planning"
+      ],
+      "physiologicalInfluence": [
+        "can increase endurance under stress",
+        "is associated with recovery-oriented outlook"
+      ],
+      "socialInfluence": [
+        "can strengthen resilience in groups facing instability",
+        "supports shared continuation rather than collapse"
+      ]
+    },
+    {
+      "term": "calm",
+      "aliases": [
+        "calmness",
+        "serene"
+      ],
+      "wikipediaTitle": "Calmness",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Calmness",
+      "sourceLayer": "wikipedia",
+      "summary": "Calmness is a state of inner peace, serenity, or freedom from agitation.",
+      "influenceSignals": [
+        "inner peace",
+        "serenity",
+        "self-calm",
+        "soothing",
+        "stable attention",
+        "reduced stress hormones",
+        "relaxation"
+      ],
+      "behavioralInfluence": [
+        "supports steadier response under stimulation",
+        "reduces reactive motion"
+      ],
+      "cognitiveInfluence": [
+        "stabilizes attention",
+        "supports more accurate reflection and observation"
+      ],
+      "physiologicalInfluence": [
+        "reduces stress-hormone burden",
+        "supports stable emotional and bodily regulation"
+      ],
+      "socialInfluence": [
+        "can help de-escalate conflict",
+        "supports soothing and co-regulation"
+      ]
+    },
+    {
+      "term": "anticipation",
+      "aliases": [
+        "expectant"
+      ],
+      "wikipediaTitle": "Anticipation",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Anticipation",
+      "sourceLayer": "wikipedia",
+      "summary": "Anticipation is an emotion involving pleasure or anxiety in considering or awaiting an expected event.",
+      "influenceSignals": [
+        "expectation",
+        "awaiting",
+        "preparation",
+        "future event",
+        "pleasure",
+        "anxiety",
+        "readiness"
+      ],
+      "behavioralInfluence": [
+        "encourages preparation for what is coming next",
+        "can hold the system in a forward-leaning state"
+      ],
+      "cognitiveInfluence": [
+        "keeps future possibilities active in thought",
+        "supports planning and expectancy-based reading"
+      ],
+      "physiologicalInfluence": [
+        "can coexist with energizing or stressful activation",
+        "often prepares the body for response"
+      ],
+      "socialInfluence": [
+        "can spread readiness or suspense through a group",
+        "can heighten shared focus on an approaching event"
+      ]
+    },
+    {
+      "term": "love",
+      "aliases": [
+        "lovely",
+        "lover"
+      ],
+      "wikipediaTitle": "Love",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Love",
+      "sourceLayer": "wikipedia",
+      "summary": "Love is an emotion involving attraction, affection, attachment, concern, and sustained care toward a person, animal, thing, or cause.",
+      "influenceSignals": [
+        "attachment",
+        "affection",
+        "care",
+        "bond",
+        "intimacy",
+        "concern",
+        "commitment",
+        "connection"
+      ],
+      "behavioralInfluence": [
+        "supports nurturing, protection, and repeated return toward the beloved",
+        "can increase willingness to stay, repair, and invest over time"
+      ],
+      "cognitiveInfluence": [
+        "makes the beloved more central in attention and valuation",
+        "supports identity-linking and stronger memory around the loved object or person"
+      ],
+      "physiologicalInfluence": [
+        "can increase arousal, attachment response, and stress regulation depending on context",
+        "is associated with emotion, attention, motivation, and memory systems"
+      ],
+      "socialInfluence": [
+        "strengthens bonds and cooperative behavior",
+        "can make loyalty, compassion, and shared concern more meaningful"
+      ]
+    },
+    {
+      "term": "peace",
+      "aliases": [],
+      "wikipediaTitle": "Peace",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Peace",
+      "sourceLayer": "wikipedia",
+      "summary": "Peace is a state of harmony and absence of hostility that can also describe inner tranquility, clarity, and calm relation.",
+      "influenceSignals": [
+        "harmony",
+        "absence of hostility",
+        "tranquility",
+        "clarity",
+        "respect",
+        "cooperation",
+        "equanimity",
+        "friendliness"
+      ],
+      "behavioralInfluence": [
+        "supports de-escalation, tolerance, and steadier interaction",
+        "encourages cooperative rather than hostile response routes"
+      ],
+      "cognitiveInfluence": [
+        "widens the system away from conflict fixation",
+        "supports seeing the larger picture and preserving relational balance"
+      ],
+      "physiologicalInfluence": [
+        "is associated with reduced agitation and a calmer internal state",
+        "supports steadier regulation under discomfort or stress"
+      ],
+      "socialInfluence": [
+        "can strengthen unity, goodwill, and group stability",
+        "makes reconciliation and respectful contact easier to sustain"
+      ]
+    },
+    {
+      "term": "trust",
+      "aliases": [
+        "trusting"
+      ],
+      "wikipediaTitle": "Trust (social science)",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Trust_%28social_science%29",
+      "sourceLayer": "wikipedia",
+      "summary": "Trust is believing that another person, group, or system will do what is expected, allowing vulnerability, cooperation, and reduced social complexity.",
+      "influenceSignals": [
+        "positive expectation",
+        "vulnerability",
+        "security",
+        "cooperation",
+        "belief",
+        "community",
+        "predictability",
+        "reduced complexity"
+      ],
+      "behavioralInfluence": [
+        "supports cooperation and willingness to rely on others",
+        "can reduce defensive checking and make sustained exchange more possible"
+      ],
+      "cognitiveInfluence": [
+        "acts as a simplifying shortcut when full certainty is impossible",
+        "makes selected futures or interpretations easier to commit to"
+      ],
+      "physiologicalInfluence": [
+        "is linked to attachment and social-bonding mechanisms",
+        "can lower defensive vigilance when stability is felt"
+      ],
+      "socialInfluence": [
+        "makes persuasion, bonding, and collaboration easier",
+        "helps relationships feel safer, more predictable, and more resilient"
+      ]
+    },
+    {
+      "term": "danger",
+      "aliases": [
+        "dangerous"
+      ],
+      "wikipediaTitle": "Hazard",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Hazard",
+      "sourceLayer": "wikipedia",
+      "summary": "Danger is oriented here through hazard language: a potential source of harm that becomes meaningful when there is a pathway to exposure and possible damage.",
+      "influenceSignals": [
+        "harm",
+        "threat",
+        "risk",
+        "exposure",
+        "stored energy",
+        "damage",
+        "warning",
+        "vulnerability"
+      ],
+      "behavioralInfluence": [
+        "pushes systems toward caution, avoidance, or protective preparation",
+        "can shift attention toward escape routes and defensive action"
+      ],
+      "cognitiveInfluence": [
+        "keeps possible harm active in attention",
+        "makes pathways to exposure, weakness, or loss more salient"
+      ],
+      "physiologicalInfluence": [
+        "can elevate stress readiness when threat is perceived as near",
+        "often overlaps with alertness and heightened defensive activation"
+      ],
+      "socialInfluence": [
+        "can increase warning exchange and guarded behavior",
+        "can make vulnerability, boundaries, and safety cues matter more"
+      ]
+    },
+    {
+      "term": "curiosity",
+      "aliases": [
+        "curious"
+      ],
+      "wikipediaTitle": "Curiosity",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Curiosity",
+      "sourceLayer": "wikipedia",
+      "summary": "Curiosity is an emotion and exploratory drive tied to investigation, learning, and the desire to acquire information or skill.",
+      "influenceSignals": [
+        "exploration",
+        "investigation",
+        "learning",
+        "novelty",
+        "questions",
+        "information seeking",
+        "inquiry",
+        "discovery"
+      ],
+      "behavioralInfluence": [
+        "pulls systems toward approach, probing, and exploratory movement",
+        "can increase willingness to enter uncertainty in order to gather information"
+      ],
+      "cognitiveInfluence": [
+        "keeps unresolved details active until more structure is found",
+        "supports hypothesis-making, question asking, and attention toward novelty"
+      ],
+      "physiologicalInfluence": [
+        "can increase alertness and exploratory readiness around new stimuli",
+        "often overlaps with mild arousal tied to orientation and investigation"
+      ],
+      "socialInfluence": [
+        "can make dialogue, inquiry, and shared discovery more likely",
+        "supports learning through exchange rather than immediate closure"
+      ]
+    },
+    {
+      "term": "loneliness",
+      "aliases": [
+        "lonely"
+      ],
+      "wikipediaTitle": "Loneliness",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Loneliness",
+      "sourceLayer": "wikipedia",
+      "summary": "Loneliness is an unpleasant emotional response to perceived or actual isolation, often involving social pain and an unmet need for connection or intimacy.",
+      "influenceSignals": [
+        "isolation",
+        "social pain",
+        "lack of connection",
+        "distance",
+        "separation",
+        "absence",
+        "yearning",
+        "unmet belonging"
+      ],
+      "behavioralInfluence": [
+        "can push systems either toward renewed connection seeking or withdrawal",
+        "may increase attention to signs of exclusion, absence, or failed intimacy"
+      ],
+      "cognitiveInfluence": [
+        "makes relational gaps and emotional distance more salient",
+        "can reinforce loops of comparison, unmet expectation, or perceived disconnection"
+      ],
+      "physiologicalInfluence": [
+        "is associated with stress burden and social-pain response",
+        "can increase vigilance around separation and lack of support"
+      ],
+      "socialInfluence": [
+        "can make belonging, intimacy, and recognition more meaningful when they appear",
+        "may weaken trust in social availability when repeated too long"
+      ]
+    },
+    {
+      "term": "melancholy",
+      "aliases": [],
+      "wikipediaTitle": "Melancholia",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Melancholia",
+      "sourceLayer": "wikipedia",
+      "summary": "Melancholy is a mood or condition historically associated with sorrow, despondency, and inward heaviness, often carrying reflective or temperamental depth.",
+      "influenceSignals": [
+        "sorrow",
+        "despondency",
+        "heaviness",
+        "gloom",
+        "inwardness",
+        "temperament",
+        "pensiveness",
+        "depth"
+      ],
+      "behavioralInfluence": [
+        "slows outward movement and can draw the system inward",
+        "supports lingering with loss, gravity, or unresolved feeling rather than quick release"
+      ],
+      "cognitiveInfluence": [
+        "keeps memory, reflection, and mood tone closely linked",
+        "can make meaning gather around weight, duration, and interior atmosphere"
+      ],
+      "physiologicalInfluence": [
+        "is historically linked with slowed movement, poor appetite, sleeplessness, and agitation or retardation",
+        "can overlap with low-energy or burdened bodily states"
+      ],
+      "socialInfluence": [
+        "can make speech, art, and relation carry more gravity than brightness",
+        "may reduce easy sociability while deepening reflective or mournful expression"
+      ]
+    },
+    {
+      "term": "cautious",
+      "aliases": [],
+      "wikipediaTitle": "Prudence",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Prudence",
+      "sourceLayer": "wikipedia",
+      "summary": "Cautious is oriented here through prudence: practical judgment that looks ahead, regulates action, and checks risk before committing to a path.",
+      "influenceSignals": [
+        "foresight",
+        "practical judgment",
+        "risk checking",
+        "restraint",
+        "calculation",
+        "guardedness",
+        "timing",
+        "appropriate action"
+      ],
+      "behavioralInfluence": [
+        "slows impulsive movement and increases checking before action",
+        "supports measured approach, boundary testing, and selective commitment"
+      ],
+      "cognitiveInfluence": [
+        "keeps consequences, timing, and possible failure active in evaluation",
+        "supports choosing between routes by fit rather than by immediacy alone"
+      ],
+      "physiologicalInfluence": [
+        "can overlap with moderated arousal and controlled readiness",
+        "often holds the system in a watchful but not fully panicked state"
+      ],
+      "socialInfluence": [
+        "can strengthen reliability, discretion, and boundary awareness",
+        "may reduce reckless trust while preserving careful cooperation"
+      ]
+    },
+    {
+      "term": "excitement",
+      "aliases": [
+        "excited"
+      ],
+      "wikipediaTitle": "Arousal",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Arousal",
+      "sourceLayer": "wikipedia",
+      "summary": "Excitement is oriented here through arousal: a heightened state of alertness, activation, and readiness that increases sensory salience, mobility, and reactivity.",
+      "influenceSignals": [
+        "activation",
+        "alertness",
+        "intensity",
+        "mobility",
+        "stimulation",
+        "reactivity",
+        "anticipatory energy",
+        "heightened attention"
+      ],
+      "behavioralInfluence": [
+        "pushes systems toward movement, expression, and fast approach behavior",
+        "can increase urgency, engagement, and responsiveness to nearby cues"
+      ],
+      "cognitiveInfluence": [
+        "narrows or intensifies attention around salient stimuli",
+        "can strengthen memory encoding and make selected events feel more vivid"
+      ],
+      "physiologicalInfluence": [
+        "is associated with increased heart rate, blood pressure, sensory alertness, and wakefulness",
+        "supports readiness for action and amplified reaction to stimulation"
+      ],
+      "socialInfluence": [
+        "can amplify shared energy, contagion, and outward expressiveness",
+        "may make groups more reactive, engaged, or quickly coordinated around a stimulus"
+      ]
+    },
+    {
+      "term": "disgust",
+      "aliases": [
+        "disgusted",
+        "revulsion"
+      ],
+      "wikipediaTitle": "Disgust",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Disgust",
+      "sourceLayer": "wikipedia",
+      "summary": "Disgust is an emotional response of strong aversion, often tied to contamination, rejection, moral offense, or a need to increase distance from what feels impure or unacceptable.",
+      "influenceSignals": [
+        "aversion",
+        "contamination",
+        "rejection",
+        "boundary",
+        "purity",
+        "repulsion",
+        "distance",
+        "avoidance"
+      ],
+      "behavioralInfluence": [
+        "pushes systems away from contact, ingestion, or identification with the offending object",
+        "can increase rejection, withdrawal, and strong boundary-setting behavior"
+      ],
+      "cognitiveInfluence": [
+        "makes contamination, impurity, and violation cues more salient",
+        "can rapidly sort stimuli into acceptable versus unacceptable categories"
+      ],
+      "physiologicalInfluence": [
+        "is associated with nausea-like reactions, recoil, and facial expressions of repulsion",
+        "can create bodily resistance to closeness, contact, or intake"
+      ],
+      "socialInfluence": [
+        "can strengthen moral distance and group boundary language",
+        "may intensify exclusion, taboo marking, or condemnation when socially shared"
+      ]
+    },
+    {
+      "term": "surprise",
+      "aliases": [
+        "surprised",
+        "astonishment"
+      ],
+      "wikipediaTitle": "Surprise (emotion)",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Surprise_%28emotion%29",
+      "sourceLayer": "wikipedia",
+      "summary": "Surprise is a brief emotional and orienting response to unexpected events that interrupts ongoing prediction and forces rapid re-evaluation of what is happening.",
+      "influenceSignals": [
+        "unexpectedness",
+        "interruption",
+        "novelty",
+        "reorientation",
+        "startle",
+        "shift",
+        "attention reset",
+        "sudden change"
+      ],
+      "behavioralInfluence": [
+        "halts ongoing action long enough for rapid orientation and reassessment",
+        "can redirect the system toward the most suddenly relevant stimulus"
+      ],
+      "cognitiveInfluence": [
+        "breaks prediction flow and demands model updating",
+        "makes new information temporarily dominate attention"
+      ],
+      "physiologicalInfluence": [
+        "often includes startle, widened attention, and fast sensory orientation",
+        "can briefly increase arousal while the system searches for explanation"
+      ],
+      "socialInfluence": [
+        "can spread quickly through shared reactions and attention shifts",
+        "often marks moments where groups collectively re-evaluate what matters now"
+      ]
+    },
+    {
+      "term": "shame",
+      "aliases": [
+        "ashamed"
+      ],
+      "wikipediaTitle": "Shame",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Shame",
+      "sourceLayer": "wikipedia",
+      "summary": "Shame is a self-conscious emotion tied to exposure, deficiency, or perceived failure before others, often creating a wish to hide, shrink, or withdraw.",
+      "influenceSignals": [
+        "exposure",
+        "deficiency",
+        "unworthiness",
+        "withdrawal",
+        "audience",
+        "self-consciousness",
+        "hiding",
+        "social judgment"
+      ],
+      "behavioralInfluence": [
+        "can push the system toward concealment, silence, or retreat",
+        "may reduce risk-taking and increase efforts to avoid further exposure"
+      ],
+      "cognitiveInfluence": [
+        "centers attention on the self as seen by others",
+        "can reinforce global negative self-evaluation rather than limited error correction"
+      ],
+      "physiologicalInfluence": [
+        "may include flushing, lowered gaze, collapse of posture, and inward contraction",
+        "can create strong bodily signals of exposure and social pain"
+      ],
+      "socialInfluence": [
+        "can make recognition, rejection, and audience cues extremely powerful",
+        "often changes how a person enters relation by increasing concealment or defensive sensitivity"
+      ]
+    },
+    {
+      "term": "guilt",
+      "aliases": [
+        "guilty",
+        "remorse"
+      ],
+      "wikipediaTitle": "Guilt (emotion)",
+      "wikipediaUrl": "https://en.wikipedia.org/wiki/Guilt_%28emotion%29",
+      "sourceLayer": "wikipedia",
+      "summary": "Guilt is a self-conscious emotion oriented around responsibility for harm, wrongdoing, or failure, often leading toward remorse, repair, confession, or amends.",
+      "influenceSignals": [
+        "responsibility",
+        "harm",
+        "wrongdoing",
+        "remorse",
+        "repair",
+        "amends",
+        "confession",
+        "self-correction"
+      ],
+      "behavioralInfluence": [
+        "can move the system toward apology, repair, and corrective action",
+        "often sustains attention on unfinished responsibility until some form of response occurs"
+      ],
+      "cognitiveInfluence": [
+        "keeps cause, consequence, and responsibility tightly linked",
+        "supports self-evaluation focused on actions rather than total identity"
+      ],
+      "physiologicalInfluence": [
+        "can overlap with heaviness, agitation, or inward pressure to correct what happened",
+        "may sustain tension until some form of repair or acknowledgment is made"
+      ],
+      "socialInfluence": [
+        "can strengthen norms around accountability and restoration",
+        "makes apology, repair, and relational trust highly relevant after harm"
+      ]
+    }
+  ]
+}

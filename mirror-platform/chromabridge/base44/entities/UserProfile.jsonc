@@ -1,0 +1,121 @@
+{
+  "name": "UserProfile",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Persona Name",
+      "description": "A custom name the user gives to this persona profile."
+    },
+    "birthday": {
+      "type": "string",
+      "format": "date",
+      "title": "Birthday"
+    },
+    "fav_colors": {
+      "type": "array",
+      "title": "Favorite Colors",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "fav_shapes": {
+      "type": "array",
+      "title": "Favorite Shapes",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "quadrilateral": {
+      "type": "string",
+      "title": "Quadrilateral Choice",
+      "enum": [
+        "Square",
+        "Rectangle",
+        "Parallelogram",
+        "Trapezoid",
+        "Rhombus",
+        "Kite",
+        "Irregular"
+      ]
+    },
+    "archetype": {
+      "type": "string",
+      "title": "Exploration Lens",
+      "enum": [
+        "Analytical Architect",
+        "Empathetic Mirror",
+        "Conceptual Explorer"
+      ]
+    },
+    "semantic_origin_x": {
+      "type": "number",
+      "title": "Semantic Origin X",
+      "default": 0
+    },
+    "semantic_origin_y": {
+      "type": "number",
+      "title": "Semantic Origin Y",
+      "default": 0
+    },
+    "semantic_origin_z": {
+      "type": "number",
+      "title": "Semantic Origin Z",
+      "default": 0
+    },
+    "star_trajectory": {
+      "type": "array",
+      "title": "Star Trajectory",
+      "description": "Chronological history of the star's semantic origin positions. Each entry records a past position and timestamp, enabling the Librarian to compute trajectory velocity and direction for orbital graph loading.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number"
+          },
+          "y": {
+            "type": "number"
+          },
+          "z": {
+            "type": "number"
+          },
+          "moved_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "default": []
+    },
+    "semantic_labels": {
+      "type": "array",
+      "title": "Semantic Labels",
+      "description": "Persona trait strings \u2014 fluid descriptors of the user's cognitive identity. These can be promoted to trait bridge nodes in the user's PERSONAL library (PersonalNode), creating structural indices into Active Memory that stay separate from the shared global ColorNode substrate.",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "trait_node_ids": {
+      "type": "array",
+      "title": "Trait Bridge Node IDs",
+      "description": "IDs of PersonalNode trait bridge nodes promoted from this profile's semantic_labels. Each trait bridge lives in the persona's personal library (PersonalNode) \u2014 NOT the shared global ColorNode substrate \u2014 keeping personal identity structurally separate from the canonical library the Librarian maintains. The Librarian never reads or writes these.",
+      "items": {
+        "type": "string"
+      },
+      "default": []
+    },
+    "last_accessed_at": {
+      "type": "string",
+      "format": "date-time",
+      "title": "Last Accessed At",
+      "description": "Timestamp of the most recent time this profile was viewed on the Persona Dashboard."
+    }
+  },
+  "required": [
+    "birthday",
+    "archetype"
+  ]
+}

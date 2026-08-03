@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Theory of Alignment GPT Setup</title>
+    <link rel="stylesheet" href="styles.css?v=20260616-gptsetup1">
+    <style>
+      .setup-shell {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 24px 16px 48px;
+      }
+
+      .setup-page {
+        display: grid;
+        gap: 18px;
+      }
+
+      .setup-hero,
+      .setup-card {
+        border: 1px solid var(--line);
+        background: #fff;
+        padding: 18px;
+      }
+
+      .setup-hero {
+        display: grid;
+        gap: 10px;
+      }
+
+      .setup-hero p,
+      .setup-card p,
+      .setup-card li {
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      .setup-card {
+        display: grid;
+        gap: 10px;
+      }
+
+      .setup-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 14px;
+      }
+
+      .setup-code {
+        overflow: auto;
+        border: 1px solid var(--line);
+        padding: 10px 12px;
+        background: #fbfaf7;
+        color: var(--ink);
+        font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+        font-size: 12px;
+        line-height: 1.5;
+        white-space: pre-wrap;
+        word-break: break-word;
+      }
+
+      .setup-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .setup-link {
+        display: inline-flex;
+        align-items: center;
+        min-height: 36px;
+        border: 1px solid #20252b;
+        padding: 0 12px;
+        background: #20252b;
+        color: #fff;
+        text-decoration: none;
+      }
+
+      .setup-link.is-secondary {
+        background: #fff;
+        color: #20252b;
+      }
+
+      .setup-list {
+        margin: 0;
+        padding-left: 18px;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="setup-shell">
+      <section class="setup-page" aria-label="Theory of Alignment GPT setup">
+        <div class="setup-hero">
+          <p class="eyebrow">Theory of Alignment</p>
+          <h1>Custom GPT Setup</h1>
+          <p>Use this page when you want a Custom GPT to read the color-climate system through supported routes instead of flattening it into isolated labels.</p>
+          <div class="setup-actions">
+            <a class="setup-link" href="./">Open translator</a>
+            <a class="setup-link is-secondary" href="./docs/chatgpt-action-openapi.json">Open action schema</a>
+            <a class="setup-link is-secondary" href="./docs/custom-gpt-instructions.md">Open GPT instructions</a>
+          </div>
+        </div>
+
+        <div class="setup-grid">
+          <section class="setup-card">
+            <h2>What To Paste</h2>
+            <p>These are the three public URLs the Custom GPT editor needs.</p>
+            <strong>Action schema URL</strong>
+            <div class="setup-code">https://elijahduclair-blip.github.io/emotional-translator/docs/chatgpt-action-openapi.json</div>
+            <strong>Privacy policy URL</strong>
+            <div class="setup-code">https://elijahduclair-blip.github.io/emotional-translator/privacy.html</div>
+            <strong>Instruction source file</strong>
+            <div class="setup-code">https://elijahduclair-blip.github.io/emotional-translator/docs/custom-gpt-instructions.md</div>
+          </section>
+
+          <section class="setup-card">
+            <h2>What The GPT Gets</h2>
+            <ul class="setup-list">
+              <li>Framework rules through <code>getAlignmentReference</code></li>
+              <li>Single-input color-climate translation through <code>translateColorClimate</code></li>
+              <li>Selection-set pattern reading through <code>analyzeSelectionClimate</code></li>
+              <li>Compact approved graph context through <code>findAlignmentContext</code></li>
+            </ul>
+            <p>The action layer is read-only. It does not expose passwords, private profiles, proposal workflow, or graph administration.</p>
+          </section>
+        </div>
+
+        <section class="setup-card">
+          <h2>Custom GPT Editor Steps</h2>
+          <ol class="setup-list">
+            <li>Open the Custom GPT editor.</li>
+            <li>In <strong>Configure</strong>, paste the system instructions from <code>docs/custom-gpt-instructions.md</code>.</li>
+            <li>Add a new <strong>Action</strong>.</li>
+            <li>Choose <strong>No authentication</strong>.</li>
+            <li>Import the action schema URL from this page.</li>
+            <li>Set the privacy policy URL to <code>privacy.html</code>.</li>
+            <li>Save, then test with one direct phrase and one selection set.</li>
+          </ol>
+        </section>
+
+        <section class="setup-card">
+          <h2>Recommended First Tests</h2>
+          <div class="setup-grid">
+            <div>
+              <strong>Translator input</strong>
+              <div class="setup-code">scared but hopeful</div>
+            </div>
+            <div>
+              <strong>Theme input</strong>
+              <div class="setup-code">religion + history</div>
+            </div>
+            <div>
+              <strong>Selection-climate input</strong>
+              <div class="setup-code">Teal Green, Blue Sapphire, Evergreen, Red Mahogany, Sand Yellow, Irregular Quadrilateral</div>
+            </div>
+            <div>
+              <strong>Unresolved boundary test</strong>
+              <div class="setup-code">because</div>
+            </div>
+          </div>
+        </section>
+
+        <section class="setup-card">
+          <h2>Expected Behavior</h2>
+          <ul class="setup-list">
+            <li>Explain the supported route before evocative interpretation.</li>
+            <li>Keep mixed climates mixed when more than one route is active.</li>
+            <li>Treat themes as filters and presentation climates, not permanent essence.</li>
+            <li>For selection sets, separate observable pattern from inferred preference.</li>
+            <li>If the route is unresolved, say it is unresolved instead of forcing a color landing.</li>
+          </ul>
+        </section>
+
+        <section class="setup-card">
+          <h2>Reference Files</h2>
+          <div class="setup-grid">
+            <div>
+              <strong>AI contract JSON</strong>
+              <div class="setup-code">docs/chatgpt-alignment-reference.json</div>
+            </div>
+            <div>
+              <strong>Human reference</strong>
+              <div class="setup-code">docs/chatgpt-color-web-reference.md</div>
+            </div>
+            <div>
+              <strong>White light note</strong>
+              <div class="setup-code">docs/white-light-filter-theme.md</div>
+            </div>
+            <div>
+              <strong>Bridge note</strong>
+              <div class="setup-code">docs/alignment-cross-domain-bridges.md</div>
+            </div>
+          </div>
+        </section>
+      </section>
+    </main>
+  </body>
+</html>

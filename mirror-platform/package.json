@@ -1,0 +1,18 @@
+{
+  "name": "mirror-platform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Workspace joining Codex, ChromaBridge, and Mirror Runtime without collapsing their boundaries.",
+  "scripts": {
+    "dev": "node scripts/dev.mjs",
+    "build": "pnpm --dir chromabridge/sdk build && pnpm --dir mirror-runtime build && pnpm --dir chromabridge build",
+    "test": "pnpm --dir chromabridge/sdk test && pnpm --dir mirror-runtime test && pnpm --dir codex/backend test",
+    "smoke": "node scripts/smoke.mjs",
+    "migrate": "pnpm --dir codex/backend migrate",
+    "knowledge:import": "pnpm --dir codex/backend knowledge:import"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "pnpm@11.9.0"
+}

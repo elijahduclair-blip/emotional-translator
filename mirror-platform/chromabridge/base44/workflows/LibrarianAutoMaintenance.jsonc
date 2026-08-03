@@ -1,0 +1,45 @@
+{
+  "name": "Librarian Auto Maintenance",
+  "description": "Every 5 hours, tasks the Librarian agent with running its full automated graph maintenance routine \u2014 accuracy audit, orphan repair, deduplication, hierarchy tidy, and label curation \u2014 then reports a summary.",
+  "trigger": {
+    "condition": null,
+    "config": {
+      "trigger_type": "scheduled",
+      "events": [],
+      "schedule_mode": "interval",
+      "cron_expression": null,
+      "one_time_date": null,
+      "timezone": "America/New_York",
+      "interval_value": 5,
+      "interval_unit": "hours",
+      "interval_anchor": null,
+      "ends_type": "never",
+      "ends_on_date": null,
+      "ends_after_count": null
+    }
+  },
+  "definition": {
+    "document": {
+      "dsl": "1.0.0",
+      "name": "librarian_auto_maintenance",
+      "version": "1.0",
+      "namespace": "base44"
+    },
+    "do": [
+      {
+        "run_maintenance": {
+          "call": "invoke_backend_function",
+          "with": {
+            "function_name": "librarianRunMaintenance",
+            "args": {}
+          },
+          "then": "end",
+          "x-base44": {
+            "title": "Librarian full maintenance",
+            "description": "Audit, repair, dedupe, tidy, curate"
+          }
+        }
+      }
+    ]
+  }
+}

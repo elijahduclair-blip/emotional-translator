@@ -1,0 +1,46 @@
+{
+  "name": "Domain",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "title": "Domain Name",
+      "description": "Auto-derived from the label node closest to the centroid"
+    },
+    "centroid_x": {
+      "type": "number",
+      "title": "Centroid X"
+    },
+    "centroid_y": {
+      "type": "number",
+      "title": "Centroid Y"
+    },
+    "centroid_z": {
+      "type": "number",
+      "title": "Centroid Z"
+    },
+    "radius": {
+      "type": "number",
+      "title": "Bounding Radius",
+      "description": "Max distance from centroid to any member"
+    },
+    "member_count": {
+      "type": "number",
+      "title": "Member Count",
+      "default": 0
+    },
+    "color": {
+      "type": "string",
+      "title": "Domain Color",
+      "default": "#888888"
+    },
+    "label_node_id": {
+      "type": "string",
+      "title": "Label Node ID",
+      "description": "ID of the node closest to the centroid, used as the domain label"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}
