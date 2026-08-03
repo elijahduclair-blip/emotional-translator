@@ -16,5 +16,25 @@ services:
         sync: false
       - key: AUTH_SECRET
         generateValue: true
+      - key: RUNTIME_SERVICE_TOKEN
+        generateValue: true
+      - key: WORDNET_READ_TOKEN
+        generateValue: true
+      - key: PUBLIC_SIGNUP_ENABLED
+        value: true
+      - key: PUBLIC_APP_URL
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_SECURE
+        value: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: SMTP_FROM
+        sync: false
       - key: CORS_ORIGINS
-        value: https://elijahduclair-blip.github.io,http://127.0.0.1:4174,http://localhost:4174
+        value: https://elijahduclair-blip.github.io

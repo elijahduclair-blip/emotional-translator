@@ -37,3 +37,20 @@ export function evaluate(input: {
   text: string;
   userId?: string;
 }): ChromaBridgeEvaluation;
+
+export interface ChromaBridgeNotationBoundary {
+  kind: 'notation_boundary';
+  code: 'ueb_with_nemeth';
+  notation: string;
+  status: 'bounded';
+  boundary: {
+    mode: 'notation_only';
+    semanticMutationAllowed: false;
+    colorAssignmentAllowed: false;
+    graphMutationAllowed: false;
+    mathematicalTruthAssessed: false;
+    reason: string;
+  };
+}
+
+export function evaluateNotation(input: { notation: string }): ChromaBridgeNotationBoundary;

@@ -1,13 +1,13 @@
 const ANCHORS = [
   { name: 'White', normalizedName: 'white', addressRoot: '1', degreeOfVision: 90 },
-  { name: 'Blue', normalizedName: 'blue', addressRoot: '2', degreeOfVision: 170 },
-  { name: 'Black', normalizedName: 'black', addressRoot: '3', degreeOfVision: 250 },
-  { name: 'Red', normalizedName: 'red', addressRoot: '4', degreeOfVision: 10 },
-  { name: 'Orange', normalizedName: 'orange', addressRoot: '5', degreeOfVision: 50 },
-  { name: 'Yellow', normalizedName: 'yellow', addressRoot: '6', degreeOfVision: 130 },
-  { name: 'Green', normalizedName: 'green', addressRoot: '7', degreeOfVision: 210 },
-  { name: 'Purple', normalizedName: 'purple', addressRoot: '8', degreeOfVision: 290 },
-  { name: 'Gray', normalizedName: 'gray', addressRoot: '9', degreeOfVision: 330 }
+  { name: 'Red', normalizedName: 'red', addressRoot: '2', degreeOfVision: 10 },
+  { name: 'Orange', normalizedName: 'orange', addressRoot: '3', degreeOfVision: 50 },
+  { name: 'Yellow', normalizedName: 'yellow', addressRoot: '4', degreeOfVision: 130 },
+  { name: 'Gray', normalizedName: 'gray', addressRoot: '5', degreeOfVision: 330 },
+  { name: 'Green', normalizedName: 'green', addressRoot: '6', degreeOfVision: 210 },
+  { name: 'Purple', normalizedName: 'purple', addressRoot: '7', degreeOfVision: 290 },
+  { name: 'Blue', normalizedName: 'blue', addressRoot: '8', degreeOfVision: 170 },
+  { name: 'Black', normalizedName: 'black', addressRoot: '9', degreeOfVision: 250 }
 ];
 
 export const FIXED_COLOR_ANCHORS = Object.freeze(ANCHORS.map(anchor => Object.freeze({ ...anchor })));

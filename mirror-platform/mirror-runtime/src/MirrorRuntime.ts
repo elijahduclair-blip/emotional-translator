@@ -136,6 +136,52 @@ export class MirrorRuntime {
 
     return { evaluation, translation, persisted };
   }
+
+  async translateBrailleMath(request: Record<string, unknown>) {
+    if (this.status !== 'ready') throw new Error(`Cannot translate Braille math: runtime is ${this.status}.`);
+    const notation = String(request.input || '');
+    const governance = this.chromaBridge.evaluateNotation(notation);
+    const translation = await this.codexClient.translateBrailleMath(request);
+    return { ...translation, governance: { chromaBridge: governance.boundary, codex: translation.boundary } };
+  }
+
+  async compileBrailleRuntime(request: Record<string, unknown>) {
+    if (this.status !== 'ready') throw new Error(`Cannot compile Braille Runtime instruction: runtime is ${this.status}.`);
+    const result = await this.codexClient.requestJson('/api/v1/foundation/braille-runtime/compile', { method: 'POST', body: request });
+    if (result.status >= 400) return result;
+    const governance = this.chromaBridge.evaluateNotation(String(result.body.executableBraille || ''));
+    return {
+      status: result.status,
+      body: { ...result.body, governance: { chromaBridge: governance.boundary, codex: result.body.boundary } }
+    };
+  }
+
+  async assembleBrailleRuntime(request: Record<string, unknown>) {
+    if (this.status !== 'ready') throw new Error(`Cannot assemble Braille Runtime module: runtime is ${this.status}.`);
+    const result = await this.codexClient.requestJson('/api/v1/foundation/braille-runtime/assemble', { method: 'POST', body: request });
+    if (result.status >= 400) return result;
+    const governance = this.chromaBridge.evaluateNotation(String(result.body.compiledInstruction?.executableBraille || ''));
+    return {
+      status: result.status,
+      body: { ...result.body, governance: { chromaBridge: governance.boundary, codex: result.body.boundary } }
+    };
+  }
+
+  async runLanguageLoop(request: Record<string, unknown>) {
+    if (this.status !== 'ready') throw new Error(`Cannot run language loop: runtime is ${this.status}.`);
+    const result = await this.codexClient.requestJson('/api/v1/foundation/language-loop', { method: 'POST', body: request });
+    if (result.status >= 400) return result;
+    const governance = this.chromaBridge.evaluateNotation(String(result.body.encoding?.ueb || ''));
+    return {
+      status: result.status,
+      body: { ...result.body, governance: { chromaBridge: governance.boundary, codex: result.body.boundary } }
+    };
+  }
+
+  async codexRequest(path: string, options?: { method?: string; body?: Record<string, unknown>; userToken?: string }) {
+    if (this.status !== 'ready') throw new Error(`Cannot reach Codex: runtime is ${this.status}.`);
+    return this.codexClient.requestJson(path, options);
+  }
 }
 
 function composeTranslation(

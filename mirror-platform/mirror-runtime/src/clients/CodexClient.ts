@@ -33,6 +33,27 @@ export class CodexClient {
     return body;
   }
 
+  async translateBrailleMath(request: Record<string, unknown>): Promise<Record<string, unknown>> {
+    const result = await this.requestJson('/api/v1/braille/math/translate', { method: 'POST', body: request });
+    if (result.status >= 400) throw codexError('Braille translation', result);
+    return result.body;
+  }
+
+  async requestJson(
+    path: string,
+    options: { method?: string; body?: Record<string, unknown>; userToken?: string } = {}
+  ): Promise<{ status: number; body: Record<string, any> }> {
+    const headers: Record<string, string> = { 'content-type': 'application/json' };
+    if (options.userToken) headers.authorization = `Bearer ${options.userToken}`;
+    const response = await this.fetcher(`${this.apiUrl}${path}`, {
+      method: options.method || 'GET',
+      headers,
+      body: options.body === undefined ? undefined : JSON.stringify(options.body)
+    });
+    const body = await response.json() as Record<string, any>;
+    return { status: response.status, body };
+  }
+
   async saveEvaluation(
     evaluation: ChromaBridgeEvaluation,
     translation: EmotionalTranslation,
@@ -67,6 +88,13 @@ export class CodexClient {
     }
     return body;
   }
+}
+
+function codexError(label: string, result: { status: number; body: Record<string, any> }) {
+  return Object.assign(
+    new Error(`${label} failed (${result.status}): ${result.body.error || 'Unknown error'}`),
+    { status: result.status }
+  );
 }
 
 export function compactGraphRead(graphRead: CodexGraphRead | null) {

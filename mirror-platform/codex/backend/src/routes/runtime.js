@@ -21,11 +21,11 @@ router.post('/runtime/evaluations', requireRuntimeService, async (req, res, next
         evaluation.userId,
         evaluation.input,
         evaluation.fingerprint,
-        evaluation.climateSignals,
-        evaluation.evidence,
-        evaluation.boundary,
-        translation,
-        graphRead
+        JSON.stringify(evaluation.climateSignals),
+        JSON.stringify(evaluation.evidence),
+        JSON.stringify(evaluation.boundary),
+        JSON.stringify(translation),
+        graphRead == null ? null : JSON.stringify(graphRead)
       ]
     );
     const stored = result.rows[0];

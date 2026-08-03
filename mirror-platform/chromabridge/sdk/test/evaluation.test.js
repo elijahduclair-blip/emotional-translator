@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { evaluate } = require('../src');
+const { evaluate, evaluateNotation } = require('../src');
 
 test('evaluation remains a proposal and traces natural climate cues', () => {
   const result = evaluate({
@@ -14,6 +14,15 @@ test('evaluation remains a proposal and traces natural climate cues', () => {
   assert.equal(result.evidence.observation, 'Ember motion beside silver revision');
   assert.equal(result.translation.climateName, 'Ember beside Silver');
   assert.match(result.translation.relationalRead, /coexist/i);
+});
+
+test('notation evaluation preserves the Braille boundary without semantic authority', () => {
+  const result = evaluateNotation({ notation: '2x = 8' });
+  assert.equal(result.boundary.mode, 'notation_only');
+  assert.equal(result.boundary.semanticMutationAllowed, false);
+  assert.equal(result.boundary.colorAssignmentAllowed, false);
+  assert.equal(result.boundary.graphMutationAllowed, false);
+  assert.equal(result.boundary.mathematicalTruthAssessed, false);
 });
 
 test('evaluation rejects empty observations', () => {

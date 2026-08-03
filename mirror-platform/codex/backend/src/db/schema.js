@@ -81,6 +81,42 @@ export async function createSchema() {
       CREATE INDEX IF NOT EXISTS idx_graph_history_entity ON graph_history(entity_type, entity_id, created_at DESC);
     `);
 
+    // Braille Runtime modules are governed drafts. Activation may create a graph
+    // proposal, but never writes directly to approved nodes or edges.
+    await query(`
+      CREATE TABLE IF NOT EXISTS braille_runtime_modules (
+        id TEXT PRIMARY KEY,
+        template_id TEXT NOT NULL,
+        entrypoint TEXT NOT NULL,
+        compiled_instruction JSONB NOT NULL,
+        module_plan JSONB NOT NULL,
+        status TEXT NOT NULL DEFAULT 'assembled',
+        created_by TEXT NOT NULL,
+        reviewer TEXT,
+        review_note TEXT,
+        activation_token_hash TEXT,
+        activation_token_expires_at TIMESTAMP,
+        activation_token_used_at TIMESTAMP,
+        activation_result JSONB,
+        graph_proposal_id TEXT REFERENCES graph_proposals(id),
+        created_at TIMESTAMP DEFAULT NOW(),
+        reviewed_at TIMESTAMP,
+        activated_at TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_braille_runtime_modules_status ON braille_runtime_modules(status, created_at DESC);
+
+      CREATE TABLE IF NOT EXISTS braille_runtime_module_events (
+        id TEXT PRIMARY KEY,
+        module_id TEXT NOT NULL REFERENCES braille_runtime_modules(id) ON DELETE CASCADE,
+        event_type TEXT NOT NULL,
+        actor TEXT NOT NULL,
+        details JSONB NOT NULL DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_braille_runtime_module_events_module ON braille_runtime_module_events(module_id, created_at);
+    `);
+
     // Runtime evaluations are recorded observations, not approved semantic truth.
     await query(`
       CREATE TABLE IF NOT EXISTS runtime_evaluations (
@@ -218,8 +254,46 @@ export async function createSchema() {
       ALTER TABLE users ADD COLUMN IF NOT EXISTS must_change_password BOOLEAN NOT NULL DEFAULT FALSE;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS token_version INTEGER NOT NULL DEFAULT 1;
       ALTER TABLE users ADD COLUMN IF NOT EXISTS password_changed_at TIMESTAMP;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS email_verified_at TIMESTAMP;
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS signup_source TEXT NOT NULL DEFAULT 'legacy';
       ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();
       CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email) WHERE email IS NOT NULL;
+
+      CREATE TABLE IF NOT EXISTS auth_action_tokens (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        purpose TEXT NOT NULL CHECK (purpose IN ('verify_email','reset_password')),
+        token_hash TEXT NOT NULL UNIQUE,
+        expires_at TIMESTAMP NOT NULL,
+        consumed_at TIMESTAMP,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_auth_action_tokens_user ON auth_action_tokens(user_id,purpose,created_at DESC);
+    `);
+
+    // Account-scoped Braille learning progress. Raw answers are intentionally not retained.
+    await query(`
+      CREATE TABLE IF NOT EXISTS braille_lesson_progress (
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        lesson_id TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'not_started' CHECK (status IN ('not_started','in_progress','completed')),
+        best_score INTEGER NOT NULL DEFAULT 0 CHECK (best_score BETWEEN 0 AND 100),
+        attempt_count INTEGER NOT NULL DEFAULT 0,
+        completed_at TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT NOW(),
+        PRIMARY KEY (user_id,lesson_id)
+      );
+      CREATE TABLE IF NOT EXISTS braille_practice_attempts (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        lesson_id TEXT NOT NULL,
+        direction TEXT NOT NULL CHECK (direction IN ('print_to_nemeth','nemeth_to_print')),
+        correct BOOLEAN NOT NULL,
+        duration_ms INTEGER NOT NULL DEFAULT 0,
+        mistake_categories TEXT[] NOT NULL DEFAULT '{}',
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_braille_attempts_user ON braille_practice_attempts(user_id,created_at DESC);
     `);
 
     // User Profiles
@@ -294,6 +368,8 @@ export async function createSchema() {
         co_occurrences JSONB NOT NULL DEFAULT '[]'::jsonb,
         pareto JSONB NOT NULL DEFAULT '[]'::jsonb,
         patterns JSONB NOT NULL DEFAULT '[]'::jsonb,
+        letter_accountability JSONB,
+        analysis_version TEXT,
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
       );
@@ -305,6 +381,8 @@ export async function createSchema() {
       ALTER TABLE foundation_sessions ADD COLUMN IF NOT EXISTS co_occurrences JSONB NOT NULL DEFAULT '[]'::jsonb;
       ALTER TABLE foundation_sessions ADD COLUMN IF NOT EXISTS pareto JSONB NOT NULL DEFAULT '[]'::jsonb;
       ALTER TABLE foundation_sessions ADD COLUMN IF NOT EXISTS patterns JSONB NOT NULL DEFAULT '[]'::jsonb;
+      ALTER TABLE foundation_sessions ADD COLUMN IF NOT EXISTS letter_accountability JSONB;
+      ALTER TABLE foundation_sessions ADD COLUMN IF NOT EXISTS analysis_version TEXT;
       ALTER TABLE foundation_sessions ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();
       CREATE INDEX IF NOT EXISTS idx_foundation_sessions_created_at ON foundation_sessions(created_at DESC);
     `);

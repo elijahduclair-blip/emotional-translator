@@ -2,6 +2,8 @@ import { Coordinate } from '../types';
 import { Capability } from './CapabilityRouter';
 import {
   evaluate as evaluateWithChromaBridge,
+  evaluateNotation as evaluateNotationWithChromaBridge,
+  type ChromaBridgeNotationBoundary,
   type ChromaBridgeEvaluation
 } from '@mirror-platform/chromabridge-sdk';
 
@@ -42,6 +44,10 @@ export class ChromaBridgeCapability implements Capability {
 
   evaluate(text: string, userId?: string): ChromaBridgeEvaluation {
     return evaluateWithChromaBridge({ text, userId });
+  }
+
+  evaluateNotation(notation: string): ChromaBridgeNotationBoundary {
+    return evaluateNotationWithChromaBridge({ notation });
   }
 
   distance(id1: string, id2: string): number | null {

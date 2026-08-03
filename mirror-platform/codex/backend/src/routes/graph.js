@@ -159,6 +159,9 @@ function normalizeProposal(value = {}) {
   const payload = value.payload || { node: value.node, relationships: value.relationships || [] };
   if (payload.node) payload.node = normalizeNodeInput(payload.node);
   if (payload.relationships) payload.relationships = normalizeRelationships(payload.relationships, payload.node?.id || value.targetId);
+  if (operation === 'create_relationship' && payload.relationship) {
+    payload.relationship = normalizeStoredRelationship(payload.relationship);
+  }
   return {
     id: crypto.randomUUID(),
     operation,
@@ -170,18 +173,36 @@ function normalizeProposal(value = {}) {
 }
 
 function validateProposal(proposal) {
-  if (!['create', 'edit', 'delete'].includes(proposal.operation)) throw httpError(400, 'Operation must be create, edit, or delete.');
+  if (!['create', 'create_relationship', 'edit', 'delete'].includes(proposal.operation)) throw httpError(400, 'Operation must be create, create_relationship, edit, or delete.');
   if (proposal.operation === 'create') {
     validateNodeInput(proposal.payload.node);
     for (const relationship of proposal.payload.relationships || []) validateRelationship(relationship);
+  } else if (proposal.operation === 'create_relationship') {
+    validateRelationship(proposal.payload.relationship);
   } else if (!proposal.targetId) throw httpError(400, 'Edit and delete proposals require a target id.');
   if (proposal.operation === 'edit' && proposal.payload.node) validateNodeInput(proposal.payload.node);
 }
 
 async function applyProposal(client, proposal, author) {
   if (proposal.operation === 'create') return applyCreate(client, proposal, author);
+  if (proposal.operation === 'create_relationship') return applyCreateRelationship(client, proposal, author);
   if (proposal.operation === 'edit') return applyEdit(client, proposal, author);
   return applyDelete(client, proposal, author);
+}
+
+async function applyCreateRelationship(client, proposal, author) {
+  const edge = normalizeStoredRelationship(proposal.payload.relationship);
+  validateRelationship(edge);
+  const endpoints = await client.query("SELECT id FROM nodes WHERE id IN ($1,$2) AND record_status='active'", [edge.source, edge.target]);
+  if (endpoints.rows.length !== 2) throw httpError(400, 'Both relationship endpoints must exist and be active.');
+  const duplicate = await client.query("SELECT id FROM edges WHERE id=$1 AND record_status='active'", [edge.id]);
+  if (duplicate.rows.length) throw httpError(409, `Relationship id already exists: ${edge.id}`);
+  const result = await client.query(
+    `INSERT INTO edges (id,source,target,type,evidence,confidence,evidence_data) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+    [edge.id, edge.source, edge.target, edge.type, edge.evidence, edge.confidence, edge.evidenceData]
+  );
+  await addHistory(client, 'edge', edge.id, 'create', null, result.rows[0], author, proposal.rationale, proposal.id);
+  return { node: null, relationships: [result.rows[0]] };
 }
 
 async function applyCreate(client, proposal, author) {
@@ -290,6 +311,19 @@ function normalizeRelationships(values, sourceId) {
   });
 }
 
+function normalizeStoredRelationship(value = {}) {
+  const evidenceData = value.evidenceData || value.evidence_data || {};
+  return {
+    id: requiredText(value.id, 'Relationship id is required.'),
+    source: requiredText(value.source, 'Relationship source is required.'),
+    target: requiredText(value.target, 'Relationship target is required.'),
+    type: requiredText(value.type, 'Relationship type is required.'),
+    evidence: requiredText(value.evidence, 'Relationship evidence is required.'),
+    confidence: nullableText(value.confidence) || 'medium',
+    evidenceData
+  };
+}
+
 function validateNodeInput(node) {
   if (!node?.id || !node.label || !node.type) throw httpError(400, 'Node label and type are required.');
   if (!/^[a-z0-9][a-z0-9-]*$/.test(node.id)) throw httpError(400, 'Node id must use lowercase letters, numbers, and hyphens.');
@@ -303,9 +337,12 @@ function validateNodeInput(node) {
 }
 
 function validateRelationship(edge) {
-  if (!edge.target || !edge.type) throw httpError(400, 'Relationship target and type are required.');
+  if (!edge.source || !edge.target || !edge.type) throw httpError(400, 'Relationship source, target, and type are required.');
   if (!/^[a-z0-9_]+$/.test(edge.type)) throw httpError(400, 'Relationship type must use lowercase letters, numbers, and underscores.');
   if (!ALLOWED_CONFIDENCE.has(edge.confidence)) throw httpError(400, 'Confidence must be high, medium, or low.');
+  if (!String(edge.evidenceData?.source || '').trim() || !String(edge.evidenceData?.boundary || '').trim() || !String(edge.evidenceData?.counterexample || '').trim()) {
+    throw httpError(400, 'Relationship provenance requires source, boundary, and counterexample.');
+  }
 }
 
 function requiredText(value, message) { const text = String(value || '').trim(); if (!text) throw httpError(400, message); return text; }

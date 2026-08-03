@@ -15,17 +15,22 @@ import researchRouter from './routes/research.js';
 import aiRouter from './routes/ai.js';
 import foundationRouter from './routes/foundation.js';
 import runtimeRouter from './routes/runtime.js';
+import wordNetRouter from './routes/wordnet.js';
+import brailleMathRouter from './routes/braille-math.js';
+import brailleRuntimeGovernanceRouter from './routes/braille-runtime-governance.js';
+import { limitPublicAnalysis, validateProductionConfig } from './middleware/public-api.js';
 
 dotenv.config();
+validateProductionConfig();
 
 const app = express();
+app.disable('x-powered-by');
+if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
 const PORT = process.env.PORT || 3000;
 const CORS_ORIGINS = String(process.env.CORS_ORIGINS || process.env.CORS_ORIGIN || 'http://localhost:4173,http://127.0.0.1:4174')
   .split(',')
   .map(value => value.trim())
   .filter(Boolean);
-
-if (process.env.NODE_ENV === 'production') app.set('trust proxy', 1);
 
 // Middleware
 app.use(express.json({ limit: '64kb' }));
@@ -42,8 +47,20 @@ app.use((req, res, next) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
   res.setHeader('X-Frame-Options', 'DENY');
   res.setHeader('Referrer-Policy', 'no-referrer');
+  res.setHeader('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none'; base-uri 'none'");
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  res.setHeader('Cache-Control', 'no-store');
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
   next();
 });
+
+app.use('/api/v1/foundation/analyze', limitPublicAnalysis);
+app.use('/api/v1/foundation/letters', limitPublicAnalysis);
+app.use('/api/v1/foundation/language-loop', limitPublicAnalysis);
+app.use('/api/v1/foundation/braille-runtime', limitPublicAnalysis);
+app.use('/api/v1/translate', limitPublicAnalysis);
 
 // Health check
 app.get('/api', (req, res) => {
@@ -55,6 +72,13 @@ app.get('/api', (req, res) => {
     routes: {
       health: '/api/health',
       foundation: '/api/v1/foundation/analyze',
+      foundationLetters: '/api/v1/foundation/letters/analyze',
+      languageLoop: '/api/v1/foundation/language-loop',
+      brailleRuntime: {
+        compile: '/api/v1/foundation/braille-runtime/compile',
+        assemble: '/api/v1/foundation/braille-runtime/assemble'
+      },
+      wordNet: '/api/v1/wordnet/lookup?term=gold',
       translate: '/api/v1/translate'
     }
   });
@@ -75,6 +99,9 @@ app.use('/api/v1', translateRouter);
 app.use('/api/v1', researchRouter);
 app.use('/api/v1', aiRouter);
 app.use('/api/v1', foundationRouter);
+app.use('/api/v1', wordNetRouter);
+app.use('/api/v1', brailleMathRouter);
+app.use('/api/v1', brailleRuntimeGovernanceRouter);
 app.use('/api/v1', runtimeRouter);
 
 // 404
@@ -92,6 +119,11 @@ app.listen(PORT, () => {
   console.log('  Graph governance (/api/v1/graph/proposals)');
   console.log('  AI translator (/api/v1/translate)');
   console.log('  Foundation analysis (/api/v1/foundation/analyze)');
+  console.log('  Ordered letter accountability (/api/v1/foundation/letters)');
+  console.log('  Reversible language loop (/api/v1/foundation/language-loop)');
+  console.log('  Braille Runtime Language (/api/v1/foundation/braille-runtime/compile, /assemble)');
+  console.log('  WordNet lexical lookup (/api/v1/wordnet/lookup)');
+  console.log('  Braille mathematics (/api/v1/braille/math)');
   console.log('  Database backups (npm run backup)');
   console.log('  Signed account authentication (/api/v1/auth)');
   console.log('  Governed research inbox (/api/v1/research)');

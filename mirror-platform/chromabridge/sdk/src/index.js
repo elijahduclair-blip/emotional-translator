@@ -43,6 +43,24 @@ function evaluate(input) {
   };
 }
 
+function evaluateNotation(input) {
+  const notation = requireNotation(input?.notation);
+  return {
+    kind: 'notation_boundary',
+    code: 'ueb_with_nemeth',
+    notation,
+    status: 'bounded',
+    boundary: {
+      mode: 'notation_only',
+      semanticMutationAllowed: false,
+      colorAssignmentAllowed: false,
+      graphMutationAllowed: false,
+      mathematicalTruthAssessed: false,
+      reason: 'ChromaBridge governs the boundary only: notation conversion does not assign color meaning, mutate the graph, or determine whether an equation is true.'
+    }
+  };
+}
+
 function translateSignals(climateSignals) {
   if (!climateSignals.length) {
     return {
@@ -88,6 +106,12 @@ function optionalText(value) {
   return typeof value === 'string' && value.trim() ? value.trim() : null;
 }
 
+function requireNotation(value) {
+  if (typeof value !== 'string' || !value.trim()) throw new TypeError('ChromaBridge.evaluateNotation requires non-empty notation.');
+  if (value.length > 512) throw new RangeError('ChromaBridge.evaluateNotation accepts at most 512 characters.');
+  return value.trim();
+}
+
 function titleCase(value) {
   return value.charAt(0).toUpperCase() + value.slice(1);
 }
@@ -98,4 +122,4 @@ function naturalList(values) {
   return `${values.slice(0, -1).join(', ')}, and ${values.at(-1)}`;
 }
 
-module.exports = { evaluate };
+module.exports = { evaluate, evaluateNotation };
