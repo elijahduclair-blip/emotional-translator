@@ -30,6 +30,7 @@ describe('LocalModelClient', () => {
     expect(result.model).toBe('qwen3:4b-instruct');
     expect(requests[1].url).toBe('http://127.0.0.1:11434/api/chat');
     expect(requests[1].body?.stream).toBe(false);
+    expect(requests[1].body?.think).toBe(false);
     expect(requests[1].body?.messages[1].content).toContain('userEnglish');
   });
 
@@ -40,6 +41,46 @@ describe('LocalModelClient', () => {
     const health = await client.health();
     expect(health.status).toBe('unavailable');
     expect(health.error).toContain('connection refused');
+  });
+
+  it('can request a deployment-verified model override without changing the configured fallback', async () => {
+    let requestedModel = '';
+    const client = new LocalModelClient('http://127.0.0.1:11434', 'qwen3:4b-instruct', async (_input, init) => {
+      requestedModel = JSON.parse(String(init?.body)).model;
+      return jsonResponse({ model: requestedModel, message: { content: 'Validated adapter response.' }, done: true });
+    });
+    const result = await client.respond('System', { userEnglish: 'Hello' }, 'mirror-qwen3-4b-conversation-v1');
+    expect(requestedModel).toBe('mirror-qwen3-4b-conversation-v1');
+    expect(result.model).toBe('mirror-qwen3-4b-conversation-v1');
+  });
+
+  it('requests and strictly parses a schema-bound invention object', async () => {
+    let requestBody: Record<string, any> = {};
+    const client = new LocalModelClient('http://127.0.0.1:11434', 'qwen3:4b-instruct', async (_input, init) => {
+      requestBody = JSON.parse(String(init?.body));
+      return jsonResponse({
+        model: 'qwen3:4b-instruct',
+        message: { content: JSON.stringify({
+          source: 'pressure', target: 'reflection', relationshipType: 'moves_toward',
+          evidence: 'The language places both labels in motion.',
+          counterexample: 'Reject when reviewed uses consistently separate them.', confidence: 'low'
+        }) },
+        done: true
+      });
+    });
+    const schema = { type: 'object', required: ['source', 'target'] };
+    const result = await client.respondJson('Imagine one proposal.', { allowedLabels: ['pressure', 'reflection'] }, schema);
+    expect(result.value.relationshipType).toBe('moves_toward');
+    expect(requestBody.format).toEqual(schema);
+    expect(requestBody.think).toBe(false);
+    expect(requestBody.options.temperature).toBe(0.35);
+  });
+
+  it('rejects malformed structured output instead of guessing', async () => {
+    const client = new LocalModelClient('http://127.0.0.1:11434', 'qwen3:4b-instruct', async () =>
+      jsonResponse({ message: { content: 'source: pressure' }, done: true })
+    );
+    await expect(client.respondJson('System', {}, { type: 'object' })).rejects.toThrow('invalid structured JSON');
   });
 });
 

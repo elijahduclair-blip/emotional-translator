@@ -4,3 +4,9 @@ node_modules/
 **/coverage/
 .env
 *.log
+training/.venv/
+training/cache/
+training/data/
+training/output/
+training/reports/
+training/__pycache__/

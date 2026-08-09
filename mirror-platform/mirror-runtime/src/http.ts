@@ -36,7 +36,108 @@ export function createMirrorHttpServer(service: MirrorRuntimeService) {
 
       if (request.method === 'POST' && path === '/local-ai/respond') {
         requireSameOriginMutation(request);
-        return proxyResult(response, await service.getRuntime().respondWithLocalModel(await readJson(request, MAX_FOUNDATION_BODY_BYTES)));
+        return proxyResult(response, await service.getRuntime().respondWithLocalModel(
+          await readJson(request, MAX_FOUNDATION_BODY_BYTES),
+          optionalSession(request)
+        ));
+      }
+
+      if (request.method === 'POST' && path === '/local-ai/inventions/propose') {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().proposeLocalInvention(
+          await readJson(request, MAX_FOUNDATION_BODY_BYTES),
+          token
+        ));
+      }
+
+      if (request.method === 'POST' && path === '/local-ai/alignment/evaluate') {
+        requireSameOriginMutation(request);
+        return proxyResult(response, await service.getRuntime().evaluateWithAlignmentModel(await readJson(request, MAX_FOUNDATION_BODY_BYTES)));
+      }
+
+      if (request.method === 'POST' && path === '/local-ai/feedback') {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/local-ai/feedback', {
+          method: 'POST', body: await readJson(request, MAX_FOUNDATION_BODY_BYTES), userToken: token
+        }));
+      }
+
+      if (request.method === 'GET' && path === '/local-ai/feedback') {
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/local-ai/feedback', { userToken: token }));
+      }
+
+      const feedbackReview = path.match(/^\/local-ai\/feedback\/([^/]+)\/review$/);
+      if (request.method === 'PATCH' && feedbackReview) {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest(`/api/v1/local-ai/feedback/${encodeURIComponent(feedbackReview[1])}/review`, {
+          method: 'PATCH', body: await readJson(request), userToken: token
+        }));
+      }
+
+      const feedbackLearningCandidate = path.match(/^\/local-ai\/feedback\/([^/]+)\/learning-candidates$/);
+      if (request.method === 'POST' && feedbackLearningCandidate) {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest(`/api/v1/local-ai/feedback/${encodeURIComponent(feedbackLearningCandidate[1])}/learning-candidates`, {
+          method: 'POST', body: await readJson(request), userToken: token
+        }));
+      }
+
+      if (request.method === 'GET' && path === '/local-ai/learning-candidates') {
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/local-ai/learning-candidates', { userToken: token }));
+      }
+
+      const learningCandidateReview = path.match(/^\/local-ai\/learning-candidates\/([^/]+)\/review$/);
+      if (request.method === 'PATCH' && learningCandidateReview) {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest(`/api/v1/local-ai/learning-candidates/${encodeURIComponent(learningCandidateReview[1])}/review`, {
+          method: 'PATCH', body: await readJson(request), userToken: token
+        }));
+      }
+
+      if (request.method === 'GET' && path === '/local-ai/user-graph') {
+        const token = requireSession(request);
+        const text = url.searchParams.get('text');
+        const suffix = text ? `?text=${encodeURIComponent(text)}` : '';
+        return proxyResult(response, await service.getRuntime().codexRequest(`/api/v1/local-ai/user-graph${suffix}`, { userToken: token }));
+      }
+
+      if (request.method === 'GET' && path === '/local-ai/training/candidates') {
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/local-ai/training/candidates', { userToken: token }));
+      }
+
+      if (request.method === 'GET' && path === '/local-ai/training/status') {
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/local-ai/training/status', { userToken: token }));
+      }
+
+      if (request.method === 'GET' && path === '/local-ai/training/versions') {
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/local-ai/training/versions', { userToken: token }));
+      }
+
+      if (request.method === 'POST' && path === '/local-ai/training/versions') {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/local-ai/training/versions', {
+          method: 'POST', body: await readJson(request), userToken: token
+        }));
+      }
+
+      const adapterAction = path.match(/^\/local-ai\/training\/versions\/([^/]+)\/(activate|rollback)$/);
+      if (request.method === 'POST' && adapterAction) {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest(`/api/v1/local-ai/training/versions/${encodeURIComponent(adapterAction[1])}/${adapterAction[2]}`, {
+          method: 'POST', body: await readJson(request), userToken: token
+        }));
       }
 
       if (request.method === 'POST' && path === '/foundation/letters/analyze') {
@@ -230,12 +331,17 @@ function requireSameOriginMutation(request: IncomingMessage) {
 }
 
 function requireSession(request: IncomingMessage) {
+  const token = optionalSession(request);
+  if (!token) throw httpError(401, 'Authentication required.');
+  return token;
+}
+
+function optionalSession(request: IncomingMessage) {
   const cookies = Object.fromEntries(String(request.headers.cookie || '').split(';').map(value => value.trim()).filter(Boolean).map(value => {
     const index = value.indexOf('=');
     return index < 0 ? [value, ''] : [value.slice(0, index), decodeURIComponent(value.slice(index + 1))];
   }));
-  if (!cookies.mirror_session) throw httpError(401, 'Authentication required.');
-  return cookies.mirror_session;
+  return cookies.mirror_session || undefined;
 }
 
 function sessionCookie(token: string, clear = false) {

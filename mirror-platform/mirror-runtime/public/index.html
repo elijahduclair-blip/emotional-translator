@@ -451,6 +451,7 @@
         <span id="chromaService" class="service"><span class="service-dot"></span><span>ChromaBridge</span></span>
         <span id="codexService" class="service"><span class="service-dot"></span><span>Codex</span></span>
         <span id="localModelService" class="service"><span class="service-dot"></span><span>Local Qwen3</span></span>
+        <span id="alignmentModelService" class="service"><span class="service-dot"></span><span>Learned Alignment</span></span>
       </div>
     </header>
 
@@ -554,9 +555,23 @@
             <p class="intro">Persisted modules wait here for administrator review. Approval creates short-lived, single-use activation authority; activation can submit a relationship proposal but cannot change the approved graph directly.</p>
             <div class="braille-actions">
               <button id="refreshModuleQueue" type="button">Refresh module queue</button>
+              <button id="refreshFeedbackQueue" type="button">Refresh learning feedback</button>
+              <button id="downloadFeedbackDataset" type="button">Prepare accepted feedback dataset</button>
+              <button id="prepareConversationVersion" type="button">Prepare Qwen3 4B version</button>
+              <button id="refreshConversationVersions" type="button">Refresh adapter versions</button>
             </div>
             <div id="moduleQueueStatus" class="braille-status" role="status" aria-live="polite">Administrator sign-in is required to inspect the queue.</div>
             <div id="moduleQueue" class="signature-list"></div>
+            <h3>Supervised learning feedback</h3>
+            <div id="feedbackQueueStatus" class="braille-status" role="status" aria-live="polite">Administrator sign-in is required to review conversational teaching records.</div>
+            <div id="feedbackQueue" class="signature-list"></div>
+            <h3>Governed learning lanes</h3>
+            <p class="hint">Model retraining candidates teach a future adapter version. User-graph candidates add reviewed relationships only to that person's adaptive overlay.</p>
+            <div id="learningCandidateStatus" class="braille-status" role="status" aria-live="polite">Administrator sign-in is required to review learning candidates.</div>
+            <div id="learningCandidateQueue" class="signature-list"></div>
+            <h3>Conversational adapter versions</h3>
+            <div id="conversationVersionStatus" class="braille-status" role="status" aria-live="polite">Administrator sign-in is required to inspect training readiness.</div>
+            <div id="conversationVersionQueue" class="signature-list"></div>
             <div class="boundary"><strong>Activation boundary</strong><br>Every authority is hashed, expires after fifteen minutes, and can execute only one frozen handler. Retrying returns the existing result instead of creating a duplicate.</div>
           </section>
 
@@ -645,6 +660,12 @@ Gold memory moves through reflection.</textarea></label>
                 <div id="trainingDatasetOutput"></div>
                 <div class="boundary"><strong>Dataset-only boundary</strong><br>Generation validates examples but does not train Qwen, change model weights, or rewrite graph meaning.</div>
               </div>
+              <div class="foundation-panel runtime-language-panel">
+                <h3>Learned Alignment adapter</h3>
+                <p class="hint">Qwen3 0.6B learned the imported Color Atlas authority and coordinate-evidence rules through a separate LoRA adapter. Deterministic code still performs coordinate math and verifies every learned result.</p>
+                <div id="learnedAlignmentStatus" class="braille-status" role="status" aria-live="polite">Checking the trained adapter...</div>
+                <div class="boundary"><strong>Learned-model boundary</strong><br>The adapter may preserve supplied evidence. It cannot turn coordinate distance into meaning, approve graph data, or mutate the Atlas.</div>
+              </div>
               <div class="foundation-panel">
                 <h3>Account for a passage</h3>
                 <form id="foundationForm">
@@ -712,6 +733,10 @@ Gold memory moves through reflection.</textarea></label>
     let selectedDots = new Set();
     let currentAccount = null;
     let currentTrainingDataset = null;
+    let currentLocalAiExchange = null;
+    let currentInvention = null;
+    let currentFeedbackDataset = null;
+    let currentConversationVersionPackage = null;
     const moduleActivationTokens = new Map();
     const chordKeys = { s: 3, d: 2, f: 1, j: 4, k: 5, l: 6 };
     const heldChord = new Set();
@@ -763,26 +788,41 @@ Gold memory moves through reflection.</textarea></label>
         const body = await response.json();
         setServiceState('runtimeService', body.status === 'ready' ? 'ready' : 'fallback');
         setServiceState('localModelService', body.localModel?.status === 'ready' ? 'ready' : body.localModel?.status === 'disabled' ? 'fallback' : 'error');
+        setServiceState('alignmentModelService', body.alignmentModel?.status === 'ready' ? 'ready' : body.alignmentModel?.status === 'disabled' ? 'fallback' : 'error');
+        const validation = body.alignmentModel?.validation;
+        setText('learnedAlignmentStatus', body.alignmentModel?.status === 'ready'
+          ? `Adapter ready on ${body.alignmentModel.device}. Held-out exact matches: ${validation?.exactMatches ?? '?'} / ${validation?.examples ?? '?'}.`
+          : body.alignmentModel?.status === 'disabled' ? 'Learned adapter is disabled.' : 'Learned adapter is unavailable.');
       } catch {
         setServiceState('runtimeService', 'error');
         setServiceState('localModelService', 'error');
+        setServiceState('alignmentModelService', 'error');
+        setText('learnedAlignmentStatus', 'Learned adapter health could not be checked.');
       }
     }
 
     function bindLocalAiRoom() {
+      document.querySelector('#refreshFeedbackQueue').addEventListener('click', () => Promise.all([loadFeedbackQueue(), loadLearningCandidates()]));
+      document.querySelector('#downloadFeedbackDataset').addEventListener('click', prepareFeedbackDataset);
+      document.querySelector('#prepareConversationVersion').addEventListener('click', prepareConversationVersion);
+      document.querySelector('#refreshConversationVersions').addEventListener('click', loadConversationVersions);
       document.querySelector('#localAiForm').addEventListener('submit', async event => {
         event.preventDefault();
         const button = document.querySelector('#localAiButton');
         button.disabled = true;
-        setText('localAiStatus', 'Tracing English through Braille and numbers, then asking local Qwen3…');
+        setText('localAiStatus', 'Tracing English, checking relational knowledge, then asking local Qwen3…');
         try {
           const body = await mirrorFetch('/local-ai/respond', { input: document.querySelector('#localAiInput').value });
           renderLocalAi(body);
-          setText('localAiStatus', `${body.model.name} responded locally in English.`);
+          const handoff = body.trace?.learnedAlignment;
+          setText('localAiStatus', `${body.model.name} responded locally in English.${handoff?.status === 'verified' ? ' Learned alignment boundary verified.' : ''}`);
           setServiceState('localModelService', 'ready');
           setServiceState('runtimeService', 'ready');
           setServiceState('chromaService', 'ready');
           setServiceState('codexService', 'ready');
+          setServiceState('alignmentModelService', handoff?.status === 'verified'
+            ? 'ready'
+            : handoff?.status === 'not_applicable' ? 'fallback' : 'error');
         } catch (error) {
           setText('localAiStatus', error.message);
           setServiceState('localModelService', 'error');
@@ -793,6 +833,8 @@ Gold memory moves through reflection.</textarea></label>
     }
 
     function renderLocalAi(body) {
+      currentLocalAiExchange = body;
+      currentInvention = null;
       const trace = body.trace || {};
       const seconds = typeof body.timings?.totalDurationNanoseconds === 'number'
         ? (body.timings.totalDurationNanoseconds / 1e9).toFixed(2)
@@ -806,11 +848,93 @@ Gold memory moves through reflection.</textarea></label>
             <div class="evidence-line"><dt>Braille cells</dt><dd>${trace.cellCount || 0}</dd></div>
             <div class="evidence-line"><dt>English round trip</dt><dd>${trace.roundTripExact ? 'exact' : 'different'}</dd></div>
             <div class="evidence-line"><dt>Graph source</dt><dd>${escapeHtml(trace.graphSource)}</dd></div>
+            <div class="evidence-line"><dt>Learned handoff</dt><dd>${escapeHtml(trace.learnedAlignment?.status || 'not applicable')}${trace.learnedAlignment?.contractVerified ? ' · contract verified' : ''}</dd></div>
+            <div class="evidence-line"><dt>Conversation adapter</dt><dd>${escapeHtml(trace.conversationAdapter?.status || 'base model')}${trace.conversationAdapter?.versionName ? ` · ${escapeHtml(trace.conversationAdapter.versionName)}` : ''}</dd></div>
+            <div class="evidence-line"><dt>Route evidence</dt><dd>${escapeHtml(body.relationalEvidence?.notice || 'No relational evidence summary returned.')}</dd></div>
             <div class="evidence-line"><dt>Duration</dt><dd>${seconds} seconds</dd></div>
           </dl>
           <p class="hint">Braille trace</p><div class="runtime-braille" lang="en-brai">${escapeHtml(trace.braille)}</div>
           <p class="hint">Ordered machine numbers</p><div class="mask-sequence" aria-label="Ordered local-AI signal numbers">${(trace.numericSequence || []).map((mask, index) => `<span class="mask-cell" aria-label="Cell ${index + 1}; number ${mask}"><strong>${mask}</strong></span>`).join('')}</div>
+          <div class="account-box">
+            <h3>Imagination stage</h3>
+            <p class="hint">When no reviewed route exists, Qwen may imagine one low- or medium-confidence possibility. It must include evidence and a condition that would prove it wrong.</p>
+            <button id="inventLocalRoute" type="button">Imagine one possible route</button>
+            <div id="localInventionStatus" class="braille-status" role="status" aria-live="polite">${currentAccount ? 'Ready to imagine without writing to the graph.' : 'Sign in before generating a personal hypothesis.'}</div>
+            <div id="localInventionOutput"></div>
+          </div>
+          <div class="account-box">
+            <h3>Teach this response</h3>
+            <p class="hint">Approval or correction creates a proposed training record. Administrator review is still required before it can enter a conversational-adapter dataset.</p>
+            <label class="field"><span>Correction, if needed</span><textarea id="localAiCorrection" rows="3" maxlength="8000" placeholder="Write the response your AI should have given."></textarea></label>
+            <div class="braille-actions"><button id="approveLocalAi" type="button">Approve response</button><button id="correctLocalAi" type="button">Submit correction</button></div>
+            <div id="localAiFeedbackStatus" class="braille-status" role="status" aria-live="polite">${currentAccount ? 'Ready for your review.' : 'Sign in before teaching the model.'}</div>
+          </div>
         </div>`;
+      document.querySelector('#approveLocalAi').addEventListener('click', () => submitLocalAiFeedback('approved'));
+      document.querySelector('#correctLocalAi').addEventListener('click', () => submitLocalAiFeedback('corrected'));
+      document.querySelector('#inventLocalRoute').addEventListener('click', proposeLocalInvention);
+    }
+
+    async function proposeLocalInvention() {
+      if (!currentAccount) {
+        setText('localInventionStatus', 'Sign in before asking Qwen to imagine a personal hypothesis.');
+        return;
+      }
+      const context = currentLocalAiExchange?.feedback?.context;
+      if (!context?.input || !context?.interactionId) {
+        setText('localInventionStatus', 'Ask the local AI first so the invention has a traceable interaction.');
+        return;
+      }
+      const button = document.querySelector('#inventLocalRoute');
+      button.disabled = true;
+      setText('localInventionStatus', 'Qwen is imagining one falsifiable possibility...');
+      try {
+        const body = await mirrorFetch('/local-ai/inventions/propose', {
+          input: context.input,
+          interactionId: context.interactionId
+        });
+        currentInvention = body;
+        const proposal = body.proposal;
+        document.querySelector('#localInventionOutput').innerHTML = `
+          <div class="difference"><strong>${escapeHtml(proposal.source)}</strong> ${escapeHtml(proposal.relationshipType)} <strong>${escapeHtml(proposal.target)}</strong></div>
+          <p><strong>Why test it:</strong> ${escapeHtml(proposal.evidence)}</p>
+          <p><strong>Reject it when:</strong> ${escapeHtml(proposal.counterexample)}</p>
+          <p class="hint">${escapeHtml(proposal.confidence)} confidence &middot; AI-generated &middot; uncommitted</p>
+          <div class="boundary"><strong>Invention boundary</strong><br>${escapeHtml(body.boundary.reason)}</div>`;
+        setText('localInventionStatus', 'Possibility generated. Approve the response, then use Governance if you want to propose it to your personal graph.');
+      } catch (error) {
+        setText('localInventionStatus', error.message);
+        document.querySelector('#localInventionOutput').innerHTML = '';
+      } finally { button.disabled = false; }
+    }
+
+    async function submitLocalAiFeedback(decision) {
+      if (!currentAccount) {
+        setText('localAiFeedbackStatus', 'Sign in before submitting supervised feedback.');
+        return;
+      }
+      const feedback = currentLocalAiExchange?.feedback;
+      if (!feedback?.eligible || !feedback?.receipt || !feedback?.context) {
+        setText('localAiFeedbackStatus', 'This response does not have a signed training receipt. Ask the local AI again.');
+        return;
+      }
+      const correction = document.querySelector('#localAiCorrection').value.trim();
+      if (decision === 'corrected' && !correction) {
+        setText('localAiFeedbackStatus', 'Write the corrected response before submitting it.');
+        return;
+      }
+      try {
+        const body = await mirrorFetch('/local-ai/feedback', {
+          ...feedback.context,
+          receipt: feedback.receipt,
+          decision,
+          ...(decision === 'corrected' ? { correction } : {})
+        });
+        setText('localAiFeedbackStatus', `${body.feedback.decision} feedback stored as ${body.feedback.status}. It has not trained or activated a model.`);
+        document.querySelector('#approveLocalAi').disabled = true;
+        document.querySelector('#correctLocalAi').disabled = true;
+        if (currentAccount.role === 'admin') await loadFeedbackQueue();
+      } catch (error) { setText('localAiFeedbackStatus', error.message); }
     }
 
     async function loadBrailleRoom() {
@@ -957,7 +1081,7 @@ Gold memory moves through reflection.</textarea></label>
         currentAccount = body.user;
         setText('accountStatus', `Signed in as ${body.user.username}. Progress can synchronize.`);
         document.querySelector('#accountPassword').value = '';
-        if (body.user.role === 'admin') await loadModuleQueue();
+        if (body.user.role === 'admin') await Promise.all([loadModuleQueue(), loadFeedbackQueue(), loadLearningCandidates(), loadConversationVersions()]);
       } catch (error) { setText('accountStatus', error.message); }
     }
 
@@ -974,7 +1098,13 @@ Gold memory moves through reflection.</textarea></label>
       moduleActivationTokens.clear();
       setText('accountStatus', 'Signed out. Translation and lessons remain public.');
       setText('moduleQueueStatus', 'Administrator sign-in is required to inspect the queue.');
+      setText('feedbackQueueStatus', 'Administrator sign-in is required to review conversational teaching records.');
+      setText('learningCandidateStatus', 'Administrator sign-in is required to review learning candidates.');
+      setText('conversationVersionStatus', 'Administrator sign-in is required to inspect training readiness.');
       document.querySelector('#moduleQueue').innerHTML = '';
+      document.querySelector('#feedbackQueue').innerHTML = '';
+      document.querySelector('#learningCandidateQueue').innerHTML = '';
+      document.querySelector('#conversationVersionQueue').innerHTML = '';
     }
 
     async function refreshAccount() {
@@ -984,7 +1114,7 @@ Gold memory moves through reflection.</textarea></label>
         if (response.ok) {
           currentAccount = body.user;
           setText('accountStatus', `Signed in as ${body.user.username}. Progress can synchronize.`);
-          if (body.user.role === 'admin') await loadModuleQueue();
+          if (body.user.role === 'admin') await Promise.all([loadModuleQueue(), loadFeedbackQueue(), loadLearningCandidates(), loadConversationVersions()]);
         }
       } catch {}
     }
@@ -1204,6 +1334,192 @@ Gold memory moves through reflection.</textarea></label>
         setText('moduleQueueStatus', error.message);
         document.querySelector('#moduleQueue').innerHTML = '';
       }
+    }
+
+    async function loadFeedbackQueue() {
+      setText('feedbackQueueStatus', 'Loading supervised feedback proposals…');
+      try {
+        const response = await fetch('/local-ai/feedback');
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.error || `Request failed (${response.status}).`);
+        renderFeedbackQueue(body.feedback || []);
+        setText('feedbackQueueStatus', `${body.count} supervised feedback record${body.count === 1 ? '' : 's'} visible.`);
+      } catch (error) {
+        setText('feedbackQueueStatus', error.message);
+        document.querySelector('#feedbackQueue').innerHTML = '';
+      }
+    }
+
+    function inventionForFeedback(item) {
+      return currentInvention?.interactionId === item.interactionId ? currentInvention.proposal : null;
+    }
+
+    function inventionConfidenceSelected(item, value) {
+      return (inventionForFeedback(item)?.confidence || 'medium') === value ? 'selected' : '';
+    }
+
+    function renderFeedbackQueue(feedback) {
+      document.querySelector('#feedbackQueue').innerHTML = feedback.map(item => `<details class="signature" data-feedback-card="${escapeHtml(item.id)}" ${item.status === 'proposed' ? 'open' : ''}>
+        <summary>${escapeHtml(item.decision)} · ${escapeHtml(item.status)} · ${escapeHtml(item.modelName)}</summary>
+        <div class="signature-body">
+          <p><strong>Person:</strong> ${escapeHtml(item.canonicalEnglish)}</p>
+          <p><strong>Model:</strong> ${escapeHtml(item.modelResponse)}</p>
+          ${item.correction ? `<p><strong>Correction:</strong> ${escapeHtml(item.correction)}</p>` : ''}
+          <p class="hint">${escapeHtml(item.graphSource)} · ${item.relationalEvidence?.matchedNodeCount || 0} matched nodes · ${item.relationalEvidence?.confirmedRouteCount || 0} confirmed routes</p>
+          ${item.status === 'proposed' ? `<label class="field"><span>Review note</span><input data-feedback-note value="Verified against the conversation and non-mutation boundaries."></label><div class="braille-actions"><button type="button" data-feedback-review="accepted">Accept feedback and propose model lesson</button><button type="button" data-feedback-review="rejected">Reject feedback</button></div>` : ''}
+          ${item.status === 'accepted' ? `<div class="boundary"><strong>Personal graph proposal</strong><br>This relationship will remain user-specific even if separately approved.</div>
+            <div class="account-grid">
+              <label class="field"><span>Source label</span><input data-learning-source value="${escapeHtml(inventionForFeedback(item)?.source || '')}" maxlength="120" autocomplete="off"></label>
+              <label class="field"><span>Target label</span><input data-learning-target value="${escapeHtml(inventionForFeedback(item)?.target || '')}" maxlength="120" autocomplete="off"></label>
+              <label class="field"><span>Relationship</span><input data-learning-type value="${escapeHtml(inventionForFeedback(item)?.relationshipType || 'relates_to')}" maxlength="80" autocomplete="off"></label>
+              <label class="field"><span>Confidence</span><select data-learning-confidence><option ${inventionConfidenceSelected(item, 'medium')}>medium</option><option ${inventionConfidenceSelected(item, 'high')}>high</option><option ${inventionConfidenceSelected(item, 'low')}>low</option></select></label>
+            </div>
+            <label class="field"><span>Evidence from this interaction</span><input data-learning-evidence value="${escapeHtml(inventionForFeedback(item)?.evidence || 'The reviewed conversation supports this user-specific relationship.')}" maxlength="1000" autocomplete="off"></label>
+            <label class="field"><span>Counterexample / falsification condition</span><input data-learning-counterexample value="${escapeHtml(inventionForFeedback(item)?.counterexample || 'Reject this relationship if later reviewed evidence contradicts it.')}" maxlength="1000" autocomplete="off"></label>
+            <button type="button" data-propose-user-graph>Propose personal graph relationship</button>` : ''}
+        </div>
+      </details>`).join('') || '<p class="empty-state">No conversational feedback has been submitted.</p>';
+      document.querySelectorAll('[data-feedback-card]').forEach(card => {
+        card.querySelectorAll('[data-feedback-review]').forEach(button => button.addEventListener('click', async () => {
+          try {
+            await mirrorFetch(`/local-ai/feedback/${encodeURIComponent(card.dataset.feedbackCard)}/review`, {
+              decision: button.dataset.feedbackReview,
+              reviewNote: card.querySelector('[data-feedback-note]').value
+            }, 'PATCH');
+            await Promise.all([loadFeedbackQueue(), loadLearningCandidates()]);
+          } catch (error) { setText('feedbackQueueStatus', error.message); }
+        }));
+        card.querySelector('[data-propose-user-graph]')?.addEventListener('click', async () => {
+          try {
+            await mirrorFetch(`/local-ai/feedback/${encodeURIComponent(card.dataset.feedbackCard)}/learning-candidates`, {
+              lane: 'user_graph',
+              proposal: {
+                source: card.querySelector('[data-learning-source]').value,
+                target: card.querySelector('[data-learning-target]').value,
+                relationshipType: card.querySelector('[data-learning-type]').value,
+                confidence: card.querySelector('[data-learning-confidence]').value,
+                evidence: card.querySelector('[data-learning-evidence]').value,
+                counterexample: card.querySelector('[data-learning-counterexample]').value
+              }
+            });
+            await loadLearningCandidates();
+            setText('learningCandidateStatus', 'Personal graph relationship proposed. Separate approval is still required.');
+          } catch (error) { setText('learningCandidateStatus', error.message); }
+        });
+      });
+    }
+
+    async function loadLearningCandidates() {
+      setText('learningCandidateStatus', 'Loading separated graph and retraining candidates...');
+      try {
+        const response = await fetch('/local-ai/learning-candidates');
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.error || `Request failed (${response.status}).`);
+        renderLearningCandidates(body.candidates || []);
+        const graphCount = (body.candidates || []).filter(item => item.lane === 'user_graph').length;
+        const modelCount = (body.candidates || []).filter(item => item.lane === 'model_retraining').length;
+        setText('learningCandidateStatus', `${graphCount} personal-graph and ${modelCount} model-retraining candidate${modelCount === 1 ? '' : 's'} visible.`);
+      } catch (error) {
+        setText('learningCandidateStatus', error.message);
+        document.querySelector('#learningCandidateQueue').innerHTML = '';
+      }
+    }
+
+    function renderLearningCandidates(candidates) {
+      document.querySelector('#learningCandidateQueue').innerHTML = candidates.map(item => `<details class="signature" data-learning-card="${escapeHtml(item.id)}" ${item.status === 'proposed' ? 'open' : ''}>
+        <summary>${escapeHtml(item.lane === 'user_graph' ? 'personal graph' : 'future model')} &middot; ${escapeHtml(item.status)}</summary>
+        <div class="signature-body">
+          <p class="hint">Feedback ${escapeHtml(item.feedbackId)} &middot; user ${escapeHtml(item.userId)}</p>
+          ${item.lane === 'user_graph' ? `<p><strong>${escapeHtml(item.proposal.source)}</strong> ${escapeHtml(item.proposal.relationshipType)} <strong>${escapeHtml(item.proposal.target)}</strong></p><p class="hint">Evidence: ${escapeHtml(item.proposal.evidence)}<br>Falsification: ${escapeHtml(item.proposal.counterexample)}</p>` : '<p>This accepted response may enter the next deterministic adapter dataset after approval.</p>'}
+          ${item.status === 'proposed' ? `<label class="field"><span>Learning review note</span><input data-learning-note value="Reviewed for its specific lane and boundary."></label><div class="braille-actions"><button type="button" data-learning-review="approved">Approve this lane</button><button type="button" data-learning-review="rejected">Reject this lane</button></div>` : ''}
+          ${item.status === 'approved' ? `<div class="boundary"><strong>Applied boundary</strong><br>${item.lane === 'user_graph' ? 'Available only in this user personal overlay; shared graph unchanged.' : 'Eligible for a future model version; active weights unchanged.'}</div>` : ''}
+        </div>
+      </details>`).join('') || '<p class="empty-state">No governed learning candidates exist yet.</p>';
+      document.querySelectorAll('[data-learning-card]').forEach(card => {
+        card.querySelectorAll('[data-learning-review]').forEach(button => button.addEventListener('click', async () => {
+          try {
+            await mirrorFetch(`/local-ai/learning-candidates/${encodeURIComponent(card.dataset.learningCard)}/review`, {
+              decision: button.dataset.learningReview,
+              reviewNote: card.querySelector('[data-learning-note]').value
+            }, 'PATCH');
+            await Promise.all([loadLearningCandidates(), loadConversationVersions()]);
+          } catch (error) { setText('learningCandidateStatus', error.message); }
+        }));
+      });
+    }
+
+    async function prepareFeedbackDataset() {
+      setText('feedbackQueueStatus', 'Preparing accepted conversational feedback without changing model weights…');
+      try {
+        const response = await fetch('/local-ai/training/candidates');
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.error || `Request failed (${response.status}).`);
+        currentFeedbackDataset = body;
+        const blob = new Blob([body.jsonl], { type: 'application/x-ndjson;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `mirror-conversation-feedback-${body.version}.jsonl`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        setText('feedbackQueueStatus', `${body.recordCount} reviewed record${body.recordCount === 1 ? '' : 's'} prepared. Training and adapter activation have not started.`);
+      } catch (error) { setText('feedbackQueueStatus', error.message); }
+    }
+
+    async function loadConversationVersions() {
+      setText('conversationVersionStatus', 'Checking reviewed-example and adapter-version gates…');
+      try {
+        const [statusResponse, versionsResponse] = await Promise.all([
+          fetch('/local-ai/training/status'),
+          fetch('/local-ai/training/versions')
+        ]);
+        const statusBody = await statusResponse.json();
+        const versionsBody = await versionsResponse.json();
+        if (!statusResponse.ok) throw new Error(statusBody.error || `Request failed (${statusResponse.status}).`);
+        if (!versionsResponse.ok) throw new Error(versionsBody.error || `Request failed (${versionsResponse.status}).`);
+        renderConversationVersions(versionsBody.versions || []);
+        setText('conversationVersionStatus', `${statusBody.readiness.acceptedFeedback} / ${statusBody.readiness.minimumAcceptedFeedback} accepted teaching records. ${statusBody.readiness.readyToPrepareVersion ? 'Ready to prepare a version.' : 'Training remains blocked.'}${statusBody.activeVersion ? ` Active: ${statusBody.activeVersion.name}.` : ' Base Qwen3 4B remains active.'}`);
+      } catch (error) {
+        setText('conversationVersionStatus', error.message);
+        document.querySelector('#conversationVersionQueue').innerHTML = '';
+      }
+    }
+
+    async function prepareConversationVersion() {
+      setText('conversationVersionStatus', 'Verifying reviewed feedback and deterministic validation split…');
+      try {
+        const body = await mirrorFetch('/local-ai/training/versions', {});
+        currentConversationVersionPackage = body;
+        const blob = new Blob([JSON.stringify(body.package, null, 2)], { type: 'application/json;charset=utf-8' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `${body.version.name}-training-package.json`;
+        link.click();
+        URL.revokeObjectURL(link.href);
+        setText('conversationVersionStatus', `${body.version.name} prepared. Training and activation remain separate gated operations.`);
+        await loadConversationVersions();
+      } catch (error) { setText('conversationVersionStatus', error.message); }
+    }
+
+    function renderConversationVersions(versions) {
+      document.querySelector('#conversationVersionQueue').innerHTML = versions.map(version => `<details class="signature" data-version-card="${escapeHtml(version.id)}">
+        <summary>${escapeHtml(version.name)} · ${escapeHtml(version.status)} · ${version.datasetRecordCount} records</summary>
+        <div class="signature-body">
+          <p class="hint">${escapeHtml(version.baseModel)} · ${escapeHtml(version.adapterKind)}${version.ollamaModelName ? ` · runtime ${escapeHtml(version.ollamaModelName)}` : ''}</p>
+          <p class="hint">Dataset SHA-256 ${escapeHtml(version.datasetSha256)}</p>
+          ${version.status === 'deployable' ? `<label class="field"><span>Activation reason</span><input data-version-reason value="Validation and deployment probes passed."></label><button type="button" data-version-action="activate">Activate validated model</button>` : ''}
+          ${version.status === 'archived' && version.ollamaModelName ? `<label class="field"><span>Rollback reason</span><input data-version-reason value="Restore this previously validated model."></label><button type="button" data-version-action="rollback">Roll back to this model</button>` : ''}
+        </div>
+      </details>`).join('') || '<p class="empty-state">No conversational adapter version has been prepared.</p>';
+      document.querySelectorAll('[data-version-card]').forEach(card => {
+        card.querySelector('[data-version-action]')?.addEventListener('click', async event => {
+          try {
+            await mirrorFetch(`/local-ai/training/versions/${encodeURIComponent(card.dataset.versionCard)}/${event.target.dataset.versionAction}`, {
+              reason: card.querySelector('[data-version-reason]').value
+            });
+            await loadConversationVersions();
+          } catch (error) { setText('conversationVersionStatus', error.message); }
+        });
+      });
     }
 
     function renderModuleQueue(modules) {

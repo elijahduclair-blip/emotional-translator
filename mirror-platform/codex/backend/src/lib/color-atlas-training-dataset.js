@@ -77,6 +77,7 @@ function trainingRecords(atlasRecord, exactRecord, loop, validation) {
   const sharedMetadata = {
     generatorVersion: COLOR_ATLAS_TRAINING_VERSION,
     sourceId: atlasRecord.id,
+    sourceTier: atlasRecord.tier,
     sourceRef: exactRecord.sourceRef,
     verified: validation.valid,
     roundTripExact: validation.roundTripExact,

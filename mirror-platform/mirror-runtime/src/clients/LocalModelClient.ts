@@ -22,6 +22,10 @@ export interface LocalModelResponse {
   };
 }
 
+export interface LocalStructuredModelResponse extends LocalModelResponse {
+  value: Record<string, unknown>;
+}
+
 export class LocalModelClient {
   private readonly apiUrl: string;
 
@@ -60,7 +64,37 @@ export class LocalModelClient {
     }
   }
 
-  async respond(system: string, context: Record<string, unknown>): Promise<LocalModelResponse> {
+  async respond(system: string, context: Record<string, unknown>, modelOverride?: string): Promise<LocalModelResponse> {
+    return this.chat(system, context, modelOverride);
+  }
+
+  async respondJson(
+    system: string,
+    context: Record<string, unknown>,
+    schema: Record<string, unknown>,
+    modelOverride?: string
+  ): Promise<LocalStructuredModelResponse> {
+    const response = await this.chat(system, context, modelOverride, schema, 0.35);
+    let value: unknown;
+    try {
+      value = JSON.parse(response.text);
+    } catch {
+      throw httpError(502, 'Local Qwen returned invalid structured JSON.');
+    }
+    if (!value || typeof value !== 'object' || Array.isArray(value)) {
+      throw httpError(502, 'Local Qwen structured output must be a JSON object.');
+    }
+    return { ...response, value: value as Record<string, unknown> };
+  }
+
+  private async chat(
+    system: string,
+    context: Record<string, unknown>,
+    modelOverride?: string,
+    format?: Record<string, unknown>,
+    temperature = 0.2
+  ): Promise<LocalModelResponse> {
+    const requestedModel = modelOverride || this.model;
     let response: Response;
     try {
       response = await this.fetcher(`${this.apiUrl}/api/chat`, {
@@ -68,13 +102,15 @@ export class LocalModelClient {
         headers: { 'content-type': 'application/json' },
         signal: AbortSignal.timeout(240_000),
         body: JSON.stringify({
-          model: this.model,
+          model: requestedModel,
           stream: false,
+          think: false,
           messages: [
             { role: 'system', content: system },
             { role: 'user', content: JSON.stringify(context) }
           ],
-          options: { temperature: 0.2, num_ctx: 4096 }
+          ...(format ? { format } : {}),
+          options: { temperature, num_ctx: 4096 }
         })
       });
     } catch (error) {
@@ -97,7 +133,7 @@ export class LocalModelClient {
 
     return {
       provider: 'ollama',
-      model: body.model || this.model,
+      model: body.model || requestedModel,
       text,
       done: body.done === true,
       timings: {

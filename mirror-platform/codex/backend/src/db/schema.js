@@ -356,6 +356,109 @@ export async function createSchema() {
       CREATE INDEX IF NOT EXISTS idx_research_items_kind ON research_items(kind, status, created_at DESC);
     `);
 
+    // Governed conversational feedback, separated learning lanes, and personal graph overlays
+    await query(`
+      CREATE TABLE IF NOT EXISTS local_ai_feedback (
+        id TEXT PRIMARY KEY,
+        interaction_id TEXT NOT NULL,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        decision TEXT NOT NULL CHECK (decision IN ('approved','corrected')),
+        input TEXT NOT NULL,
+        canonical_english TEXT NOT NULL,
+        model_name TEXT NOT NULL,
+        model_response TEXT NOT NULL,
+        correction TEXT,
+        graph_source TEXT NOT NULL CHECK (graph_source IN ('approved_graph','chromabridge_knowledge','unresolved')),
+        learned_alignment_status TEXT NOT NULL,
+        contract_verified BOOLEAN NOT NULL DEFAULT FALSE,
+        relational_evidence JSONB NOT NULL,
+        response_sha256 TEXT NOT NULL,
+        status TEXT NOT NULL DEFAULT 'proposed' CHECK (status IN ('proposed','accepted','rejected')),
+        reviewer TEXT REFERENCES users(id),
+        review_note TEXT,
+        created_at TIMESTAMP DEFAULT NOW(),
+        reviewed_at TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT NOW(),
+        UNIQUE (user_id,interaction_id)
+      );
+      CREATE INDEX IF NOT EXISTS idx_local_ai_feedback_user ON local_ai_feedback(user_id,created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_local_ai_feedback_status ON local_ai_feedback(status,created_at DESC);
+
+      CREATE TABLE IF NOT EXISTS local_ai_learning_candidates (
+        id TEXT PRIMARY KEY,
+        feedback_id TEXT NOT NULL REFERENCES local_ai_feedback(id) ON DELETE CASCADE,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        lane TEXT NOT NULL CHECK (lane IN ('user_graph','model_retraining')),
+        proposal JSONB NOT NULL DEFAULT '{}'::jsonb,
+        status TEXT NOT NULL DEFAULT 'proposed' CHECK (status IN ('proposed','approved','rejected')),
+        reviewer TEXT REFERENCES users(id),
+        review_note TEXT,
+        created_at TIMESTAMP DEFAULT NOW(),
+        reviewed_at TIMESTAMP,
+        applied_at TIMESTAMP,
+        UNIQUE (feedback_id,lane)
+      );
+      CREATE INDEX IF NOT EXISTS idx_local_ai_learning_candidates_user ON local_ai_learning_candidates(user_id,created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_local_ai_learning_candidates_lane_status ON local_ai_learning_candidates(lane,status,created_at DESC);
+
+      CREATE TABLE IF NOT EXISTS user_graph_relationships (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        source_label TEXT NOT NULL,
+        source_key TEXT NOT NULL,
+        target_label TEXT NOT NULL,
+        target_key TEXT NOT NULL,
+        relationship_type TEXT NOT NULL,
+        confidence TEXT NOT NULL CHECK (confidence IN ('high','medium','low')),
+        evidence TEXT NOT NULL,
+        counterexample TEXT NOT NULL,
+        source_feedback_id TEXT NOT NULL REFERENCES local_ai_feedback(id) ON DELETE CASCADE,
+        learning_candidate_id TEXT NOT NULL UNIQUE REFERENCES local_ai_learning_candidates(id) ON DELETE CASCADE,
+        record_status TEXT NOT NULL DEFAULT 'active' CHECK (record_status IN ('active','retired')),
+        created_at TIMESTAMP DEFAULT NOW(),
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_user_graph_relationships_user ON user_graph_relationships(user_id,record_status,created_at DESC);
+
+      INSERT INTO local_ai_learning_candidates
+        (id,feedback_id,user_id,lane,proposal,status,reviewer,review_note,created_at,reviewed_at,applied_at)
+      SELECT 'legacy_retraining_' || feedback.id, feedback.id, feedback.user_id, 'model_retraining',
+        jsonb_build_object('source','accepted_feedback_backfill'), 'approved', feedback.reviewer,
+        'Accepted before governed learning lanes were introduced.', feedback.created_at,
+        COALESCE(feedback.reviewed_at,feedback.created_at), COALESCE(feedback.reviewed_at,feedback.created_at)
+      FROM local_ai_feedback AS feedback
+      WHERE feedback.status='accepted'
+      ON CONFLICT (feedback_id,lane) DO NOTHING;
+
+      CREATE TABLE IF NOT EXISTS local_ai_adapter_versions (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL UNIQUE,
+        base_model TEXT NOT NULL DEFAULT 'Qwen/Qwen3-4B',
+        runtime_base_model TEXT NOT NULL DEFAULT 'qwen3:4b-instruct',
+        adapter_kind TEXT NOT NULL DEFAULT 'conversation_lora',
+        dataset_sha256 TEXT NOT NULL,
+        dataset_record_count INTEGER NOT NULL,
+        training_feedback_ids TEXT[] NOT NULL,
+        dataset_manifest JSONB NOT NULL,
+        status TEXT NOT NULL DEFAULT 'prepared' CHECK (status IN ('prepared','training','trained','validated','deployable','active','rejected','failed','archived')),
+        artifact_path TEXT,
+        artifact_sha256 TEXT,
+        ollama_model_name TEXT,
+        training_report JSONB,
+        validation_report JSONB,
+        deployment_report JSONB,
+        created_by TEXT NOT NULL REFERENCES users(id),
+        activated_by TEXT REFERENCES users(id),
+        created_at TIMESTAMP DEFAULT NOW(),
+        trained_at TIMESTAMP,
+        validated_at TIMESTAMP,
+        deployed_at TIMESTAMP,
+        activated_at TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_local_ai_adapter_versions_status ON local_ai_adapter_versions(status,created_at DESC);
+    `);
+
     // Foundation sessions: saved structure-only word analysis for Base44 and other frontends
     await query(`
       CREATE TABLE IF NOT EXISTS foundation_sessions (

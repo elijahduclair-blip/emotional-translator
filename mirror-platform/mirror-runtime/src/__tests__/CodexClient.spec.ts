@@ -46,6 +46,19 @@ function graphRead(): CodexGraphRead {
 }
 
 describe('CodexClient compact persistence', () => {
+  it('reads the active conversational adapter only with the runtime service token', async () => {
+    let authorization = '';
+    const client = new CodexClient('http://codex.test', 'service-token', async (_url, init) => {
+      authorization = String((init?.headers as Record<string, string>)?.authorization || '');
+      return new Response(JSON.stringify({ activeVersion: { id: 'v1', status: 'active', ollamaModelName: 'mirror-qwen3-v1' } }), {
+        status: 200, headers: { 'content-type': 'application/json' }
+      });
+    });
+    const active = await client.getActiveConversationAdapter();
+    expect(authorization).toBe('Bearer service-token');
+    expect(active?.ollamaModelName).toBe('mirror-qwen3-v1');
+  });
+
   it('keeps only graph evidence references for runtime memory', () => {
     const compact = compactGraphRead(graphRead());
 

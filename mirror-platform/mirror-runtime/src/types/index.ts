@@ -39,10 +39,12 @@ export interface MirrorRuntimeConfig {
   enablePersistence?: boolean;
   enableCodexGraphRead?: boolean;
   enableLocalModel?: boolean;
+  enableAlignmentModel?: boolean;
   codexApiUrl?: string;
   codexServiceToken?: string;
   localModelUrl?: string;
   localModelName?: string;
+  alignmentModelUrl?: string;
 }
 
 export interface CodexGraphRead {
@@ -55,6 +57,15 @@ export interface CodexGraphRead {
     family: string | null;
     hexColor: string | null;
     semanticCode?: string | null;
+    coordinate?: Coordinate | null;
+    sourceLayer?: 'approved_graph' | 'chromabridge_knowledge';
+    sourceRef?: {
+      document: string;
+      sha256?: string | null;
+      page: number;
+      row: number;
+      extractionConfidence: string;
+    } | null;
     fixedSpace?: {
       anchor: string;
       degreeOfVision: number;

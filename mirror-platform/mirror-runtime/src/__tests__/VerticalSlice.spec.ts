@@ -26,6 +26,9 @@ describe('Mirror Platform vertical slice', () => {
   it('connects HTTP ask to ChromaBridge evaluation and Codex save', async () => {
     let receivedEvaluation: Record<string, unknown> | undefined;
     let receivedLocalContext: Record<string, any> | undefined;
+    let receivedAlignmentRequest: Record<string, any> | undefined;
+    let receivedFeedback: Record<string, any> | undefined;
+    let alignmentRequestCount = 0;
     const localModel = createServer(async (request, response) => {
       const chunks: Buffer[] = [];
       for await (const chunk of request) chunks.push(Buffer.from(chunk));
@@ -40,7 +43,12 @@ describe('Mirror Platform vertical slice', () => {
         response.writeHead(200, { 'content-type': 'application/json' });
         response.end(JSON.stringify({
           model: 'qwen3:4b-instruct',
-          message: { content: 'Reflection is moving as an open climate.' },
+          message: { content: body.format ? JSON.stringify({
+            sourceIndex: 1, targetIndex: 2, relationshipType: 'moves_toward',
+            evidence: 'The unresolved phrase places both grounded labels together.',
+            counterexample: 'Reject when reviewed uses consistently separate Amber from Glow.',
+            confidence: 'low'
+          }) : 'Reflection is moving as an open climate.' },
           done: true,
           total_duration: 1_000_000_000,
           load_duration: 1_000_000,
@@ -54,6 +62,41 @@ describe('Mirror Platform vertical slice', () => {
     await listen(localModel);
     const localModelAddress = localModel.address();
     if (!localModelAddress || typeof localModelAddress === 'string') throw new Error('Local model test server did not bind.');
+    const alignmentModel = createServer(async (request, response) => {
+      const chunks: Buffer[] = [];
+      for await (const chunk of request) chunks.push(Buffer.from(chunk));
+      const body = JSON.parse(Buffer.concat(chunks).toString('utf8') || '{}');
+      if (request.url === '/health') {
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({
+          status: 'ready', provider: 'transformers_peft', model: 'Qwen/Qwen3-0.6B',
+          adapter: 'qwen3-0.6b-alignment-v2', device: 'cpu', learned: true,
+          validation: { examples: 38, exactMatches: 38, jsonEquivalentMatches: 38 }
+        }));
+        return;
+      }
+      if (request.url === '/v1/evaluate') {
+        alignmentRequestCount += 1;
+        receivedAlignmentRequest = body;
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({
+          engine: 'mirror_learned_alignment',
+          model: { provider: 'transformers_peft', base: 'Qwen/Qwen3-0.6B', adapter: 'qwen3-0.6b-alignment-v2', local: true, learned: true },
+          mode: 'authority_boundary',
+          result: {
+            sourceLayer: 'chromabridge_knowledge', importedTierIsCanonicalAnchor: false,
+            coordinateDistanceCreatesMeaning: false, semanticMutationAllowed: false, graphMutationAllowed: false
+          },
+          contractVerified: true,
+          boundary: { semanticMutationAllowed: false, graphMutationAllowed: false, coordinateDistanceCreatesMeaning: false, reason: 'verified' }
+        }));
+        return;
+      }
+      response.writeHead(404).end();
+    });
+    await listen(alignmentModel);
+    const alignmentModelAddress = alignmentModel.address();
+    if (!alignmentModelAddress || typeof alignmentModelAddress === 'string') throw new Error('Alignment model test server did not bind.');
     const codex = createServer(async (request, response) => {
       const chunks: Buffer[] = [];
       for await (const chunk of request) chunks.push(Buffer.from(chunk));
@@ -192,7 +235,62 @@ describe('Mirror Platform vertical slice', () => {
         response.end(JSON.stringify({ token: 'signed-codex-token', user: { id: 'learner', username: 'learner' } }));
         return;
       }
+      if (request.url === '/api/v1/local-ai/feedback' && request.method === 'POST') {
+        receivedFeedback = body;
+        expect(request.headers.authorization).toBe('Bearer signed-codex-token');
+        response.writeHead(201, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({
+          feedback: { id: 'feedback-1', interactionId: body.receipt.interactionId, decision: body.decision, status: 'proposed' },
+          boundary: { trainingStarted: false, modelWeightsChanged: false, activeAdapterChanged: false }
+        }));
+        return;
+      }
+      if (request.url === '/api/v1/local-ai/feedback' && request.method === 'GET') {
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ feedback: [], count: 0 }));
+        return;
+      }
+      if (request.url?.startsWith('/api/v1/local-ai/user-graph?text=') && request.method === 'GET') {
+        expect(request.headers.authorization).toBe('Bearer signed-codex-token');
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ sourceLayer: 'user_graph', consulted: true, relationships: [], relationshipCount: 0, truncated: false }));
+        return;
+      }
+      if (request.url === '/api/v1/local-ai/feedback/feedback-1/review' && request.method === 'PATCH') {
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ feedback: { id: 'feedback-1', status: body.decision } }));
+        return;
+      }
+      if (request.url === '/api/v1/local-ai/training/candidates' && request.method === 'GET') {
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ version: '1.0.0', recordCount: 1, jsonl: '{}\n', boundary: { trainingStarted: false, activeAdapterChanged: false } }));
+        return;
+      }
+      if (request.url === '/api/v1/local-ai/training/active' && request.method === 'GET') {
+        expect(request.headers.authorization).toBe('Bearer test-service-token');
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ activeVersion: null }));
+        return;
+      }
       if (request.url === '/api/v1/translate/graph-read') {
+        if (body.text === 'Amber Glow') {
+          response.writeHead(200, { 'content-type': 'application/json' });
+          response.end(JSON.stringify({
+            input: body.text,
+            sourceLayer: 'chromabridge_knowledge',
+            matchedNodes: [{
+              id: 'amber-glow', label: 'Amber Glow', type: 'bridge', family: 'stimulus', hexColor: '#FFBF00',
+              coordinate: { x: 255, y: 149, z: 255 },
+              sourceRef: { document: 'ChromaBridge Export example.pdf', page: 1, row: 18, extractionConfidence: 'high' }
+            }],
+            supportedRoutes: [],
+            colorClimateLanding: null,
+            connectionStrength: 'low',
+            evidence: { nodeCount: 1, routeCount: 0, confidenceBasis: 'Imported exact phrase.' },
+            boundary: 'Imported reference knowledge only.'
+          }));
+          return;
+        }
         response.writeHead(200, { 'content-type': 'application/json' });
         response.end(JSON.stringify({
           input: body.text,
@@ -232,7 +330,9 @@ describe('Mirror Platform vertical slice', () => {
       codexApiUrl: `http://127.0.0.1:${codexAddress.port}`,
       codexServiceToken: 'test-service-token',
       localModelUrl: `http://127.0.0.1:${localModelAddress.port}`,
-      localModelName: 'qwen3:4b-instruct'
+      localModelName: 'qwen3:4b-instruct',
+      enableAlignmentModel: true,
+      alignmentModelUrl: `http://127.0.0.1:${alignmentModelAddress.port}`
     });
     await service.start();
     const mirror = createMirrorHttpServer(service);
@@ -259,31 +359,102 @@ describe('Mirror Platform vertical slice', () => {
       expect(shell).toContain('Your local AI / Qwen3 reasoning');
       expect(shell).toContain('Verified training dataset');
       expect(shell).toContain('Convert current color atlas');
+      expect(shell).toContain('Learned Alignment adapter');
+      expect(shell).toContain('Learned handoff');
+      expect(shell).toContain('Teach this response');
+      expect(shell).toContain('Imagination stage');
+      expect(shell).toContain('Supervised learning feedback');
+      expect(shell).toContain('Prepare accepted feedback dataset');
+      expect(shell).toContain('Prepare Qwen3 4B version');
+      expect(shell).toContain('Conversational adapter versions');
       expect(shell).toContain('record.metadata.task');
 
       const health = await fetch(`http://127.0.0.1:${mirrorAddress.port}/health`);
-      const healthBody = await health.json() as { localModel: { status: string; model: string } };
+      const healthBody = await health.json() as {
+        localModel: { status: string; model: string };
+        alignmentModel: { status: string; validation: { exactMatches: number } };
+      };
       expect(healthBody.localModel.status).toBe('ready');
       expect(healthBody.localModel.model).toBe('qwen3:4b-instruct');
+      expect(healthBody.alignmentModel.status).toBe('ready');
+      expect(healthBody.alignmentModel.validation.exactMatches).toBe(38);
 
       const localAi = await fetch(`http://127.0.0.1:${mirrorAddress.port}/local-ai/respond`, {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin' },
-        body: JSON.stringify({ input: 'Reflection moves through silver climate.' })
+        body: JSON.stringify({ input: 'Amber Glow' })
       });
       const localAiBody = await localAi.json() as {
         model: { name: string; local: boolean };
         response: { language: string; text: string };
-        trace: { roundTripExact: boolean };
+        relationalEvidence: { matchedNodeCount: number; confirmedRouteCount: number; relationshipClaimsSupported: boolean; notice: string };
+        feedback: {
+          eligible: boolean;
+          receipt: { version: string; interactionId: string; issuedAt: string; signature: string };
+          context: Record<string, unknown>;
+          boundary: { trainingStarted: boolean; modelWeightsChanged: boolean; activeAdapterChanged: boolean };
+        };
+        trace: {
+          roundTripExact: boolean;
+          graphSource: string;
+          learnedAlignment: { consulted: boolean; status: string; contractVerified: boolean; adapter: string };
+          conversationAdapter: { status: string; versionId: string | null; servedModel: string };
+        };
         boundary: { semanticMutationAllowed: boolean };
       };
       expect(localAi.status).toBe(200);
       expect(localAiBody.model).toEqual({ provider: 'ollama', name: 'qwen3:4b-instruct', local: true });
       expect(localAiBody.response).toEqual({ language: 'english', text: 'Reflection is moving as an open climate.' });
       expect(localAiBody.trace.roundTripExact).toBe(true);
+      expect(localAiBody.trace.graphSource).toBe('chromabridge_knowledge');
+      expect(localAiBody.trace.learnedAlignment).toEqual({
+        consulted: true,
+        status: 'verified',
+        contractVerified: true,
+        adapter: 'qwen3-0.6b-alignment-v2'
+      });
+      expect(localAiBody.trace.conversationAdapter).toEqual(expect.objectContaining({
+        status: 'base_model',
+        versionId: null,
+        servedModel: 'qwen3:4b-instruct'
+      }));
+      expect(localAiBody.relationalEvidence).toEqual(expect.objectContaining({
+        matchedNodeCount: 1,
+        confirmedRouteCount: 0,
+        relationshipClaimsSupported: false
+      }));
+      expect(localAiBody.relationalEvidence.notice).toContain('no relationship is established');
       expect(localAiBody.boundary.semanticMutationAllowed).toBe(false);
-      expect(receivedLocalContext?.userEnglish).toBe('Reflection moves through silver climate.');
+      expect(localAiBody.feedback.eligible).toBe(true);
+      expect(localAiBody.feedback.receipt.signature.length).toBeGreaterThan(20);
+      expect(localAiBody.feedback.boundary).toEqual(expect.objectContaining({
+        trainingStarted: false,
+        modelWeightsChanged: false,
+        activeAdapterChanged: false
+      }));
+      expect(receivedLocalContext?.userEnglish).toBe('Amber Glow');
       expect(receivedLocalContext?.signal.numericSequence.length).toBeGreaterThan(0);
+      expect(receivedLocalContext?.relationships.sourceLayer).toBe('chromabridge_knowledge');
+      expect(receivedLocalContext?.learnedAlignment.contractVerified).toBe(true);
+      expect(receivedAlignmentRequest?.mode).toBe('authority_boundary');
+      expect(receivedAlignmentRequest?.record.name).toBe('Amber Glow');
+      expect(alignmentRequestCount).toBe(1);
+
+      const governedGraphAi = await fetch(`http://127.0.0.1:${mirrorAddress.port}/local-ai/respond`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin' },
+        body: JSON.stringify({ input: 'Rose connection' })
+      });
+      const governedGraphAiBody = await governedGraphAi.json() as {
+        trace: { graphSource: string; learnedAlignment: { status: string; consulted: boolean } };
+      };
+      expect(governedGraphAi.status).toBe(200);
+      expect(governedGraphAiBody.trace.graphSource).toBe('approved_graph');
+      expect(governedGraphAiBody.trace.learnedAlignment).toEqual(expect.objectContaining({
+        status: 'not_applicable',
+        consulted: false
+      }));
+      expect(alignmentRequestCount).toBe(1);
 
       const trainingDataset = await fetch(`http://127.0.0.1:${mirrorAddress.port}/foundation/training/dataset`, {
         method: 'POST',
@@ -407,7 +578,41 @@ describe('Mirror Platform vertical slice', () => {
       expect(login.headers.get('set-cookie')).toContain('HttpOnly');
       expect(loginBody.token).toBeUndefined();
       const session = login.headers.get('set-cookie')?.split(';')[0];
+
+      const invention = await fetch(`http://127.0.0.1:${mirrorAddress.port}/local-ai/inventions/propose`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin', cookie: session! },
+        body: JSON.stringify({ input: 'Amber Glow', interactionId: 'interaction-invention-1' })
+      });
+      const inventionBody = await invention.json() as {
+        proposal: { source: string; target: string; origin: string; status: string; confidence: string };
+        boundary: { persisted: boolean; graphMutationAllowed: boolean; trainingStarted: boolean };
+      };
+      expect(invention.status).toBe(200);
+      expect(inventionBody.proposal).toEqual(expect.objectContaining({
+        source: 'Amber', target: 'Glow', origin: 'ai_generated', status: 'uncommitted_hypothesis', confidence: 'low'
+      }));
+      expect(inventionBody.boundary).toEqual(expect.objectContaining({
+        persisted: false, graphMutationAllowed: false, trainingStarted: false
+      }));
       expect(session).toContain('mirror_session=');
+
+      const feedback = await fetch(`http://127.0.0.1:${mirrorAddress.port}/local-ai/feedback`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin', cookie: session! },
+        body: JSON.stringify({
+          ...localAiBody.feedback.context,
+          receipt: localAiBody.feedback.receipt,
+          decision: 'corrected',
+          correction: 'Amber Glow is an imported reference match. No supplied route establishes a relationship.'
+        })
+      });
+      const feedbackBody = await feedback.json() as { feedback: { status: string }; boundary: { modelWeightsChanged: boolean } };
+      expect(feedback.status).toBe(201);
+      expect(feedbackBody.feedback.status).toBe('proposed');
+      expect(feedbackBody.boundary.modelWeightsChanged).toBe(false);
+      expect(receivedFeedback?.decision).toBe('corrected');
+      expect(receivedFeedback?.receipt.signature).toBe(localAiBody.feedback.receipt.signature);
 
       const submittedModule = await fetch(`http://127.0.0.1:${mirrorAddress.port}/foundation/braille-runtime/modules`, {
         method: 'POST',
@@ -453,6 +658,7 @@ describe('Mirror Platform vertical slice', () => {
       await close(mirror);
       await service.stop();
       await close(codex);
+      await close(alignmentModel);
       await close(localModel);
     }
   });

@@ -18,6 +18,7 @@ import runtimeRouter from './routes/runtime.js';
 import wordNetRouter from './routes/wordnet.js';
 import brailleMathRouter from './routes/braille-math.js';
 import brailleRuntimeGovernanceRouter from './routes/braille-runtime-governance.js';
+import localAiFeedbackRouter from './routes/local-ai-feedback.js';
 import { limitPublicAnalysis, validateProductionConfig } from './middleware/public-api.js';
 
 dotenv.config();
@@ -106,6 +107,7 @@ app.use('/api/v1', wordNetRouter);
 app.use('/api/v1', brailleMathRouter);
 app.use('/api/v1', brailleRuntimeGovernanceRouter);
 app.use('/api/v1', runtimeRouter);
+app.use('/api/v1', localAiFeedbackRouter);
 
 // 404
 app.use((req, res) => {

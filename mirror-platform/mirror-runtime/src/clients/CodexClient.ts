@@ -1,4 +1,5 @@
 import type { ChromaBridgeEvaluation } from '@mirror-platform/chromabridge-sdk';
+import crypto from 'node:crypto';
 import type { CodexGraphRead, EmotionalTranslation } from '../types';
 
 const MAX_SAVE_PAYLOAD_BYTES = 32 * 1024;
@@ -12,12 +13,57 @@ export interface SavedEvaluation {
 
 type Fetch = typeof fetch;
 
+export interface FeedbackReceiptInput {
+  interactionId: string;
+  issuedAt: string;
+  input: string;
+  canonicalEnglish: string;
+  modelName: string;
+  modelResponse: string;
+  graphSource: string;
+  learnedAlignmentStatus: string;
+  contractVerified: boolean;
+  relationalEvidence: {
+    sourceLayer: string;
+    matchedNodeCount: number;
+    confirmedRouteCount: number;
+    relationshipClaimsSupported: boolean;
+  };
+}
+
 export class CodexClient {
   constructor(
     private readonly apiUrl: string,
     private readonly serviceToken: string,
     private readonly fetcher: Fetch = fetch
   ) {}
+
+  createFeedbackReceipt(value: FeedbackReceiptInput) {
+    if (!this.serviceToken) return null;
+    const version = '1.0.0';
+    const payload = JSON.stringify([
+      version,
+      value.interactionId,
+      value.issuedAt,
+      value.input,
+      value.canonicalEnglish,
+      value.modelName,
+      value.modelResponse,
+      value.graphSource,
+      value.learnedAlignmentStatus,
+      value.contractVerified === true,
+      value.relationalEvidence.sourceLayer,
+      value.relationalEvidence.matchedNodeCount,
+      value.relationalEvidence.confirmedRouteCount,
+      value.relationalEvidence.relationshipClaimsSupported === true
+    ]);
+    return {
+      version,
+      interactionId: value.interactionId,
+      issuedAt: value.issuedAt,
+      signature: crypto.createHmac('sha256', this.serviceToken).update(payload).digest('base64url')
+    };
+  }
 
   async translateGraph(text: string): Promise<CodexGraphRead> {
     const response = await this.fetcher(`${this.apiUrl}/api/v1/translate/graph-read`, {
@@ -52,6 +98,16 @@ export class CodexClient {
     });
     const body = await response.json() as Record<string, any>;
     return { status: response.status, body };
+  }
+
+  async getActiveConversationAdapter(): Promise<Record<string, any> | null> {
+    if (!this.serviceToken) return null;
+    const response = await this.fetcher(`${this.apiUrl}/api/v1/local-ai/training/active`, {
+      headers: { authorization: `Bearer ${this.serviceToken}`, 'content-type': 'application/json' }
+    });
+    const body = await response.json() as { activeVersion?: Record<string, any> | null; error?: string };
+    if (!response.ok) throw new Error(`Codex active adapter read failed (${response.status}): ${body.error || 'Unknown error'}`);
+    return body.activeVersion || null;
   }
 
   async saveEvaluation(
