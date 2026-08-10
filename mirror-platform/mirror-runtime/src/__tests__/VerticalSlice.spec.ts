@@ -4,7 +4,7 @@ import { MirrorRuntime } from '../MirrorRuntime';
 import { MirrorRuntimeService } from '../services/mirror-runtime.service';
 import { createMirrorHttpServer } from '../http';
 
-describe('Mirror Platform vertical slice', () => {
+describe('Community Garden vertical slice', () => {
   it('asks ChromaBridge for a boundary-safe evaluation', async () => {
     const runtime = new MirrorRuntime({
       userId: 'test-user',
@@ -28,6 +28,7 @@ describe('Mirror Platform vertical slice', () => {
     let receivedLocalContext: Record<string, any> | undefined;
     let receivedAlignmentRequest: Record<string, any> | undefined;
     let receivedFeedback: Record<string, any> | undefined;
+    let receivedResearchItem: Record<string, any> | undefined;
     let alignmentRequestCount = 0;
     const localModel = createServer(async (request, response) => {
       const chunks: Buffer[] = [];
@@ -230,9 +231,59 @@ describe('Mirror Platform vertical slice', () => {
         }));
         return;
       }
+      if (request.url?.startsWith('/api/v1/research/search?') && request.method === 'GET') {
+        expect(request.headers.authorization).toBe('Bearer signed-codex-token');
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({
+          query: 'color atmosphere', sources: ['wikipedia', 'crossref'], cached: false, warnings: [],
+          suggestions: { strength: 'weak', graphMatches: [{ id: 'mist', label: 'Mist', type: 'environment_term', score: 1 }], boundary: 'Suggestions are leads only.' },
+          results: [{
+            externalId: 'wikipedia:1', title: 'Atmospheric colour', sourceName: 'Wikipedia', sourceType: 'encyclopedic',
+            url: 'https://en.wikipedia.org/?curid=1', excerpt: 'A bounded source excerpt.', publishedAt: null,
+            boundary: 'Orientation only; verify contested claims.'
+          }]
+        }));
+        return;
+      }
+      if (request.url === '/api/v1/research/items' && request.method === 'POST') {
+        expect(request.headers.authorization).toBe('Bearer signed-codex-token');
+        receivedResearchItem = body;
+        response.writeHead(201, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ item: { id: 'research-1', ...body, source_name: body.sourceName, source_url: body.sourceUrl, status: 'proposed' } }));
+        return;
+      }
+      if (request.url === '/api/v1/research/items' && request.method === 'GET') {
+        expect(request.headers.authorization).toBe('Bearer signed-codex-token');
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ items: [{
+          id: 'research-1', query: 'color atmosphere', title: 'Atmospheric colour', source_name: 'Wikipedia',
+          source_url: 'https://en.wikipedia.org/?curid=1', excerpt: 'A bounded source excerpt.', boundary: 'Orientation only.',
+          counterexample: 'Reject when the source does not address relational climate.', confidence: 'low', status: 'proposed'
+        }], count: 1 }));
+        return;
+      }
+      if (request.url === '/api/v1/research/items/research-1/review' && request.method === 'PATCH') {
+        expect(request.headers.authorization).toBe('Bearer signed-codex-token');
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ item: { id: 'research-1', status: body.decision, review_note: body.reviewNote } }));
+        return;
+      }
+      if (request.url === '/api/v1/research/items/research-1/graph-proposal' && request.method === 'POST') {
+        expect(request.headers.authorization).toBe('Bearer signed-codex-token');
+        response.writeHead(201, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ proposalId: 'proposal-research-1', status: 'proposed' }));
+        return;
+      }
       if (request.url === '/api/v1/auth/login') {
         response.writeHead(200, { 'content-type': 'application/json' });
-        response.end(JSON.stringify({ token: 'signed-codex-token', user: { id: 'learner', username: 'learner' } }));
+        response.end(JSON.stringify({ token: 'signed-codex-token', user: { id: 'learner', username: 'learner', role: 'admin' } }));
+        return;
+      }
+      if (request.url === '/api/v1/auth/change-password' && request.method === 'POST') {
+        expect(request.headers.authorization).toBe('Bearer signed-codex-token');
+        expect(body).toEqual({ currentPassword: 'Example2026', newPassword: 'Replacement2026' });
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ token: 'refreshed-codex-token', user: { id: 'learner', username: 'learner', role: 'admin', must_change_password: false } }));
         return;
       }
       if (request.url === '/api/v1/local-ai/feedback' && request.method === 'POST') {
@@ -344,7 +395,20 @@ describe('Mirror Platform vertical slice', () => {
       const shellResponse = await fetch(`http://127.0.0.1:${mirrorAddress.port}/`);
       const shell = await shellResponse.text();
       expect(shellResponse.status).toBe(200);
-      expect(shell).toContain('Mirror Platform');
+      expect(shellResponse.headers.get('permissions-policy')).toBe('camera=(), microphone=(self), geolocation=()');
+      expect(shell).toContain('Community Garden');
+      expect(shell).toContain('id="garden"');
+      expect(shell).toContain('The knowledge cultivation loop');
+      expect(shell).toContain('Personal plot');
+      expect(shell).toContain('Community soil');
+      expect(shell).toContain('data-garden-room="research"');
+      expect(shell).toContain('data-garden-room="account"');
+      expect(shell).toContain('Open Account sign-in');
+      expect(shell).toContain('Research Intake / outside evidence');
+      expect(shell).toContain('Save as evidence candidate');
+      expect(shell).toContain('External-evidence boundary');
+      expect(shell).toContain('data-garden-room="localAi"');
+      expect(shell).toContain('function activateGardenRoom()');
       expect(shell).toContain('id="atlas"');
       expect(shell).toContain('id="governance"');
       expect(shell).toContain('id="memory"');
@@ -368,6 +432,15 @@ describe('Mirror Platform vertical slice', () => {
       expect(shell).toContain('Prepare Qwen3 4B version');
       expect(shell).toContain('Conversational adapter versions');
       expect(shell).toContain('record.metadata.task');
+      expect(shell).toContain('id="translateMicButton"');
+      expect(shell).toContain('id="localAiMicButton"');
+      expect(shell).toContain('navigator.mediaDevices.getUserMedia');
+      expect(shell).toContain('window.SpeechRecognition || window.webkitSpeechRecognition');
+      expect(shell).toContain('Community Garden does not store raw audio; speech recognition is handled by your browser.');
+      expect(shell).toContain('mirror-platform.microphone-always-on');
+      expect(shell).toContain('Turn microphone off');
+      expect(shell).toContain('handleAlwaysOnRecognitionEnd');
+      expect(shell).toContain('startAlwaysOnMicrophone(config, { skipPermissionCheck: true })');
 
       const health = await fetch(`http://127.0.0.1:${mirrorAddress.port}/health`);
       const healthBody = await health.json() as {
@@ -578,6 +651,65 @@ describe('Mirror Platform vertical slice', () => {
       expect(login.headers.get('set-cookie')).toContain('HttpOnly');
       expect(loginBody.token).toBeUndefined();
       const session = login.headers.get('set-cookie')?.split(';')[0];
+
+      const changedPassword = await fetch(`http://127.0.0.1:${mirrorAddress.port}/account/change-password`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin', cookie: session! },
+        body: JSON.stringify({ currentPassword: 'Example2026', newPassword: 'Replacement2026' })
+      });
+      const changedPasswordBody = await changedPassword.json() as Record<string, unknown>;
+      expect(changedPassword.status).toBe(200);
+      expect(changedPassword.headers.get('set-cookie')).toContain('HttpOnly');
+      expect(changedPassword.headers.get('set-cookie')).toContain('refreshed-codex-token');
+      expect(changedPasswordBody.token).toBeUndefined();
+
+      const researchSearch = await fetch(`http://127.0.0.1:${mirrorAddress.port}/research/search?q=color%20atmosphere&sources=wikipedia%2Ccrossref`, {
+        headers: { cookie: session! }
+      });
+      const researchSearchBody = await researchSearch.json() as { results: Array<{ sourceName: string }>; suggestions: { strength: string } };
+      expect(researchSearch.status).toBe(200);
+      expect(researchSearchBody.results[0].sourceName).toBe('Wikipedia');
+      expect(researchSearchBody.suggestions.strength).toBe('weak');
+
+      const researchCandidate = await fetch(`http://127.0.0.1:${mirrorAddress.port}/research/items`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin', cookie: session! },
+        body: JSON.stringify({
+          query: 'color atmosphere', title: 'Atmospheric colour', sourceName: 'Wikipedia', sourceType: 'encyclopedic',
+          sourceUrl: 'https://en.wikipedia.org/?curid=1', excerpt: 'A bounded source excerpt.',
+          boundary: 'Orientation only; verify contested claims.',
+          counterexample: 'Reject when the source does not address relational climate.', confidence: 'low'
+        })
+      });
+      const researchCandidateBody = await researchCandidate.json() as { item: { status: string } };
+      expect(researchCandidate.status).toBe(201);
+      expect(researchCandidateBody.item.status).toBe('proposed');
+      expect(receivedResearchItem?.counterexample).toContain('does not address relational climate');
+      expect(receivedResearchItem?.status).toBeUndefined();
+      expect(receivedResearchItem?.graphProposalId).toBeUndefined();
+
+      const researchInbox = await fetch(`http://127.0.0.1:${mirrorAddress.port}/research/items`, { headers: { cookie: session! } });
+      const researchInboxBody = await researchInbox.json() as { items: Array<{ status: string }> };
+      expect(researchInbox.status).toBe(200);
+      expect(researchInboxBody.items[0].status).toBe('proposed');
+
+      const researchReview = await fetch(`http://127.0.0.1:${mirrorAddress.port}/research/items/research-1/review`, {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin', cookie: session! },
+        body: JSON.stringify({ decision: 'approved', reviewNote: 'Provenance and falsification condition reviewed.' })
+      });
+      const researchReviewBody = await researchReview.json() as { item: { status: string } };
+      expect(researchReview.status).toBe(200);
+      expect(researchReviewBody.item.status).toBe('approved');
+
+      const researchProposal = await fetch(`http://127.0.0.1:${mirrorAddress.port}/research/items/research-1/graph-proposal`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin', cookie: session! },
+        body: JSON.stringify({ label: 'color atmosphere', nodeType: 'theme', family: null })
+      });
+      const researchProposalBody = await researchProposal.json() as { proposalId: string; status: string };
+      expect(researchProposal.status).toBe(201);
+      expect(researchProposalBody).toEqual({ proposalId: 'proposal-research-1', status: 'proposed' });
 
       const invention = await fetch(`http://127.0.0.1:${mirrorAddress.port}/local-ai/inventions/propose`, {
         method: 'POST',

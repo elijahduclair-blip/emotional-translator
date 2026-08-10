@@ -18,7 +18,7 @@ import { AlignmentModelClient, AlignmentModelStatus } from './clients/AlignmentM
 import crypto from 'node:crypto';
 
 const LOCAL_REASONING_SYSTEM = [
-  'You are the local reasoning engine for Mirror Platform.',
+  'You are the local reasoning engine for Community Garden.',
   'Respond in clear English to the userEnglish field.',
   'Treat the user\'s language as part of the evolving Theory of Alignment and color-climate vocabulary when relevant.',
   'Use the supplied structural trace and relational evidence as context, but do not invent graph matches.',
@@ -33,7 +33,7 @@ const LOCAL_REASONING_SYSTEM = [
 ].join(' ');
 
 const LOCAL_INVENTION_SYSTEM = [
-  'You are the imagination stage for Mirror Platform.',
+  'You are the imagination stage for Community Garden.',
   'Return exactly one JSON relationship hypothesis by selecting sourceIndex and targetIndex from labelChoices.',
   'The hypothesis is a possibility to test, never an established graph route or semantic truth.',
   'Use a short snake_case relationshipType.',

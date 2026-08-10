@@ -140,6 +140,53 @@ export function createMirrorHttpServer(service: MirrorRuntimeService) {
         }));
       }
 
+      if (request.method === 'GET' && path === '/research/search') {
+        const token = requireSession(request);
+        const params = new URLSearchParams();
+        const researchQuery = url.searchParams.get('q');
+        const sources = url.searchParams.get('sources');
+        if (researchQuery) params.set('q', researchQuery);
+        if (sources) params.set('sources', sources);
+        return proxyResult(response, await service.getRuntime().codexRequest(`/api/v1/research/search?${params.toString()}`, { userToken: token }));
+      }
+
+      if (request.method === 'GET' && path === '/research/items') {
+        const token = requireSession(request);
+        const params = new URLSearchParams();
+        const status = url.searchParams.get('status');
+        const kind = url.searchParams.get('kind');
+        if (status) params.set('status', status);
+        if (kind) params.set('kind', kind);
+        const suffix = params.size ? `?${params.toString()}` : '';
+        return proxyResult(response, await service.getRuntime().codexRequest(`/api/v1/research/items${suffix}`, { userToken: token }));
+      }
+
+      if (request.method === 'POST' && path === '/research/items') {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/research/items', {
+          method: 'POST', body: await readJson(request, MAX_FOUNDATION_BODY_BYTES), userToken: token
+        }));
+      }
+
+      const researchReview = path.match(/^\/research\/items\/([^/]+)\/review$/);
+      if (request.method === 'PATCH' && researchReview) {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest(`/api/v1/research/items/${encodeURIComponent(researchReview[1])}/review`, {
+          method: 'PATCH', body: await readJson(request), userToken: token
+        }));
+      }
+
+      const researchGraphProposal = path.match(/^\/research\/items\/([^/]+)\/graph-proposal$/);
+      if (request.method === 'POST' && researchGraphProposal) {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest(`/api/v1/research/items/${encodeURIComponent(researchGraphProposal[1])}/graph-proposal`, {
+          method: 'POST', body: await readJson(request), userToken: token
+        }));
+      }
+
       if (request.method === 'POST' && path === '/foundation/letters/analyze') {
         requireSameOriginMutation(request);
         return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/foundation/letters/analyze', {
@@ -276,6 +323,21 @@ export function createMirrorHttpServer(service: MirrorRuntimeService) {
         return proxyResult(response, result);
       }
 
+      if (request.method === 'POST' && path === '/account/change-password') {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        const result = await service.getRuntime().codexRequest('/api/v1/auth/change-password', {
+          method: 'POST',
+          body: await readJson(request),
+          userToken: token
+        });
+        if (result.status < 400 && typeof result.body.token === 'string') {
+          response.setHeader('set-cookie', sessionCookie(result.body.token));
+          delete result.body.token;
+        }
+        return proxyResult(response, result);
+      }
+
       if (request.method === 'GET' && path === '/account/me') {
         const token = requireSession(request);
         return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/auth/me', { userToken: token }));
@@ -356,7 +418,7 @@ function securityHeaders() {
     'x-content-type-options': 'nosniff',
     'x-frame-options': 'DENY',
     'referrer-policy': 'no-referrer',
-    'permissions-policy': 'camera=(), microphone=(), geolocation=()',
+    'permissions-policy': 'camera=(), microphone=(self), geolocation=()',
     'cache-control': 'no-store',
     ...(process.env.NODE_ENV === 'production' ? { 'strict-transport-security': 'max-age=31536000; includeSubDomains' } : {})
   };

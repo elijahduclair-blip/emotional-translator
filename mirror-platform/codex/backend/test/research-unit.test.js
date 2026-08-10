@@ -27,6 +27,26 @@ test('research evidence requires HTTPS, a boundary, and a counterexample', () =>
   assert.throws(() => normalizeResearchItem({ ...base, counterexample: '' }), /counterexample/i);
 });
 
+test('research intake cannot smuggle approval or graph mutation state into a candidate', () => {
+  const item = normalizeResearchItem({
+    query: 'color atmosphere',
+    title: 'Color atmosphere',
+    sourceName: 'Example source',
+    sourceType: 'scholarly_metadata',
+    sourceUrl: 'https://example.com/evidence',
+    boundary: 'Evidence lead only.',
+    counterexample: 'Reject when the source does not address the claimed context.',
+    confidence: 'low',
+    status: 'approved',
+    graphProposalId: 'proposal-smuggled',
+    semanticMutationAllowed: true
+  });
+
+  assert.equal('status' in item, false);
+  assert.equal('graphProposalId' in item, false);
+  assert.equal('semanticMutationAllowed' in item, false);
+});
+
 test('history index research records require lane, era, type, summary, and route seeds', () => {
   const item = normalizeResearchItem({
     query: 'byzantine iconography',

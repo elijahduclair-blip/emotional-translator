@@ -1,6 +1,6 @@
-# Mirror Platform
+# Community Garden
 
-Mirror Platform keeps three existing systems separate while giving them one emotional-translation vertical slice:
+Community Garden is the visible knowledge-cultivation shell. It keeps the existing systems separate while giving them one emotional-translation vertical slice:
 
 ```text
 MirrorRuntime.ask(input)
@@ -57,6 +57,12 @@ WordNet lexical evidence is available through `GET /api/v1/wordnet/lookup?term=g
 
 If neither the approved graph nor imported knowledge has an exact match, the translator keeps ChromaBridge's unresolved or natural-climate reading instead of inventing graph evidence. A translation does **not** approve or mutate durable semantic meaning.
 
+### Research Intake bed
+
+The Community Garden shell exposes the existing governed research inbox as a focused Research bed. Signed-in users can search the allowlisted Wikipedia and Crossref APIs through `GET /research/search`, inspect source URLs, excerpts, retrieval context, and existing graph cues, then save a source only after supplying a falsification condition. Saved records enter `research_items` with `proposed` status and remain separate from the approved graph.
+
+Administrators may mark a research candidate approved, rejected, or in need of revision with an accountable review note. Even approved research cannot alter graph data: it may create only a second `graph_proposals` record, which must complete the existing graph review and approval workflow. Browser JavaScript never receives the Codex bearer token; the same-origin Mirror Runtime facade carries the HttpOnly account session. External source failures are bounded, cached briefly, and reported independently so one provider cannot silently stand in for another.
+
 ### Braille mathematics room
 
 The combined Mirror Runtime shell includes an accessible UEB-with-Nemeth learning room. Codex owns a versioned eight-lesson arithmetic/pre-algebra curriculum and the bounded routes under `/api/v1/braille/math`; ChromaBridge marks every result `notation_only`; Mirror Runtime keeps account tokens in an HttpOnly same-origin cookie. The translator accepts strict ASCII math or Unicode Braille, produces canonical print, MathML, spoken structure, Unicode Nemeth, and dot-number cells, and returns `422` instead of guessing at unsupported advanced structures.
@@ -108,7 +114,7 @@ SMTP_PORT=587
 SMTP_SECURE=false
 SMTP_USER=replace-me
 SMTP_PASS=replace-me
-SMTP_FROM=Mirror Platform <no-reply@example.com>
+SMTP_FROM=Community Garden <no-reply@example.com>
 ```
 
 Local Qwen defaults for Mirror Runtime are:
