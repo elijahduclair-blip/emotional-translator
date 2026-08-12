@@ -320,7 +320,7 @@ export async function createSchema() {
       );
     `);
 
-    // Research inbox: external evidence candidates, never graph truth by themselves
+    // Research library: external references, never graph truth by themselves
     await query(`
       CREATE TABLE IF NOT EXISTS research_items (
         id TEXT PRIMARY KEY,
@@ -337,7 +337,7 @@ export async function createSchema() {
         history_metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
         emotional_logic TEXT,
         boundary TEXT NOT NULL,
-        counterexample TEXT NOT NULL,
+        counterexample TEXT,
         confidence TEXT NOT NULL DEFAULT 'low',
         status TEXT NOT NULL DEFAULT 'proposed',
         proposed_by TEXT NOT NULL REFERENCES users(id),
@@ -350,6 +350,7 @@ export async function createSchema() {
     `);
     await query(`ALTER TABLE research_items ADD COLUMN IF NOT EXISTS kind TEXT NOT NULL DEFAULT 'general';`);
     await query(`ALTER TABLE research_items ADD COLUMN IF NOT EXISTS history_metadata JSONB NOT NULL DEFAULT '{}'::jsonb;`);
+    await query(`ALTER TABLE research_items ALTER COLUMN counterexample DROP NOT NULL;`);
     await query(`
       CREATE INDEX IF NOT EXISTS idx_research_items_status ON research_items(status, created_at DESC);
       CREATE INDEX IF NOT EXISTS idx_research_items_proposed_by ON research_items(proposed_by, created_at DESC);

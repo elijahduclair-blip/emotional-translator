@@ -8,7 +8,7 @@ export const LANGUAGE_LOOP_VERSION = '1.0.0';
 export function runStructuralLanguageLoop(text) {
   const originalEnglish = String(text || '');
   if (!originalEnglish.trim()) throw httpError(400, 'text is required.');
-  if ([...originalEnglish].length > 2_000) throw httpError(413, 'Language-loop text must be 2000 Unicode code points or fewer.');
+  if ([...originalEnglish].length > 10_000) throw httpError(413, 'Language-loop text must be 10000 Unicode code points or fewer.');
   const canonicalEnglish = originalEnglish.normalize('NFC').trim().replace(/\s+/gu, ' ');
   const ueb = transcribeEnglishToUeb(canonicalEnglish);
   const cells = brailleToCellRecords(ueb);

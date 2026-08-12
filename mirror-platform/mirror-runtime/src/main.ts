@@ -10,7 +10,7 @@ async function main() {
     enableAlignmentModel: process.env.MIRROR_ENABLE_ALIGNMENT_MODEL !== 'false',
     codexServiceToken: process.env.RUNTIME_SERVICE_TOKEN || (process.env.NODE_ENV === 'production' ? '' : 'mirror-platform-local'),
     localModelUrl: process.env.LOCAL_MODEL_URL || 'http://127.0.0.1:11434',
-    localModelName: process.env.LOCAL_MODEL_NAME || 'qwen3:4b-instruct',
+    localModelName: process.env.LOCAL_MODEL_NAME || 'mirror-qwen3-conversation:v2',
     alignmentModelUrl: process.env.ALIGNMENT_MODEL_URL || 'http://127.0.0.1:11435'
   });
   const port = Number(process.env.MIRROR_RUNTIME_PORT || 3100);

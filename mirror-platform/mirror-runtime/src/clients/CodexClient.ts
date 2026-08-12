@@ -72,7 +72,7 @@ export class CodexClient {
       body: JSON.stringify({ text })
     });
 
-    const body = await response.json() as CodexGraphRead & { error?: string };
+    const body = await readJsonResponse(response, 'Codex graph translation') as CodexGraphRead & { error?: string };
     if (!response.ok) {
       throw new Error(`Codex graph translation failed (${response.status}): ${body.error || 'Unknown error'}`);
     }
@@ -96,7 +96,7 @@ export class CodexClient {
       headers,
       body: options.body === undefined ? undefined : JSON.stringify(options.body)
     });
-    const body = await response.json() as Record<string, any>;
+    const body = await readJsonResponse(response, `Codex ${path}`);
     return { status: response.status, body };
   }
 
@@ -105,7 +105,7 @@ export class CodexClient {
     const response = await this.fetcher(`${this.apiUrl}/api/v1/local-ai/training/active`, {
       headers: { authorization: `Bearer ${this.serviceToken}`, 'content-type': 'application/json' }
     });
-    const body = await response.json() as { activeVersion?: Record<string, any> | null; error?: string };
+    const body = await readJsonResponse(response, 'Codex active adapter') as { activeVersion?: Record<string, any> | null; error?: string };
     if (!response.ok) throw new Error(`Codex active adapter read failed (${response.status}): ${body.error || 'Unknown error'}`);
     return body.activeVersion || null;
   }
@@ -138,7 +138,7 @@ export class CodexClient {
       body: payload
     });
 
-    const body = await response.json() as SavedEvaluation & { error?: string };
+    const body = await readJsonResponse(response, 'Codex save') as SavedEvaluation & { error?: string };
     if (!response.ok) {
       throw new Error(`Codex save failed (${response.status}): ${body.error || 'Unknown error'}`);
     }
@@ -151,6 +151,18 @@ function codexError(label: string, result: { status: number; body: Record<string
     new Error(`${label} failed (${result.status}): ${result.body.error || 'Unknown error'}`),
     { status: result.status }
   );
+}
+
+async function readJsonResponse(response: Response, source: string): Promise<Record<string, any>> {
+  const raw = await response.text();
+  try {
+    return JSON.parse(raw || '{}') as Record<string, any>;
+  } catch {
+    throw Object.assign(
+      new Error(`${source} returned an unreadable response (HTTP ${response.status}).`),
+      { status: 502 }
+    );
+  }
 }
 
 export function compactGraphRead(graphRead: CodexGraphRead | null) {

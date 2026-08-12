@@ -28,6 +28,16 @@ test('corrected feedback requires the person-supplied replacement', () => {
   assert.throws(() => normalizeLocalAiFeedback(feedbackValue({ decision: 'corrected', correction: undefined })), /correction is required/);
 });
 
+test('feedback preserves expanded conversation inputs up to 10000 code points', () => {
+  const input = 'a'.repeat(2_001);
+  const normalized = normalizeLocalAiFeedback(feedbackValue({ input, canonicalEnglish: input }));
+  assert.equal(normalized.input.length, 2_001);
+  assert.throws(
+    () => normalizeLocalAiFeedback(feedbackValue({ input: 'a'.repeat(10_001), canonicalEnglish: 'a'.repeat(10_001) })),
+    error => error.status === 413 && /10000 Unicode code points/.test(error.message)
+  );
+});
+
 test('reviewed feedback produces a separate conversational LoRA dataset', () => {
   const dataset = buildReviewedFeedbackDataset([{
     id: 'feedback-1', interaction_id: 'interaction-1', decision: 'corrected',

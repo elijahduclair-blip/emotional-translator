@@ -31,6 +31,7 @@ describe('LocalModelClient', () => {
     expect(requests[1].url).toBe('http://127.0.0.1:11434/api/chat');
     expect(requests[1].body?.stream).toBe(false);
     expect(requests[1].body?.think).toBe(false);
+    expect(requests[1].body?.options.num_ctx).toBe(8192);
     expect(requests[1].body?.messages[1].content).toContain('userEnglish');
   });
 
@@ -41,6 +42,15 @@ describe('LocalModelClient', () => {
     const health = await client.health();
     expect(health.status).toBe('unavailable');
     expect(health.error).toContain('connection refused');
+  });
+
+  it('reports a readable boundary error when the local model returns non-JSON text', async () => {
+    const client = new LocalModelClient('http://127.0.0.1:11434', 'qwen3:4b-instruct', async () =>
+      new Response('<html>temporary upstream error</html>', { status: 502, headers: { 'content-type': 'text/html' } })
+    );
+    await expect(client.respond('System', { userEnglish: 'Hello' })).rejects.toThrow(
+      'Local Qwen returned an unreadable response (HTTP 502).'
+    );
   });
 
   it('can request a deployment-verified model override without changing the configured fallback', async () => {

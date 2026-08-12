@@ -258,7 +258,7 @@ describe('Community Garden vertical slice', () => {
         response.end(JSON.stringify({ items: [{
           id: 'research-1', query: 'color atmosphere', title: 'Atmospheric colour', source_name: 'Wikipedia',
           source_url: 'https://en.wikipedia.org/?curid=1', excerpt: 'A bounded source excerpt.', boundary: 'Orientation only.',
-          counterexample: 'Reject when the source does not address relational climate.', confidence: 'low', status: 'proposed'
+          counterexample: null, confidence: 'low', status: 'proposed'
         }], count: 1 }));
         return;
       }
@@ -270,6 +270,8 @@ describe('Community Garden vertical slice', () => {
       }
       if (request.url === '/api/v1/research/items/research-1/graph-proposal' && request.method === 'POST') {
         expect(request.headers.authorization).toBe('Bearer signed-codex-token');
+        expect(body.claim).toBe('Atmospheric colour is relevant background for the proposed theme.');
+        expect(body.counterexample).toContain('unrelated optical context');
         response.writeHead(201, { 'content-type': 'application/json' });
         response.end(JSON.stringify({ proposalId: 'proposal-research-1', status: 'proposed' }));
         return;
@@ -277,6 +279,24 @@ describe('Community Garden vertical slice', () => {
       if (request.url === '/api/v1/auth/login') {
         response.writeHead(200, { 'content-type': 'application/json' });
         response.end(JSON.stringify({ token: 'signed-codex-token', user: { id: 'learner', username: 'learner', role: 'admin' } }));
+        return;
+      }
+      if (request.url === '/api/v1/auth/signup' && request.method === 'POST') {
+        expect(body).toEqual({ username: 'new-gardener', email: 'new@example.com', password: 'Example2026' });
+        response.writeHead(202, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ message: 'Check your email to verify the account.' }));
+        return;
+      }
+      if (request.url === '/api/v1/auth/verify-email' && request.method === 'POST') {
+        expect(body).toEqual({ token: 'single-use-token' });
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ verified: true }));
+        return;
+      }
+      if (request.url === '/api/v1/auth/me' && request.method === 'GET') {
+        expect(request.headers.authorization).toBe('Bearer signed-codex-token');
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ user: { id: 'learner', username: 'learner', role: 'admin' } }));
         return;
       }
       if (request.url === '/api/v1/auth/change-password' && request.method === 'POST') {
@@ -301,10 +321,28 @@ describe('Community Garden vertical slice', () => {
         response.end(JSON.stringify({ feedback: [], count: 0 }));
         return;
       }
-      if (request.url?.startsWith('/api/v1/local-ai/user-graph?text=') && request.method === 'GET') {
+      if (request.url === '/api/v1/local-ai/user-graph' && request.method === 'POST') {
         expect(request.headers.authorization).toBe('Bearer signed-codex-token');
+        expect(typeof body.text).toBe('string');
+        expect(body.text.length).toBeGreaterThan(0);
         response.writeHead(200, { 'content-type': 'application/json' });
         response.end(JSON.stringify({ sourceLayer: 'user_graph', consulted: true, relationships: [], relationshipCount: 0, truncated: false }));
+        return;
+      }
+      if (request.url === '/api/v1/local-ai/user-graph' && request.method === 'GET') {
+        expect(request.headers.authorization).toBe('Bearer signed-codex-token');
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({
+          sourceLayer: 'user_graph',
+          consulted: true,
+          relationships: [{
+            id: 'personal-route-1', source: 'mist', target: 'revision', relationshipType: 'personal_association',
+            confidence: 'medium', evidence: 'Reviewed personal observation.', counterexample: 'Not every revision begins in mist.',
+            sourceFeedbackId: 'private-feedback-id'
+          }],
+          relationshipCount: 1,
+          truncated: false
+        }));
         return;
       }
       if (request.url === '/api/v1/local-ai/feedback/feedback-1/review' && request.method === 'PATCH') {
@@ -398,15 +436,23 @@ describe('Community Garden vertical slice', () => {
       expect(shellResponse.headers.get('permissions-policy')).toBe('camera=(), microphone=(self), geolocation=()');
       expect(shell).toContain('Community Garden');
       expect(shell).toContain('id="garden"');
+      expect(shell).toContain('Garden Entrance');
+      expect(shell).toContain('Plant a seed of information.');
+      expect(shell).toContain('id="gardenEntranceForm"');
+      expect(shell).toContain('id="gardenSeed" maxlength="10000"');
+      expect(shell).toContain("mirrorFetch('/garden/fruit', { input })");
       expect(shell).toContain('The knowledge cultivation loop');
       expect(shell).toContain('Personal plot');
       expect(shell).toContain('Community soil');
       expect(shell).toContain('data-garden-room="research"');
       expect(shell).toContain('data-garden-room="account"');
       expect(shell).toContain('Open Account sign-in');
-      expect(shell).toContain('Research Intake / outside evidence');
-      expect(shell).toContain('Save as evidence candidate');
-      expect(shell).toContain('External-evidence boundary');
+      expect(shell).toContain('id="accountIdentity"');
+      expect(shell).toContain("window.location.hostname === '127.0.0.1'");
+      expect(shell).toContain('Research / external reference library');
+      expect(shell).toContain('Save reference');
+      expect(shell).not.toContain('What observation would weaken or disprove using this source here?');
+      expect(shell).toContain('External-reference boundary');
       expect(shell).toContain('data-garden-room="localAi"');
       expect(shell).toContain('function activateGardenRoom()');
       expect(shell).toContain('id="atlas"');
@@ -421,6 +467,7 @@ describe('Community Garden vertical slice', () => {
       expect(shell).toContain('Submit assembled module to Governance');
       expect(shell).toContain('Reversible language loop');
       expect(shell).toContain('Your local AI / Qwen3 reasoning');
+      expect(shell).toContain('id="localAiInput" rows="4" maxlength="10000"');
       expect(shell).toContain('Verified training dataset');
       expect(shell).toContain('Convert current color atlas');
       expect(shell).toContain('Learned Alignment adapter');
@@ -451,6 +498,74 @@ describe('Community Garden vertical slice', () => {
       expect(healthBody.localModel.model).toBe('qwen3:4b-instruct');
       expect(healthBody.alignmentModel.status).toBe('ready');
       expect(healthBody.alignmentModel.validation.exactMatches).toBe(38);
+
+      const gardenIdentity = await fetch(`http://127.0.0.1:${mirrorAddress.port}/garden/identity`);
+      const gardenIdentityBody = await gardenIdentity.json() as {
+        version: string;
+        name: string;
+        purpose: string;
+        protectedRoots: string[];
+        boundary: { graphMutationAllowed: boolean };
+      };
+      expect(gardenIdentity.status).toBe(200);
+      expect(gardenIdentityBody.version).toBe('garden-entrance.v1');
+      expect(gardenIdentityBody.name).toBe('Community Garden');
+      expect(gardenIdentityBody.purpose).toContain('grow useful fruit for people');
+      expect(gardenIdentityBody.protectedRoots).toContain('service credentials');
+      expect(gardenIdentityBody.boundary.graphMutationAllowed).toBe(false);
+
+      const untrustedGardenMutation = await fetch(`http://127.0.0.1:${mirrorAddress.port}/garden/fruit`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ input: 'A visitor seed' })
+      });
+      expect(untrustedGardenMutation.status).toBe(403);
+
+      const gardenFruit = await fetch(`http://127.0.0.1:${mirrorAddress.port}/garden/fruit`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin' },
+        body: JSON.stringify({ input: 'A visitor seed' })
+      });
+      const gardenFruitBody = await gardenFruit.json() as {
+        version: string;
+        seed: { received: boolean; codePointCount: number };
+        fruit: { type: string; language: string; text: string };
+        cultivation: { personalContextConsulted: boolean; persisted: boolean; sharedGraphMutated: boolean };
+        boundary: { mode: string; graphMutationAllowed: boolean };
+        model?: unknown;
+        trace?: unknown;
+        feedback?: unknown;
+        evidence?: unknown;
+        timings?: unknown;
+      };
+      expect(gardenFruit.status).toBe(200);
+      expect(gardenFruit.headers.get('ratelimit-limit')).toBe('20');
+      expect(gardenFruitBody.seed).toEqual({ received: true, codePointCount: 14 });
+      expect(gardenFruitBody.fruit).toEqual({
+        type: 'cultivated_response',
+        language: 'english',
+        text: 'Reflection is moving as an open climate.'
+      });
+      expect(gardenFruitBody.cultivation).toEqual(expect.objectContaining({
+        personalContextConsulted: false,
+        persisted: false,
+        sharedGraphMutated: false
+      }));
+      expect(gardenFruitBody.boundary).toEqual(expect.objectContaining({ mode: 'public_fruit_read_only', graphMutationAllowed: false }));
+      expect(gardenFruitBody).not.toHaveProperty('model');
+      expect(gardenFruitBody).not.toHaveProperty('trace');
+      expect(gardenFruitBody).not.toHaveProperty('feedback');
+      expect(gardenFruitBody).not.toHaveProperty('evidence');
+      expect(gardenFruitBody).not.toHaveProperty('timings');
+
+      const oversizedGardenFruit = await fetch(`http://127.0.0.1:${mirrorAddress.port}/garden/fruit`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin' },
+        body: JSON.stringify({ input: 'a'.repeat(10_001) })
+      });
+      const oversizedGardenFruitBody = await oversizedGardenFruit.json() as { error: string };
+      expect(oversizedGardenFruit.status).toBe(413);
+      expect(oversizedGardenFruitBody.error).toContain('10000 Unicode code points');
 
       const localAi = await fetch(`http://127.0.0.1:${mirrorAddress.port}/local-ai/respond`, {
         method: 'POST',
@@ -641,6 +756,37 @@ describe('Community Garden vertical slice', () => {
       });
       expect(unsupported.status).toBe(422);
 
+      const gardenApiCatalog = await fetch(`http://127.0.0.1:${mirrorAddress.port}/api/v1`);
+      const gardenApiCatalogBody = await gardenApiCatalog.json() as Record<string, any>;
+      expect(gardenApiCatalog.status).toBe(200);
+      expect(gardenApiCatalogBody.entrances.person.cultivate).toBe('/api/v1/me/cultivate');
+      expect(gardenApiCatalogBody.entrances.person.garden).toBe('/api/v1/me/garden');
+      expect(gardenApiCatalogBody.entrances.person.createAccount).toBe('/api/v1/me/account');
+      expect(gardenApiCatalogBody.entrances.people.cultivate).toBe('/api/v1/community/cultivate');
+
+      const createdAccount = await fetch(`http://127.0.0.1:${mirrorAddress.port}/api/v1/me/account`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin' },
+        body: JSON.stringify({ username: 'new-gardener', email: 'new@example.com', password: 'Example2026' })
+      });
+      expect(createdAccount.status).toBe(202);
+      expect(await createdAccount.json()).toEqual({ message: 'Check your email to verify the account.' });
+
+      const verifiedAccount = await fetch(`http://127.0.0.1:${mirrorAddress.port}/api/v1/me/account/verify`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin' },
+        body: JSON.stringify({ token: 'single-use-token' })
+      });
+      expect(verifiedAccount.status).toBe(200);
+      expect(await verifiedAccount.json()).toEqual({ verified: true });
+
+      const anonymousPersonalApi = await fetch(`http://127.0.0.1:${mirrorAddress.port}/api/v1/me/cultivate`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin' },
+        body: JSON.stringify({ input: 'private seed' })
+      });
+      expect(anonymousPersonalApi.status).toBe(401);
+
       const login = await fetch(`http://127.0.0.1:${mirrorAddress.port}/account/login`, {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin' },
@@ -651,6 +797,48 @@ describe('Community Garden vertical slice', () => {
       expect(login.headers.get('set-cookie')).toContain('HttpOnly');
       expect(loginBody.token).toBeUndefined();
       const session = login.headers.get('set-cookie')?.split(';')[0];
+
+      const personalSession = await fetch(`http://127.0.0.1:${mirrorAddress.port}/api/v1/me/session`, {
+        headers: { cookie: session! }
+      });
+      const personalSessionBody = await personalSession.json() as Record<string, any>;
+      expect(personalSession.status).toBe(200);
+      expect(personalSessionBody.user.username).toBe('learner');
+
+      const communityCultivation = await fetch(`http://127.0.0.1:${mirrorAddress.port}/api/v1/community/cultivate`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin', cookie: session! },
+        body: JSON.stringify({ input: 'community seed' })
+      });
+      const communityCultivationBody = await communityCultivation.json() as Record<string, any>;
+      expect(communityCultivation.status).toBe(200);
+      expect(communityCultivationBody.cultivation.personalContextConsulted).toBe(false);
+      expect(communityCultivationBody.cultivation.persisted).toBe(false);
+      expect(communityCultivationBody.cultivation.sharedGraphMutated).toBe(false);
+      expect(communityCultivationBody.boundary.mode).toBe('community_api_read_only');
+
+      const personalCultivation = await fetch(`http://127.0.0.1:${mirrorAddress.port}/api/v1/me/cultivate`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin', cookie: session! },
+        body: JSON.stringify({ input: 'personal seed' })
+      });
+      const personalCultivationBody = await personalCultivation.json() as Record<string, any>;
+      expect(personalCultivation.status).toBe(200);
+      expect(personalCultivationBody.cultivation.personalContextConsulted).toBe(true);
+      expect(personalCultivationBody.cultivation.persisted).toBe(false);
+      expect(personalCultivationBody.cultivation.sharedGraphMutated).toBe(false);
+      expect(personalCultivationBody.boundary.crossPersonAccessAllowed).toBe(false);
+
+      const personalGarden = await fetch(`http://127.0.0.1:${mirrorAddress.port}/api/v1/me/garden`, {
+        headers: { cookie: session! }
+      });
+      const personalGardenBody = await personalGarden.json() as Record<string, any>;
+      expect(personalGarden.status).toBe(200);
+      expect(personalGardenBody.garden.relationships[0]).toEqual(expect.objectContaining({
+        id: 'personal-route-1', source: 'mist', target: 'revision'
+      }));
+      expect(personalGardenBody.garden.relationships[0]).not.toHaveProperty('sourceFeedbackId');
+      expect(personalGardenBody.boundary.crossPersonAccessAllowed).toBe(false);
 
       const changedPassword = await fetch(`http://127.0.0.1:${mirrorAddress.port}/account/change-password`, {
         method: 'POST',
@@ -677,14 +865,13 @@ describe('Community Garden vertical slice', () => {
         body: JSON.stringify({
           query: 'color atmosphere', title: 'Atmospheric colour', sourceName: 'Wikipedia', sourceType: 'encyclopedic',
           sourceUrl: 'https://en.wikipedia.org/?curid=1', excerpt: 'A bounded source excerpt.',
-          boundary: 'Orientation only; verify contested claims.',
-          counterexample: 'Reject when the source does not address relational climate.', confidence: 'low'
+          boundary: 'Orientation only; verify contested claims.'
         })
       });
       const researchCandidateBody = await researchCandidate.json() as { item: { status: string } };
       expect(researchCandidate.status).toBe(201);
       expect(researchCandidateBody.item.status).toBe('proposed');
-      expect(receivedResearchItem?.counterexample).toContain('does not address relational climate');
+      expect(receivedResearchItem?.counterexample).toBeUndefined();
       expect(receivedResearchItem?.status).toBeUndefined();
       expect(receivedResearchItem?.graphProposalId).toBeUndefined();
 
@@ -696,7 +883,7 @@ describe('Community Garden vertical slice', () => {
       const researchReview = await fetch(`http://127.0.0.1:${mirrorAddress.port}/research/items/research-1/review`, {
         method: 'PATCH',
         headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin', cookie: session! },
-        body: JSON.stringify({ decision: 'approved', reviewNote: 'Provenance and falsification condition reviewed.' })
+        body: JSON.stringify({ decision: 'approved', reviewNote: 'Reference provenance and scope reviewed.' })
       });
       const researchReviewBody = await researchReview.json() as { item: { status: string } };
       expect(researchReview.status).toBe(200);
@@ -705,7 +892,13 @@ describe('Community Garden vertical slice', () => {
       const researchProposal = await fetch(`http://127.0.0.1:${mirrorAddress.port}/research/items/research-1/graph-proposal`, {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin', cookie: session! },
-        body: JSON.stringify({ label: 'color atmosphere', nodeType: 'theme', family: null })
+        body: JSON.stringify({
+          label: 'color atmosphere',
+          claim: 'Atmospheric colour is relevant background for the proposed theme.',
+          counterexample: 'Reject the claim when the reference addresses only an unrelated optical context.',
+          nodeType: 'theme',
+          family: null
+        })
       });
       const researchProposalBody = await researchProposal.json() as { proposalId: string; status: string };
       expect(researchProposal.status).toBe(201);

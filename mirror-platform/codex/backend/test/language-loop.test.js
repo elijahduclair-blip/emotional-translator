@@ -22,6 +22,15 @@ test('ordered letter changes remain visible in the machine sequence', () => {
   assert.notDeepEqual(cat.encoding.numericSequence, bat.encoding.numericSequence);
 });
 
+test('the language loop accepts expanded conversations and rejects more than 10000 code points', () => {
+  const expanded = runStructuralLanguageLoop('a'.repeat(2_001));
+  assert.equal(expanded.originalEnglish.length, 2_001);
+  assert.throws(
+    () => runStructuralLanguageLoop('a'.repeat(10_001)),
+    error => error.status === 413 && /10000 Unicode code points/.test(error.message)
+  );
+});
+
 test('the bounded decoder rejects unsupported cells rather than inventing English', () => {
   const ueb = transcribeEnglishToUeb('Gold memory.');
   assert.equal(transcribeUebToEnglish(ueb), 'Gold memory.');

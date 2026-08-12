@@ -91,7 +91,7 @@ export class MirrorRuntime {
     );
     this.localModelClient = new LocalModelClient(
       config.localModelUrl || process.env.LOCAL_MODEL_URL || 'http://127.0.0.1:11434',
-      config.localModelName || process.env.LOCAL_MODEL_NAME || 'qwen3:4b-instruct'
+      config.localModelName || process.env.LOCAL_MODEL_NAME || 'mirror-qwen3-conversation:v2'
     );
     this.alignmentModelClient = new AlignmentModelClient(
       config.alignmentModelUrl || process.env.ALIGNMENT_MODEL_URL || 'http://127.0.0.1:11435'
@@ -251,7 +251,7 @@ export class MirrorRuntime {
     if (this.config.enableLocalModel === false) throw httpError(503, 'Local model integration is disabled.');
     const text = String(request.input || '').trim();
     if (!text) throw httpError(400, 'input is required.');
-    if ([...text].length > 2_000) throw httpError(413, 'Local AI input must be 2000 Unicode code points or fewer.');
+    if ([...text].length > 10_000) throw httpError(413, 'Local AI input must be 10000 Unicode code points or fewer.');
 
     const languageLoop = await this.runLanguageLoop({ text });
     if (languageLoop.status >= 400) return languageLoop;
@@ -351,7 +351,7 @@ export class MirrorRuntime {
     if (this.config.enableLocalModel === false) throw httpError(503, 'Local model integration is disabled.');
     const text = String(request.input || '').trim();
     if (!text) throw httpError(400, 'input is required.');
-    if ([...text].length > 2_000) throw httpError(413, 'Invention input must be 2000 Unicode code points or fewer.');
+    if ([...text].length > 10_000) throw httpError(413, 'Invention input must be 10000 Unicode code points or fewer.');
     const interactionId = String(request.interactionId || '').trim();
     if (!/^[a-zA-Z0-9_-]{8,120}$/.test(interactionId)) throw httpError(400, 'interactionId is required.');
 
@@ -431,7 +431,11 @@ export class MirrorRuntime {
     }
     if (!userToken) return graph;
     try {
-      const overlay = await this.codexClient.requestJson(`/api/v1/local-ai/user-graph?text=${encodeURIComponent(text)}`, { userToken });
+      const overlay = await this.codexClient.requestJson('/api/v1/local-ai/user-graph', {
+        method: 'POST',
+        body: { text },
+        userToken
+      });
       if (overlay.status < 400) return mergePersonalGraphOverlay(graph, overlay.body);
     } catch {
       // Personal learning is optional evidence; approved graph reads remain available if it cannot be loaded.

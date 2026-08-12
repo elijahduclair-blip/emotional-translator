@@ -5,9 +5,18 @@ import { MirrorRuntimeService } from './services/mirror-runtime.service';
 
 const MAX_BODY_BYTES = 16 * 1024;
 const MAX_FOUNDATION_BODY_BYTES = 64 * 1024;
+const MAX_GARDEN_SEED_CODE_POINTS = 10_000;
+const GARDEN_FRUIT_RATE_LIMIT = 20;
+const GARDEN_FRUIT_RATE_WINDOW_MS = 60 * 1000;
 const translatorPage = readFileSync(join(__dirname, '..', 'public', 'index.html'), 'utf8');
 
 export function createMirrorHttpServer(service: MirrorRuntimeService) {
+  const limitGardenFruit = createFixedWindowRateLimiter({
+    name: 'garden fruit',
+    maxRequests: GARDEN_FRUIT_RATE_LIMIT,
+    windowMs: GARDEN_FRUIT_RATE_WINDOW_MS
+  });
+
   return createServer(async (request, response) => {
     try {
       const url = new URL(request.url || '/', 'http://mirror.local');
@@ -23,6 +32,97 @@ export function createMirrorHttpServer(service: MirrorRuntimeService) {
 
       if (request.method === 'GET' && path === '/health') {
         return sendJson(response, 200, await service.getHealth());
+      }
+
+      if (request.method === 'GET' && path === '/garden/identity') {
+        return sendJson(response, 200, gardenIdentity());
+      }
+
+      if (request.method === 'POST' && path === '/garden/fruit') {
+        requireSameOriginMutation(request);
+        limitGardenFruit(request, response);
+        const input = await readGardenInput(request);
+
+        const session = optionalSession(request);
+        const result = await service.getRuntime().respondWithLocalModel({ input }, session);
+        if (result.status >= 400) return proxyResult(response, result);
+        return sendJson(response, 200, publicGardenFruit(input, result.body, Boolean(session)));
+      }
+
+      if (request.method === 'GET' && path === '/api/v1') {
+        return sendJson(response, 200, gardenApiIdentity());
+      }
+
+      if (request.method === 'POST' && path === '/api/v1/community/cultivate') {
+        requireSameOriginMutation(request);
+        limitGardenFruit(request, response);
+        const input = await readGardenInput(request);
+        const result = await service.getRuntime().respondWithLocalModel({ input });
+        if (result.status >= 400) return proxyResult(response, result);
+        return sendJson(response, 200, communityApiFruit(input, result.body));
+      }
+
+      if (request.method === 'POST' && path === '/api/v1/me/cultivate') {
+        requireSameOriginMutation(request);
+        limitGardenFruit(request, response);
+        const token = requireSession(request);
+        const input = await readGardenInput(request);
+        const result = await service.getRuntime().respondWithLocalModel({ input }, token);
+        if (result.status >= 400) return proxyResult(response, result);
+        return sendJson(response, 200, personalApiFruit(input, result.body));
+      }
+
+      if (request.method === 'GET' && path === '/api/v1/me/garden') {
+        const token = requireSession(request);
+        const result = await service.getRuntime().codexRequest('/api/v1/local-ai/user-graph', { userToken: token });
+        if (result.status >= 400) return proxyResult(response, result);
+        return sendJson(response, 200, personalGardenSummary(result.body));
+      }
+
+      if (request.method === 'POST' && path === '/api/v1/me/session') {
+        requireSameOriginMutation(request);
+        const result = await service.getRuntime().codexRequest('/api/v1/auth/login', { method: 'POST', body: await readJson(request) });
+        if (result.status < 400 && typeof result.body.token === 'string') {
+          response.setHeader('set-cookie', sessionCookie(result.body.token));
+          delete result.body.token;
+        }
+        return proxyResult(response, result);
+      }
+
+      if (request.method === 'POST' && path === '/api/v1/me/account') {
+        requireSameOriginMutation(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/auth/signup', {
+          method: 'POST',
+          body: await readJson(request)
+        }));
+      }
+
+      if (request.method === 'POST' && path === '/api/v1/me/account/verify') {
+        requireSameOriginMutation(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/auth/verify-email', {
+          method: 'POST',
+          body: await readJson(request)
+        }));
+      }
+
+      if (request.method === 'POST' && path === '/api/v1/me/account/resend-verification') {
+        requireSameOriginMutation(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/auth/resend-verification', {
+          method: 'POST',
+          body: await readJson(request)
+        }));
+      }
+
+      if (request.method === 'GET' && path === '/api/v1/me/session') {
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/auth/me', { userToken: token }));
+      }
+
+      if (request.method === 'DELETE' && path === '/api/v1/me/session') {
+        requireSameOriginMutation(request);
+        requireSession(request);
+        response.setHeader('set-cookie', sessionCookie('', true));
+        return sendJson(response, 200, { signedOut: true });
       }
 
       if (request.method === 'POST' && path === '/ask') {
@@ -376,6 +476,16 @@ async function readJson(request: IncomingMessage, maxBytes = MAX_BODY_BYTES): Pr
   }
 }
 
+async function readGardenInput(request: IncomingMessage) {
+  const body = await readJson(request, MAX_FOUNDATION_BODY_BYTES);
+  const input = typeof body.input === 'string' ? body.input.trim() : '';
+  if (!input) throw httpError(400, 'A seed of information is required.');
+  if ([...input].length > MAX_GARDEN_SEED_CODE_POINTS) {
+    throw httpError(413, `Garden seeds must be ${MAX_GARDEN_SEED_CODE_POINTS} Unicode code points or fewer.`);
+  }
+  return input;
+}
+
 function sendJson(response: ServerResponse, status: number, body: unknown) {
   response.writeHead(status, {
     'content-type': 'application/json; charset=utf-8',
@@ -422,6 +532,190 @@ function securityHeaders() {
     'cache-control': 'no-store',
     ...(process.env.NODE_ENV === 'production' ? { 'strict-transport-security': 'max-age=31536000; includeSubDomains' } : {})
   };
+}
+
+function gardenIdentity() {
+  return {
+    version: 'garden-entrance.v1',
+    name: 'Community Garden',
+    kind: 'public_cultivation_interface',
+    purpose: 'Receive seeds of information, cultivate them through protected relational systems, and grow useful fruit for people.',
+    publicSurface: {
+      identity: '/garden/identity',
+      fruit: '/garden/fruit',
+      accountRequired: false
+    },
+    cultivationCycle: ['receive', 'translate', 'relate', 'compose', 'return'],
+    protectedRoots: ['service credentials', 'database records', 'model traces', 'administrative controls', 'direct graph mutation'],
+    adaptation: {
+      immediate: 'The response may adapt to the current seed and an authenticated personal context.',
+      personal: 'Personal learning remains attached to the authenticated person.',
+      shared: 'Shared semantic growth requires an explicit governed proposal.'
+    },
+    boundary: {
+      semanticMutationAllowed: false,
+      graphMutationAllowed: false,
+      sourceMutationAllowed: false,
+      reason: 'Visitors receive fruit through the public surface; they do not receive direct access to the Garden roots.'
+    }
+  };
+}
+
+function gardenApiIdentity() {
+  return {
+    version: 'garden-api.v1',
+    name: 'Community Garden API',
+    entrances: {
+      person: {
+        session: '/api/v1/me/session',
+        createAccount: '/api/v1/me/account',
+        verifyAccount: '/api/v1/me/account/verify',
+        cultivate: '/api/v1/me/cultivate',
+        garden: '/api/v1/me/garden',
+        authentication: 'HttpOnly same-origin session cookie'
+      },
+      people: {
+        cultivate: '/api/v1/community/cultivate',
+        authentication: 'anonymous bounded access'
+      }
+    },
+    boundary: {
+      personScope: 'Only the authenticated person private overlay may be consulted.',
+      communityScope: 'Only shared approved or imported reference knowledge may be consulted.',
+      automaticLearningAllowed: false,
+      sharedGraphMutationAllowed: false,
+      crossPersonAccessAllowed: false
+    }
+  };
+}
+
+function publicGardenFruit(input: string, result: Record<string, any>, personalContextConsulted: boolean) {
+  return {
+    version: 'garden-entrance.v1',
+    seed: {
+      received: true,
+      codePointCount: [...input].length
+    },
+    fruit: {
+      type: 'cultivated_response',
+      language: String(result.response?.language || 'english'),
+      text: String(result.response?.text || '')
+    },
+    cultivation: {
+      stages: ['received', 'translated', 'related', 'composed'],
+      graphSource: String(result.trace?.graphSource || 'unresolved'),
+      relationshipNotice: String(result.relationalEvidence?.notice || 'No relational evidence summary was returned.'),
+      personalContextConsulted,
+      persisted: false,
+      sharedGraphMutated: false
+    },
+    boundary: {
+      mode: 'public_fruit_read_only',
+      semanticMutationAllowed: false,
+      graphMutationAllowed: false,
+      sourceMutationAllowed: false,
+      reason: 'This visitor interaction returns a cultivated response without exposing internal traces or granting mutation authority.'
+    }
+  };
+}
+
+function communityApiFruit(input: string, result: Record<string, any>) {
+  const fruit = publicGardenFruit(input, result, false);
+  return {
+    ...fruit,
+    version: 'garden-api.v1',
+    boundary: {
+      ...fruit.boundary,
+      mode: 'community_api_read_only',
+      reason: 'The community API cultivates against shared knowledge without reading personal memory or granting mutation authority.'
+    }
+  };
+}
+
+function personalApiFruit(input: string, result: Record<string, any>) {
+  const fruit = publicGardenFruit(input, result, true);
+  return {
+    ...fruit,
+    version: 'garden-api.v1',
+    cultivation: {
+      ...fruit.cultivation,
+      personalContextConsulted: true,
+      persisted: false,
+      sharedGraphMutated: false
+    },
+    boundary: {
+      ...fruit.boundary,
+      mode: 'personal_api_private_context',
+      crossPersonAccessAllowed: false,
+      automaticLearningAllowed: false,
+      reason: 'The personal cultivation API may read only the authenticated person reviewed overlay. It does not automatically save the seed or change shared knowledge.'
+    }
+  };
+}
+
+function personalGardenSummary(body: Record<string, any>) {
+  const relationships = Array.isArray(body.relationships) ? body.relationships.slice(0, 100) : [];
+  return {
+    version: 'garden-api.v1',
+    garden: {
+      sourceLayer: 'user_graph',
+      consulted: body.consulted === true,
+      relationships: relationships.map((relationship: Record<string, any>) => ({
+        id: String(relationship.id || ''),
+        source: String(relationship.source || '').slice(0, 120),
+        target: String(relationship.target || '').slice(0, 120),
+        relationshipType: String(relationship.relationshipType || '').slice(0, 80),
+        confidence: String(relationship.confidence || ''),
+        evidence: String(relationship.evidence || '').slice(0, 1_000),
+        counterexample: String(relationship.counterexample || '').slice(0, 1_000),
+        sourceLayer: 'user_graph',
+        createdAt: relationship.createdAt || null
+      })),
+      relationshipCount: Number(body.relationshipCount || relationships.length),
+      truncated: body.truncated === true
+    },
+    boundary: {
+      mode: 'personal_garden_owner_only',
+      crossPersonAccessAllowed: false,
+      sharedGraphMutationAllowed: false,
+      colorAtlasMutationAllowed: false,
+      automaticLearningAllowed: false,
+      reason: 'This read is scoped by the authenticated account. Personal relationships enter this overlay only through the existing reviewed learning workflow.'
+    }
+  };
+}
+
+function createFixedWindowRateLimiter({ name, windowMs, maxRequests }: { name: string; windowMs: number; maxRequests: number }) {
+  const windows = new Map<string, { startedAt: number; count: number }>();
+
+  return (request: IncomingMessage, response: ServerResponse) => {
+    const now = Date.now();
+    const key = clientAddress(request);
+    const current = windows.get(key);
+    const record = !current || now - current.startedAt >= windowMs
+      ? { startedAt: now, count: 0 }
+      : current;
+    record.count += 1;
+    windows.set(key, record);
+
+    const remaining = Math.max(maxRequests - record.count, 0);
+    const resetSeconds = Math.max(Math.ceil((record.startedAt + windowMs - now) / 1000), 1);
+    response.setHeader('RateLimit-Limit', String(maxRequests));
+    response.setHeader('RateLimit-Remaining', String(remaining));
+    response.setHeader('RateLimit-Reset', String(resetSeconds));
+    if (record.count > maxRequests) {
+      response.setHeader('Retry-After', String(resetSeconds));
+      throw httpError(429, `Too many ${name} requests. Try again later.`);
+    }
+  };
+}
+
+function clientAddress(request: IncomingMessage) {
+  if (process.env.MIRROR_TRUST_PROXY === 'true') {
+    const forwarded = String(request.headers['x-forwarded-for'] || '').split(',')[0].trim();
+    if (forwarded) return forwarded;
+  }
+  return request.socket.remoteAddress || 'unknown';
 }
 
 function httpError(status: number, message: string) {

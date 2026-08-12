@@ -105,6 +105,11 @@ test('signed feedback remains governed through review and dataset preparation', 
     const personalGraph = await request('/local-ai/user-graph?text=amber%20glow', learner);
     assert.equal(personalGraph.status, 200);
     assert.equal(personalGraph.body.relationshipCount, 1);
+    const longPersonalGraph = await request('/local-ai/user-graph', learner, {
+      method: 'POST', body: { text: `${'unrelated '.repeat(800)}amber glow` }
+    });
+    assert.equal(longPersonalGraph.status, 200);
+    assert.equal(longPersonalGraph.body.relationshipCount, 1);
     assert.equal((await request('/local-ai/user-graph?text=young', learner)).body.relationshipCount, 0);
     assert.equal((await request('/local-ai/user-graph?text=amber%20glow', other)).body.relationshipCount, 0);
     const sharedAfter = await Promise.all([

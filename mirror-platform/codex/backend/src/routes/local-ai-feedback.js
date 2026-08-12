@@ -172,9 +172,10 @@ router.patch('/local-ai/learning-candidates/:id/review', requireAuth, requireAdm
   } finally { client?.release(); }
 });
 
-router.get('/local-ai/user-graph', requireAuth, requirePasswordCurrent, async (req, res, next) => {
+async function readUserGraph(req, res, next) {
   try {
-    const text = String(req.query?.text || '');
+    const text = String(req.method === 'POST' ? req.body?.text || '' : req.query?.text || '');
+    if ([...text].length > 10_000) throw httpError(413, 'Personal graph lookup text must be 10000 Unicode code points or fewer.');
     const terms = graphTerms(text);
     const result = terms.length
       ? await query(
@@ -197,7 +198,10 @@ router.get('/local-ai/user-graph', requireAuth, requirePasswordCurrent, async (r
       boundary: learningBoundary('This is a user-specific adaptive overlay. It does not replace approved graph truth or fixed Color Atlas coordinates.')
     });
   } catch (error) { next(error); }
-});
+}
+
+router.get('/local-ai/user-graph', requireAuth, requirePasswordCurrent, readUserGraph);
+router.post('/local-ai/user-graph', requireAuth, requirePasswordCurrent, readUserGraph);
 
 router.get('/local-ai/training/candidates', requireAuth, requireAdmin, async (req, res, next) => {
   try {

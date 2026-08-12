@@ -9,7 +9,11 @@
     "test": "pnpm --dir chromabridge/sdk test && pnpm --dir mirror-runtime test && pnpm --dir codex/backend test",
     "smoke": "node scripts/smoke.mjs",
     "migrate": "pnpm --dir codex/backend migrate",
-    "knowledge:import": "pnpm --dir codex/backend knowledge:import"
+    "knowledge:import": "pnpm --dir codex/backend knowledge:import",
+    "email:configure": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/configure-community-garden-email.ps1",
+    "email:test": "pnpm --dir codex/backend exec node scripts/verify-email-delivery.js",
+    "autostart:register": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/register-community-garden-autostart.ps1 -StartNow",
+    "autostart:status": "powershell -NoProfile -Command \"Get-ScheduledTask -TaskName 'Community Garden Autostart' | Select-Object TaskName,State\""
   },
   "engines": {
     "node": ">=20"

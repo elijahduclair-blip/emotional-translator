@@ -7,7 +7,9 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
+    "public:start": "node dist/public-main.js",
     "dev": "npx ts-node src/main.ts",
+    "public:dev": "npx ts-node src/public-main.ts",
     "dev:quickstart": "npx ts-node src/examples/quickstart.ts",
     "test": "npx vitest",
     "test:watch": "npx vitest --watch",

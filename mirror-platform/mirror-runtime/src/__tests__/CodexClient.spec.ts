@@ -46,6 +46,15 @@ function graphRead(): CodexGraphRead {
 }
 
 describe('CodexClient compact persistence', () => {
+  it('reports a readable boundary error when Codex returns non-JSON text', async () => {
+    const client = new CodexClient('http://codex.test', 'service-token', async () =>
+      new Response('temporary upstream error', { status: 502, headers: { 'content-type': 'text/plain' } })
+    );
+    await expect(client.requestJson('/api/v1/test')).rejects.toThrow(
+      'Codex /api/v1/test returned an unreadable response (HTTP 502).'
+    );
+  });
+
   it('reads the active conversational adapter only with the runtime service token', async () => {
     let authorization = '';
     const client = new CodexClient('http://codex.test', 'service-token', async (_url, init) => {

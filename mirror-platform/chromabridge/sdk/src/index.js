@@ -9,6 +9,8 @@ const NATURAL_CLIMATES = [
   ['silver', '#a7adb4', ['silver', 'mist', 'fog', 'revision', 'ambiguity']]
 ];
 
+const MAX_NOTATION_CODE_POINTS = 20_000;
+
 function evaluate(input) {
   const text = requireInput(input?.text);
   const normalized = text.toLowerCase();
@@ -108,7 +110,9 @@ function optionalText(value) {
 
 function requireNotation(value) {
   if (typeof value !== 'string' || !value.trim()) throw new TypeError('ChromaBridge.evaluateNotation requires non-empty notation.');
-  if (value.length > 512) throw new RangeError('ChromaBridge.evaluateNotation accepts at most 512 characters.');
+  if ([...value].length > MAX_NOTATION_CODE_POINTS) {
+    throw new RangeError(`ChromaBridge.evaluateNotation accepts at most ${MAX_NOTATION_CODE_POINTS} Unicode code points.`);
+  }
   return value.trim();
 }
 

@@ -41,7 +41,7 @@ export class LocalModelClient {
     try {
       const response = await this.fetcher(`${this.apiUrl}/api/tags`, { signal: AbortSignal.timeout(3_000) });
       if (!response.ok) throw new Error(`Ollama returned HTTP ${response.status}.`);
-      const body = await response.json() as { models?: Array<{ name?: string; model?: string }> };
+      const body = await readJsonResponse(response, 'Local Qwen health') as { models?: Array<{ name?: string; model?: string }> };
       const installedModels = (body.models || [])
         .map(item => item.name || item.model || '')
         .filter(Boolean);
@@ -110,14 +110,14 @@ export class LocalModelClient {
             { role: 'user', content: JSON.stringify(context) }
           ],
           ...(format ? { format } : {}),
-          options: { temperature, num_ctx: 4096 }
+          options: { temperature, num_ctx: 8192 }
         })
       });
     } catch (error) {
       throw httpError(503, `Local Qwen connection failed: ${error instanceof Error ? error.message : 'Ollama is unavailable.'}`);
     }
 
-    const body = await response.json() as {
+    const body = await readJsonResponse(response, 'Local Qwen') as {
       model?: string;
       message?: { content?: string };
       done?: boolean;
@@ -148,6 +148,15 @@ export class LocalModelClient {
 
 function finiteNumber(value: unknown) {
   return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
+async function readJsonResponse(response: Response, source: string) {
+  const raw = await response.text();
+  try {
+    return JSON.parse(raw || '{}') as Record<string, unknown>;
+  } catch {
+    throw httpError(502, `${source} returned an unreadable response (HTTP ${response.status}).`);
+  }
 }
 
 function httpError(status: number, message: string) {

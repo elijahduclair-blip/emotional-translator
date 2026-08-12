@@ -25,6 +25,15 @@ test('notation evaluation preserves the Braille boundary without semantic author
   assert.equal(result.boundary.mathematicalTruthAssessed, false);
 });
 
+test('notation evaluation supports the expanded conversation-to-Braille budget', () => {
+  const expanded = evaluateNotation({ notation: '⠁'.repeat(513) });
+  assert.equal([...expanded.notation].length, 513);
+  assert.throws(
+    () => evaluateNotation({ notation: '⠁'.repeat(20_001) }),
+    /at most 20000 Unicode code points/
+  );
+});
+
 test('evaluation rejects empty observations', () => {
   assert.throws(() => evaluate({ text: ' ' }), /non-empty text/);
 });

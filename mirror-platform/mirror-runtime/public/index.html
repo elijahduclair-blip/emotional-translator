@@ -139,6 +139,8 @@
     }
     .room-link:hover { color: var(--ink); background: rgba(255, 255, 255, 0.04); }
     .room-link[aria-current="page"] { color: var(--ink); background: rgba(255, 255, 255, 0.07); }
+    .account-identity { margin-left: auto; color: #8c929b; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.04em; }
+    .room-link[data-account-state="signed-in"] .account-identity { color: var(--green); }
     .room-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
     .room-link[data-room="garden"] .room-dot { background: var(--green); }
     .room-link[data-room="account"] .room-dot { background: #d6c7a1; }
@@ -336,6 +338,23 @@
     .garden-overview { position: relative; }
     .garden-overview > * { position: relative; }
     .garden-intro { max-width: 760px; margin: 0 0 18px; color: var(--muted); line-height: 1.65; }
+    .garden-entrance { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(260px, .75fr); gap: 12px; margin: 0 0 22px; }
+    .garden-entrance-panel, .garden-fruit {
+      padding: 16px;
+      border: 1px solid rgba(126, 184, 153, .28);
+      border-radius: 14px;
+      background: rgba(126, 184, 153, .045);
+    }
+    .garden-entrance h2, .garden-fruit h2 { margin: 5px 0 7px; font-family: Georgia, "Times New Roman", serif; font-size: 1.45rem; font-weight: 500; }
+    .garden-entrance p, .garden-fruit p { color: var(--muted); line-height: 1.55; }
+    .garden-entrance textarea { min-height: 96px; padding-inline: 0; font-size: 1rem; }
+    .garden-entrance-actions { display: flex; align-items: center; justify-content: space-between; gap: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
+    .garden-entrance-actions button { flex: 0 0 auto; padding: 10px 17px; }
+    .garden-fruit { position: relative; overflow: hidden; }
+    .garden-fruit::before { position: absolute; right: -50px; top: -55px; width: 140px; height: 140px; border-radius: 50%; background: rgba(216,183,106,.16); content: ""; filter: blur(35px); pointer-events: none; }
+    .garden-fruit > * { position: relative; }
+    .garden-fruit-text { margin: 12px 0; color: var(--ink) !important; font-size: 1rem; }
+    .garden-fruit-meta { color: var(--muted); font-size: .75rem; }
     .garden-bed-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
     .garden-bed {
       display: grid;
@@ -504,7 +523,7 @@
       .service-strip { gap: 8px; }
       .service span:last-child { display: none; }
       .workspace-grid { grid-template-columns: 1fr; }
-      .braille-grid, .foundation-grid, .account-grid, .garden-bed-grid, .garden-lanes, .research-grid { grid-template-columns: 1fr; }
+      .braille-grid, .foundation-grid, .account-grid, .garden-entrance, .garden-bed-grid, .garden-lanes, .research-grid { grid-template-columns: 1fr; }
       .garden-loop { grid-template-columns: 1fr; }
       .garden-loop-step:not(:last-child)::after { right: auto; left: 16px; top: auto; bottom: -10px; content: "↓"; }
       .flow { grid-template-columns: 1fr; }
@@ -541,7 +560,7 @@
       <nav class="sidebar" aria-label="Community Garden beds">
         <p class="nav-label">Garden beds</p>
         <a class="room-link" data-room="garden" href="#garden"><span class="room-dot"></span>Garden</a>
-        <a class="room-link" data-room="account" href="#account"><span class="room-dot"></span>Account</a>
+        <a class="room-link" data-room="account" data-account-state="signed-out" href="#account" aria-label="Account, sign in"><span class="room-dot"></span><span>Account</span><span id="accountIdentity" class="account-identity">Sign in</span></a>
         <a class="room-link" data-room="research" href="#research"><span class="room-dot"></span>Research</a>
         <a class="room-link" data-room="translate" href="#translate"><span class="room-dot"></span>Translate</a>
         <a class="room-link" data-room="atlas" href="#atlas"><span class="room-dot"></span>Color Atlas</a>
@@ -561,9 +580,28 @@
           <section id="garden" class="zone garden-overview" data-garden-room="garden">
             <div class="zone-label"><span class="zone-number">∞</span>Community Garden / knowledge map</div>
             <p class="garden-intro">Knowledge develops over time, is organized into distinct beds, receives focused work inside one local plot, connects to running services, and returns through personal or governed shared storage. The loop repeats without turning every observation into shared truth.</p>
+            <div class="garden-entrance" aria-label="Garden Entrance">
+              <form id="gardenEntranceForm" class="garden-entrance-panel">
+                <span class="garden-bed-kicker">Open to visitors</span>
+                <h2>Plant a seed of information.</h2>
+                <p>Bring a question, observation, or unfinished thought. The Garden will cultivate it through its protected roots and return useful fruit without changing shared knowledge.</p>
+                <label class="sr-only" for="gardenSeed">Question, observation, or unfinished thought</label>
+                <textarea id="gardenSeed" maxlength="10000" required placeholder="What would you like the Garden to help grow?"></textarea>
+                <div class="garden-entrance-actions">
+                  <span id="gardenEntranceStatus" class="hint" role="status" aria-live="polite">The entrance accepts text without requiring an account.</span>
+                  <button id="gardenEntranceButton" type="submit">Grow fruit</button>
+                </div>
+              </form>
+              <article id="gardenFruit" class="garden-fruit" aria-live="polite">
+                <span class="garden-bed-kicker">Public harvest</span>
+                <h2 id="gardenFruitTitle">Fruit grows here.</h2>
+                <p id="gardenFruitText" class="garden-fruit-text">Your result will appear here. The visitor surface does not expose service credentials, database records, model traces, or graph mutation controls.</p>
+                <div id="gardenFruitMeta" class="garden-fruit-meta">Seed → translation → relation → composition → fruit</div>
+              </article>
+            </div>
             <div class="garden-bed-grid" aria-label="Community Garden beds">
               <a class="garden-bed" href="#account"><span class="garden-bed-kicker">Personal gate</span><strong>Account</strong><span>Sign in once for research, progress, governance, and personal learning records.</span></a>
-              <a class="garden-bed" href="#research"><span class="garden-bed-kicker">Research intake</span><strong>Outside Sources</strong><span>Gather evidence leads with provenance and hold them outside the approved graph.</span></a>
+              <a class="garden-bed" href="#research"><span class="garden-bed-kicker">Reference library</span><strong>Outside References</strong><span>Use Wikipedia and Crossref for accountable orientation while keeping references outside the approved graph.</span></a>
               <a class="garden-bed" href="#translate"><span class="garden-bed-kicker">Climate bed</span><strong>Translate</strong><span>Bring language in and trace its revisable relational color climate.</span></a>
               <a class="garden-bed" href="#atlas"><span class="garden-bed-kicker">Knowledge bed</span><strong>Color Atlas</strong><span>Inspect governed graph placement, routes, coordinates, and provenance.</span></a>
               <a class="garden-bed" href="#localAi"><span class="garden-bed-kicker">Conversation bed</span><strong>Local AI</strong><span>Talk with Qwen3 through the reversible structural and evidence loop.</span></a>
@@ -688,11 +726,11 @@
           </section>
 
           <section id="research" class="zone foundation-room" data-garden-room="research">
-            <div class="zone-label"><span class="zone-number">R</span>Research Intake / outside evidence</div>
-            <p class="intro">Search curated external sources, inspect their provenance, and save only accountable evidence candidates. Outside information cannot enter the approved graph directly.</p>
+            <div class="zone-label"><span class="zone-number">R</span>Research / external reference library</div>
+            <p class="intro">Use Wikipedia and Crossref as external references for definitions, background, terminology, and known relationships. A saved reference is not automatically evidence for a graph claim.</p>
             <div class="research-grid">
               <div class="foundation-panel">
-                <h3>Gather evidence leads</h3>
+                <h3>Find references</h3>
                 <form id="researchSearchForm">
                   <label class="field"><span>What should the Garden investigate?</span><input id="researchQuery" maxlength="180" autocomplete="off" placeholder="For example: color atmosphere and emotional regulation"></label>
                   <div class="research-options" aria-label="Research sources">
@@ -707,14 +745,14 @@
                 <div id="researchResults" class="research-list"></div>
               </div>
               <div class="foundation-panel">
-                <h3>Evidence candidate inbox</h3>
-                <p class="hint">Candidates remain separate from shared semantic knowledge. Administrators may review them and create a second, still-unapproved graph proposal.</p>
-                <button id="refreshResearchItems" type="button">Refresh candidate inbox</button>
-                <div id="researchItemsStatus" class="braille-status" role="status" aria-live="polite">Sign in to inspect your saved candidates.</div>
+                <h3>Saved reference library</h3>
+                <p class="hint">References remain separate from shared semantic knowledge. Administrators review provenance before a reference can be used in a still-unapproved graph proposal.</p>
+                <button id="refreshResearchItems" type="button">Refresh reference library</button>
+                <div id="researchItemsStatus" class="braille-status" role="status" aria-live="polite">Sign in to inspect your saved references.</div>
                 <div id="researchItems" class="research-list"></div>
               </div>
             </div>
-            <div class="boundary"><strong>External-evidence boundary</strong><br>Search results are leads, saved items are candidates, and approved research can create only a graph proposal. No search, source, or model can approve or mutate the Color Atlas.</div>
+            <div class="boundary"><strong>External-reference boundary</strong><br>Search results and saved references help the Garden understand. Only a later, explicit claim can use a reference as evidence, and that claim still enters governance as an unapproved graph proposal. No source or model can mutate the Color Atlas.</div>
           </section>
 
           <section id="localAi" class="zone foundation-room" data-garden-room="localAi">
@@ -722,7 +760,7 @@
             <p class="intro">Your English passes through the reversible Braille and number trace, receives bounded graph and WordNet evidence, and is then reasoned over by Qwen3 running on this computer.</p>
             <div class="foundation-panel runtime-language-panel">
               <form id="localAiForm">
-                <label class="field"><span>Talk to your local AI</span><textarea id="localAiInput" rows="4" maxlength="2000" placeholder="For example: What climate is moving through reflection?"></textarea></label>
+                <label class="field"><span>Talk to your local AI</span><textarea id="localAiInput" rows="4" maxlength="10000" placeholder="For example: What climate is moving through reflection?"></textarea></label>
                 <div class="braille-actions">
                   <button id="localAiMicButton" class="microphone-button" type="button" aria-pressed="true" aria-controls="localAiInput">Turn microphone off</button>
                   <button id="localAiButton" type="submit">Ask local Qwen3</button>
@@ -893,6 +931,12 @@ Gold memory moves through reflection.</textarea></label>
   </div>
 
   <script>
+    if (window.location.hostname === '127.0.0.1') {
+      const canonicalUrl = new URL(window.location.href);
+      canonicalUrl.hostname = 'localhost';
+      window.location.replace(canonicalUrl.toString());
+    }
+
     const form = document.querySelector('#translatorForm');
     const input = document.querySelector('#input');
     const button = document.querySelector('#translateButton');
@@ -937,9 +981,9 @@ Gold memory moves through reflection.</textarea></label>
       },
       research: {
         label: 'Research',
-        eyebrow: 'Community Garden / research intake',
-        title: 'Bring outside evidence to the gate.',
-        intro: 'Curated sources may contribute accountable leads with provenance and falsification conditions, but they cannot write shared truth.'
+        eyebrow: 'Community Garden / external reference library',
+        title: 'Bring outside references into view.',
+        intro: 'Wikipedia and Crossref may provide accountable orientation and vocabulary. A later claim—not the reference itself—must carry evidence limitations.'
       },
       translate: {
         label: 'Translate',
@@ -989,6 +1033,7 @@ Gold memory moves through reflection.</textarea></label>
     const heldChord = new Set();
 
     bindGardenNavigation();
+    bindGardenEntrance();
     checkRuntime();
     loadBrailleRoom();
     bindLocalAiRoom();
@@ -997,8 +1042,68 @@ Gold memory moves through reflection.</textarea></label>
     bindMicrophoneControls();
 
     function bindGardenNavigation() {
-      window.addEventListener('hashchange', activateGardenRoom);
+      window.addEventListener('hashchange', () => {
+        activateGardenRoom();
+        syncAccountForActiveRoom();
+      });
+      window.addEventListener('focus', syncAccountForActiveRoom);
+      document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) syncAccountForActiveRoom();
+      });
       activateGardenRoom();
+    }
+
+    function bindGardenEntrance() {
+      const entranceForm = document.querySelector('#gardenEntranceForm');
+      entranceForm.addEventListener('submit', growGardenFruit);
+      loadGardenIdentity();
+    }
+
+    async function loadGardenIdentity() {
+      try {
+        const response = await fetch('/garden/identity');
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.error || 'The Garden identity is unavailable.');
+        setText('gardenEntranceStatus', `${body.name} · ${body.version} · no account required`);
+      } catch {
+        setText('gardenEntranceStatus', 'The Garden entrance is waiting for the runtime.');
+      }
+    }
+
+    async function growGardenFruit(event) {
+      event.preventDefault();
+      const seedInput = document.querySelector('#gardenSeed');
+      const growButton = document.querySelector('#gardenEntranceButton');
+      const input = seedInput.value.trim();
+      if (!input) return;
+
+      growButton.disabled = true;
+      setText('gardenEntranceStatus', 'Cultivating the seed through the protected roots...');
+      setText('gardenFruitTitle', 'Growing...');
+      setText('gardenFruitText', 'The Garden is translating, relating, and composing a useful response.');
+      setText('gardenFruitMeta', 'No shared graph mutation is permitted.');
+      try {
+        const body = await mirrorFetch('/garden/fruit', { input });
+        setText('gardenFruitTitle', 'Fruit from this seed');
+        setText('gardenFruitText', body.fruit?.text || 'The Garden returned an empty harvest.');
+        setText('gardenFruitMeta', `${body.seed?.codePointCount || 0} code points · ${body.cultivation?.graphSource || 'unresolved'} roots · not persisted · shared graph unchanged`);
+        setText('gardenEntranceStatus', body.cultivation?.personalContextConsulted
+          ? 'Fruit returned with your signed-in personal context.'
+          : 'Fruit returned without storing a personal record.');
+      } catch (error) {
+        setText('gardenFruitTitle', 'This seed could not be cultivated');
+        setText('gardenFruitText', error.message);
+        setText('gardenFruitMeta', 'The protected roots remain unchanged.');
+        setText('gardenEntranceStatus', 'The Garden entrance needs attention.');
+      } finally {
+        growButton.disabled = false;
+      }
+    }
+
+    async function syncAccountForActiveRoom() {
+      await refreshAccount();
+      const room = window.location.hash.slice(1).split('?')[0];
+      if (room === 'research' && currentAccount) await loadResearchItems();
     }
 
     function activateGardenRoom() {
@@ -1123,7 +1228,7 @@ Gold memory moves through reflection.</textarea></label>
         currentResearchSuggestions = body.suggestions || {};
         renderResearchSuggestions(body);
         renderResearchResults(currentResearchResults);
-        setText('researchSearchStatus', `${currentResearchResults.length} evidence leads returned${body.cached ? ' from the bounded cache' : ''}. Nothing was saved or approved.`);
+        setText('researchSearchStatus', `${currentResearchResults.length} reference results returned${body.cached ? ' from the bounded cache' : ''}. Nothing was saved or approved.`);
         setServiceState('codexService', 'ready');
       } catch (error) {
         setText('researchSearchStatus', error.message);
@@ -1152,19 +1257,14 @@ Gold memory moves through reflection.</textarea></label>
           <p><a href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">Open source record</a></p>
           <p><strong>Boundary:</strong> ${escapeHtml(item.boundary)}</p>
           <div class="research-card-actions">
-            <label class="field"><span>What observation would weaken or disprove using this source here?</span><textarea data-research-counterexample="${index}" rows="3" maxlength="2000" placeholder="Required before this lead can enter the candidate inbox."></textarea></label>
-            <label class="field"><span>Your evidence confidence</span><select data-research-confidence="${index}"><option value="low">Low</option><option value="medium">Medium</option><option value="high">High</option></select></label>
-            <button type="button" data-research-save="${index}">Save as evidence candidate</button>
+            <button type="button" data-research-save="${index}">Save reference</button>
           </div>
-        </article>`).join('') : '<p class="empty-state">No outside evidence leads matched this search.</p>';
+        </article>`).join('') : '<p class="empty-state">No outside references matched this search.</p>';
     }
 
     async function saveResearchResult(index) {
       const item = currentResearchResults[index];
       if (!item) return;
-      const counterexample = document.querySelector(`[data-research-counterexample="${index}"]`).value.trim();
-      if (!counterexample) return setText('researchSearchStatus', 'Write a falsification condition before saving this evidence lead.');
-      const confidence = document.querySelector(`[data-research-confidence="${index}"]`).value;
       try {
         const body = await mirrorFetch('/research/items', {
           query: document.querySelector('#researchQuery').value.trim(),
@@ -1176,29 +1276,27 @@ Gold memory moves through reflection.</textarea></label>
           excerpt: item.excerpt,
           publishedAt: item.publishedAt,
           suggestions: currentResearchSuggestions || {},
-          boundary: item.boundary,
-          counterexample,
-          confidence
+          boundary: item.boundary
         });
-        setText('researchSearchStatus', `${body.item.title} is now a proposed evidence candidate. It is not graph truth.`);
+        setText('researchSearchStatus', `${body.item.title} is saved as a reference. It is not evidence for a graph claim and is not graph truth.`);
         await loadResearchItems();
       } catch (error) { setText('researchSearchStatus', error.message); }
     }
 
     async function loadResearchItems() {
       if (!currentAccount) {
-        setText('researchItemsStatus', 'Sign in to inspect your saved candidates.');
+        setText('researchItemsStatus', 'Sign in to inspect your saved references.');
         document.querySelector('#researchItems').innerHTML = '';
         return;
       }
-      setText('researchItemsStatus', 'Loading the candidate-only evidence inbox...');
+      setText('researchItemsStatus', 'Loading the external reference library...');
       try {
         const response = await fetch('/research/items');
         const body = await response.json();
         if (!response.ok) throw new Error(body.error || 'Research candidates are unavailable.');
         currentResearchItems = body.items || [];
         renderResearchItems(currentResearchItems);
-        setText('researchItemsStatus', `${currentResearchItems.length} research ${currentResearchItems.length === 1 ? 'candidate' : 'candidates'} visible. None can mutate the graph directly.`);
+        setText('researchItemsStatus', `${currentResearchItems.length} saved ${currentResearchItems.length === 1 ? 'reference' : 'references'} visible. None can mutate the graph directly.`);
       } catch (error) { setText('researchItemsStatus', error.message); }
     }
 
@@ -1207,17 +1305,17 @@ Gold memory moves through reflection.</textarea></label>
         const canReview = currentAccount?.role === 'admin' && ['proposed', 'needs_revision'].includes(item.status);
         const canPropose = currentAccount?.role === 'admin' && item.status === 'approved' && !item.graph_proposal_id;
         return `<article class="research-card">
-          <div class="research-meta"><span class="research-chip">${escapeHtml(item.status)}</span><span class="research-chip">${escapeHtml(item.source_name)}</span><span class="research-chip">${escapeHtml(item.confidence)}</span></div>
+          <div class="research-meta"><span class="research-chip">${escapeHtml(item.status)}</span><span class="research-chip">Reference</span><span class="research-chip">${escapeHtml(item.source_name)}</span></div>
           <h4>${escapeHtml(item.title)}</h4>
           <p>${escapeHtml(item.excerpt || 'No source excerpt stored.')}</p>
           <p><a href="${escapeHtml(item.source_url)}" target="_blank" rel="noopener noreferrer">Review provenance</a></p>
-          <p><strong>Boundary:</strong> ${escapeHtml(item.boundary)}<br><strong>Falsification:</strong> ${escapeHtml(item.counterexample)}</p>
+          <p><strong>Reference boundary:</strong> ${escapeHtml(item.boundary)}${item.counterexample ? `<br><strong>Legacy limitation:</strong> ${escapeHtml(item.counterexample)}` : ''}</p>
           ${item.review_note ? `<p><strong>Review note:</strong> ${escapeHtml(item.review_note)}</p>` : ''}
           ${item.graph_proposal_id ? `<p><strong>Graph proposal:</strong> ${escapeHtml(item.graph_proposal_id)} — still awaiting graph governance.</p>` : ''}
-          ${canReview ? `<div class="research-card-actions"><label class="field"><span>Administrator review note</span><textarea data-research-review-note="${index}" rows="2" maxlength="2000"></textarea></label><div class="research-review-actions"><button type="button" data-research-index="${index}" data-research-decision="approved">Approve evidence</button><button type="button" data-research-index="${index}" data-research-decision="needs_revision">Needs revision</button><button type="button" data-research-index="${index}" data-research-decision="rejected">Reject</button></div></div>` : ''}
-          ${canPropose ? `<div class="research-card-actions"><label class="field"><span>Proposed graph label</span><input data-research-label="${index}" maxlength="240" value="${escapeHtml(item.query)}"></label><label class="field"><span>Node type</span><select data-research-node-type="${index}"><option value="common_word">Common word</option><option value="neutral_word">Neutral word</option><option value="emotion_word">Emotion word</option><option value="theme">Theme</option><option value="environment_term">Environment term</option></select></label><label class="field"><span>Optional existing family</span><input data-research-family="${index}" maxlength="120"></label><button type="button" data-research-proposal="${index}">Create governed graph proposal</button></div>` : ''}
+          ${canReview ? `<div class="research-card-actions"><label class="field"><span>Administrator provenance review note</span><textarea data-research-review-note="${index}" rows="2" maxlength="2000"></textarea></label><div class="research-review-actions"><button type="button" data-research-index="${index}" data-research-decision="approved">Approve reference</button><button type="button" data-research-index="${index}" data-research-decision="needs_revision">Needs revision</button><button type="button" data-research-index="${index}" data-research-decision="rejected">Reject</button></div></div>` : ''}
+          ${canPropose ? `<div class="research-card-actions"><label class="field"><span>Proposed graph label</span><input data-research-label="${index}" maxlength="240" value="${escapeHtml(item.query)}"></label><label class="field"><span>Specific claim this reference would support</span><textarea data-research-claim="${index}" rows="3" maxlength="2000" placeholder="Required only because this reference is now being used to justify a graph proposal."></textarea></label><label class="field"><span>What would weaken or disprove this specific claim?</span><textarea data-research-counterexample="${index}" rows="3" maxlength="2000" placeholder="A limitation on the claim, not on saving the reference."></textarea></label><label class="field"><span>Node type</span><select data-research-node-type="${index}"><option value="common_word">Common word</option><option value="neutral_word">Neutral word</option><option value="emotion_word">Emotion word</option><option value="theme">Theme</option><option value="environment_term">Environment term</option></select></label><label class="field"><span>Optional existing family</span><input data-research-family="${index}" maxlength="120"></label><button type="button" data-research-proposal="${index}">Create governed graph proposal</button></div>` : ''}
         </article>`;
-      }).join('') : '<p class="empty-state">No research candidates have been saved.</p>';
+      }).join('') : '<p class="empty-state">No references have been saved.</p>';
     }
 
     async function reviewResearchItem(index, decision) {
@@ -1226,7 +1324,7 @@ Gold memory moves through reflection.</textarea></label>
       if (!item || !reviewNote) return setText('researchItemsStatus', 'An administrator review note is required.');
       try {
         await mirrorFetch(`/research/items/${encodeURIComponent(item.id)}/review`, { decision, reviewNote }, 'PATCH');
-        setText('researchItemsStatus', `${item.title} was marked ${decision}. This decision still did not change the graph.`);
+        setText('researchItemsStatus', `${item.title} was marked ${decision} as a reference. This decision still did not change the graph.`);
         await loadResearchItems();
       } catch (error) { setText('researchItemsStatus', error.message); }
     }
@@ -1235,11 +1333,15 @@ Gold memory moves through reflection.</textarea></label>
       const item = currentResearchItems[index];
       if (!item) return;
       const label = document.querySelector(`[data-research-label="${index}"]`).value.trim();
+      const claim = document.querySelector(`[data-research-claim="${index}"]`).value.trim();
+      const counterexample = document.querySelector(`[data-research-counterexample="${index}"]`).value.trim();
       const nodeType = document.querySelector(`[data-research-node-type="${index}"]`).value;
       const family = document.querySelector(`[data-research-family="${index}"]`).value.trim();
       if (!label) return setText('researchItemsStatus', 'A proposed graph label is required.');
+      if (!claim) return setText('researchItemsStatus', 'Write the specific claim this reference would support.');
+      if (!counterexample) return setText('researchItemsStatus', 'Write what would weaken or disprove the proposed claim.');
       try {
-        const body = await mirrorFetch(`/research/items/${encodeURIComponent(item.id)}/graph-proposal`, { label, nodeType, family: family || null });
+        const body = await mirrorFetch(`/research/items/${encodeURIComponent(item.id)}/graph-proposal`, { label, claim, counterexample, nodeType, family: family || null });
         setText('researchItemsStatus', `${body.proposalId} was created as a graph proposal. It remains unapproved.`);
         await loadResearchItems();
       } catch (error) { setText('researchItemsStatus', error.message); }
@@ -1609,7 +1711,7 @@ Gold memory moves through reflection.</textarea></label>
       } catch (error) {
         setText('brailleMessage', error.message);
       }
-      await refreshAccount();
+      await refreshAccount({ loadProtected: true });
       const fragment = new URLSearchParams(location.hash.split('?')[1] || '');
       const token = fragment.get('token');
       if (token && (location.hash.startsWith('#braille-verify') || location.hash.startsWith('#account-verify'))) await accountAction('/account/verify-email', { token }, 'Email verified. You may sign in.');
@@ -1742,6 +1844,7 @@ Gold memory moves through reflection.</textarea></label>
       try {
         const body = await mirrorFetch('/account/login', accountCredentials());
         currentAccount = body.user;
+        updateAccountPresence();
         setText('accountStatus', `Signed in as ${body.user.username}. Progress can synchronize.`);
         document.querySelector('#accountPassword').value = '';
         if (body.user.role === 'admin') await Promise.all([loadModuleQueue(), loadFeedbackQueue(), loadLearningCandidates(), loadConversationVersions(), loadResearchItems()]);
@@ -1775,6 +1878,7 @@ Gold memory moves through reflection.</textarea></label>
       try {
         const body = await mirrorFetch('/account/change-password', { currentPassword, newPassword });
         currentAccount = body.user;
+        updateAccountPresence();
         document.querySelector('#accountCurrentPassword').value = '';
         document.querySelector('#accountNewPassword').value = '';
         document.querySelector('#accountConfirmPassword').value = '';
@@ -1786,6 +1890,7 @@ Gold memory moves through reflection.</textarea></label>
     async function logoutAccount() {
       try { await mirrorFetch('/account/logout', {}); } catch {}
       currentAccount = null;
+      updateAccountPresence();
       moduleActivationTokens.clear();
       setText('accountStatus', 'Signed out. Translation and lessons remain public.');
       setText('accountChangeStatus', 'Sign in above before changing your password.');
@@ -1794,7 +1899,7 @@ Gold memory moves through reflection.</textarea></label>
       setText('learningCandidateStatus', 'Administrator sign-in is required to review learning candidates.');
       setText('conversationVersionStatus', 'Administrator sign-in is required to inspect training readiness.');
       setText('researchSearchStatus', 'Sign in before consulting outside sources.');
-      setText('researchItemsStatus', 'Sign in to inspect your saved candidates.');
+      setText('researchItemsStatus', 'Sign in to inspect your saved references.');
       document.querySelector('#moduleQueue').innerHTML = '';
       document.querySelector('#feedbackQueue').innerHTML = '';
       document.querySelector('#learningCandidateQueue').innerHTML = '';
@@ -1806,17 +1911,35 @@ Gold memory moves through reflection.</textarea></label>
       currentResearchItems = [];
     }
 
-    async function refreshAccount() {
+    async function refreshAccount({ loadProtected = false } = {}) {
       try {
         const response = await fetch('/account/me');
         const body = await response.json();
         if (response.ok) {
           currentAccount = body.user;
+          updateAccountPresence();
           setText('accountStatus', `Signed in as ${body.user.username}. Progress can synchronize.`);
-          if (body.user.role === 'admin') await Promise.all([loadModuleQueue(), loadFeedbackQueue(), loadLearningCandidates(), loadConversationVersions(), loadResearchItems()]);
-          else await loadResearchItems();
+          if (loadProtected && body.user.role === 'admin') await Promise.all([loadModuleQueue(), loadFeedbackQueue(), loadLearningCandidates(), loadConversationVersions(), loadResearchItems()]);
+          else if (loadProtected) await loadResearchItems();
+          return currentAccount;
         }
       } catch {}
+      currentAccount = null;
+      updateAccountPresence();
+      return null;
+    }
+
+    function updateAccountPresence() {
+      const link = document.querySelector('.room-link[data-room="account"]');
+      const identity = document.querySelector('#accountIdentity');
+      const signedIn = Boolean(currentAccount);
+      identity.textContent = signedIn ? currentAccount.username : 'Sign in';
+      link.dataset.accountState = signedIn ? 'signed-in' : 'signed-out';
+      link.setAttribute('aria-label', signedIn ? `Account, signed in as ${currentAccount.username}` : 'Account, sign in');
+      const researchStatus = document.querySelector('#researchSearchStatus');
+      if (signedIn && /sign in|open the account/iu.test(researchStatus.textContent)) {
+        researchStatus.textContent = `Signed in as ${currentAccount.username}. Ready to consult bounded outside sources.`;
+      }
     }
 
     function accountCredentials(includeUsername = false) {
@@ -2376,7 +2499,13 @@ Gold memory moves through reflection.</textarea></label>
         headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin' },
         body: JSON.stringify(body)
       });
-      const result = await response.json();
+      const raw = await response.text();
+      let result;
+      try {
+        result = JSON.parse(raw || '{}');
+      } catch {
+        throw new Error(`The Garden received an unreadable service response (${response.status}). Please refresh the page and try again.`);
+      }
       if (!response.ok) throw new Error(result.error || `Request failed (${response.status}).`);
       return result;
     }

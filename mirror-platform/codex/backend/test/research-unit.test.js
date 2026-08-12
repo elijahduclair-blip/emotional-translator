@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { normalizeResearchItem, parseSources, stripHtml } from '../src/routes/research.js';
+import { normalizeGraphPromotion, normalizeResearchItem, parseSources, stripHtml } from '../src/routes/research.js';
 
 test('research sources default to the two curated providers', () => {
   assert.deepEqual([...parseSources()].sort(), ['crossref', 'wikipedia']);
@@ -11,7 +11,7 @@ test('unsupported research sources do not become fetch targets', () => {
   assert.throws(() => parseSources('example'), /Choose Wikipedia, Crossref, or both/);
 });
 
-test('research evidence requires HTTPS, a boundary, and a counterexample', () => {
+test('research references require HTTPS and provenance but not a counterexample', () => {
   const base = {
     query: 'winter ritual',
     title: 'Winter ritual',
@@ -19,12 +19,25 @@ test('research evidence requires HTTPS, a boundary, and a counterexample', () =>
     sourceType: 'scholarly_metadata',
     sourceUrl: 'https://example.com/evidence',
     boundary: 'Context only.',
-    counterexample: 'The pattern does not recur outside this setting.',
     confidence: 'medium'
   };
   assert.equal(normalizeResearchItem(base).sourceUrl, 'https://example.com/evidence');
+  assert.equal(normalizeResearchItem(base).counterexample, null);
   assert.throws(() => normalizeResearchItem({ ...base, sourceUrl: 'http://example.com' }), /HTTPS/);
-  assert.throws(() => normalizeResearchItem({ ...base, counterexample: '' }), /counterexample/i);
+});
+
+test('graph promotion requires a specific claim and its limitation', () => {
+  const item = { query: 'winter ritual' };
+  assert.throws(() => normalizeGraphPromotion({ label: 'winter ritual' }, item), /specific claim/i);
+  assert.throws(() => normalizeGraphPromotion({ label: 'winter ritual', claim: 'Winter ritual belongs in this theme.' }, item), /limitation/i);
+  const promotion = normalizeGraphPromotion({
+    label: 'winter ritual',
+    nodeType: 'theme',
+    claim: 'Winter ritual belongs in this theme.',
+    counterexample: 'Reject the claim when the reference describes an unrelated use.'
+  }, item);
+  assert.equal(promotion.nodeType, 'theme');
+  assert.match(promotion.counterexample, /unrelated use/);
 });
 
 test('research intake cannot smuggle approval or graph mutation state into a candidate', () => {

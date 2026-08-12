@@ -5,11 +5,11 @@ export const capturedMail = [];
 
 export async function sendAccountActionEmail({ to, purpose, token }) {
   const publicUrl = String(process.env.PUBLIC_APP_URL || 'http://127.0.0.1:3100').replace(/\/$/, '');
-  const path = purpose === 'verify_email' ? '/#braille-verify' : '/#braille-reset';
-  const action = purpose === 'verify_email' ? 'Verify your Mirror Platform account' : 'Reset your Mirror Platform password';
+  const path = purpose === 'verify_email' ? '/#profile-verify' : '/#braille-reset';
+  const action = purpose === 'verify_email' ? 'Verify your Community Garden account' : 'Reset your Community Garden password';
   const url = `${publicUrl}${path}?token=${encodeURIComponent(token)}`;
   const message = {
-    from: process.env.SMTP_FROM || 'Mirror Platform <no-reply@localhost>',
+    from: process.env.SMTP_FROM || 'Community Garden <no-reply@localhost>',
     to,
     subject: action,
     text: `${action}: ${url}\n\nIf you did not request this, you can ignore this message.`

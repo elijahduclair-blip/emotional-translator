@@ -96,17 +96,13 @@ router.post('/research/items/:id/graph-proposal', requireAuth, requireAdmin, asy
     if (!researchResult.rows.length) throw httpError(409, 'Research must be approved before it can become a graph proposal.');
     const item = researchResult.rows[0];
     if (item.graph_proposal_id) throw httpError(409, 'This research item already has a graph proposal.');
-    const label = requiredText(req.body?.label || item.query, 'A graph label is required.');
-    const nodeId = slugify(req.body?.nodeId || label);
-    const nodeType = String(req.body?.nodeType || 'common_word');
-    const allowedTypes = new Set(['common_word', 'neutral_word', 'emotion_word', 'theme', 'environment_term']);
-    if (!allowedTypes.has(nodeType)) throw httpError(400, 'Unsupported graph node type.');
+    const promotion = normalizeGraphPromotion(req.body, item);
     const payload = {
       node: {
-        id: nodeId,
-        label,
-        type: nodeType,
-        family: nullableText(req.body?.family),
+        id: promotion.nodeId,
+        label: promotion.label,
+        type: promotion.nodeType,
+        family: promotion.family,
         hexColor: null,
         metadata: {
           definition: item.excerpt,
@@ -115,16 +111,26 @@ router.post('/research/items/:id/graph-proposal', requireAuth, requireAdmin, asy
           researchItemId: item.id,
           sourceUrl: item.source_url,
           sourceName: item.source_name,
-          suggestions: item.suggestions
+          suggestions: item.suggestions,
+          referenceClaim: promotion.claim,
+          referenceLimitation: promotion.counterexample
         }
       },
-      relationships: []
+      relationships: [],
+      reference: {
+        researchItemId: item.id,
+        sourceName: item.source_name,
+        sourceUrl: item.source_url,
+        claim: promotion.claim,
+        counterexample: promotion.counterexample,
+        boundary: item.boundary
+      }
     };
     const proposalId = crypto.randomUUID();
     await query(
       `INSERT INTO graph_proposals (id,operation,target_id,payload,status,author,rationale)
        VALUES ($1,'create',NULL,$2,'proposed',$3,$4)`,
-      [proposalId, payload, req.user.username, `Approved research evidence from ${item.source_name}: ${item.source_url}`]
+      [proposalId, payload, req.user.username, `Approved reference from ${item.source_name}: ${item.source_url}. Claim: ${promotion.claim}. Limitation: ${promotion.counterexample}`]
     );
     await query('UPDATE research_items SET graph_proposal_id=$2 WHERE id=$1', [item.id, proposalId]);
     res.status(201).json({ proposalId, status: 'proposed' });
@@ -162,7 +168,7 @@ async function searchCrossref(searchQuery) {
     publishedAt: crossrefDate(item.published),
     retrievedAt: new Date().toISOString(),
     doi: item.DOI,
-    boundary: 'Scholarly metadata record; title and abstract are evidence leads, not automatic proof of the translator connection.'
+    boundary: 'Scholarly metadata reference; title and abstract support orientation, not automatic proof of a translator connection.'
   }));
 }
 
@@ -231,8 +237,23 @@ function normalizeResearchItem(value = {}) {
     historyMetadata,
     emotionalLogic: nullableText(value.emotionalLogic)?.slice(0, 2000) || null,
     boundary: requiredText(value.boundary, 'A boundary is required.').slice(0, 2000),
-    counterexample: requiredText(value.counterexample, 'A counterexample or falsification condition is required.').slice(0, 2000),
+    counterexample: nullableText(value.counterexample)?.slice(0, 2000) || null,
     confidence
+  };
+}
+
+function normalizeGraphPromotion(value = {}, item = {}) {
+  const label = requiredText(value.label || item.query, 'A graph label is required.').slice(0, 240);
+  const nodeType = String(value.nodeType || 'common_word');
+  const allowedTypes = new Set(['common_word', 'neutral_word', 'emotion_word', 'theme', 'environment_term']);
+  if (!allowedTypes.has(nodeType)) throw httpError(400, 'Unsupported graph node type.');
+  return {
+    label,
+    nodeId: slugify(value.nodeId || label),
+    nodeType,
+    family: nullableText(value.family),
+    claim: requiredText(value.claim, 'A specific claim is required before a reference can support a graph proposal.').slice(0, 2000),
+    counterexample: requiredText(value.counterexample, 'A limitation or falsification condition is required for the proposed claim.').slice(0, 2000)
   };
 }
 
@@ -303,5 +324,5 @@ function nullableText(value) { const text = String(value || '').trim(); return t
 function slugify(value) { return String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''); }
 function httpError(status, message) { const error = new Error(message); error.status = status; return error; }
 
-export { normalizeResearchItem, parseSources, stripHtml };
+export { normalizeGraphPromotion, normalizeResearchItem, parseSources, stripHtml };
 export default router;
