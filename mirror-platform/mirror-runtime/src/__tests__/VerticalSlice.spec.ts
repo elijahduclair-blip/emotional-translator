@@ -29,6 +29,7 @@ describe('Community Garden vertical slice', () => {
     let receivedAlignmentRequest: Record<string, any> | undefined;
     let receivedFeedback: Record<string, any> | undefined;
     let receivedResearchItem: Record<string, any> | undefined;
+    const conversationEvents: Array<Record<string, any>> = [];
     let alignmentRequestCount = 0;
     const localModel = createServer(async (request, response) => {
       const chunks: Buffer[] = [];
@@ -127,6 +128,24 @@ describe('Community Garden vertical slice', () => {
           decoding: { english: body.text, roundTripExact: true },
           meaning: { approvedGraph: { sourceLayer: 'unresolved', nodes: [], routes: [] }, wordNet: { matchedWords: [] } },
           boundary: { mode: 'reversible_signal_with_relational_evidence', encodingCreatesMeaning: false, semanticMutationAllowed: false }
+        }));
+        return;
+      }
+      if (request.url === '/api/v1/ari/foundation') {
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({
+          foundation: {
+            version: 'ari-foundation.v1', status: 'active',
+            identity: { name: 'ARI', expandedName: 'Accountable Relational Intelligence', domain: 'Community Garden' },
+            roles: { qwen: 'Qwen supplies candidate words and outside information. Qwen is not ARI.' },
+            operationalLoop: ['preserve', 'remember', 'consult', 'encode', 'sort', 'translate'],
+            theoryOfAlignment: { meaningRule: 'relation before isolated labels' },
+            cultivation: { method: 'objective_based_reviewed_cultivation' },
+            authority: { sharedKnowledge: 'governed' },
+            responseContract: { speakAs: 'ARI' },
+            provenance: { source: 'reviewed_codex_cultivation' },
+            boundary: { qwenIsIdentity: false, automaticTranscriptTrainingAllowed: false, sharedGraphMutationAllowed: false }
+          }
         }));
         return;
       }
@@ -306,6 +325,33 @@ describe('Community Garden vertical slice', () => {
         response.end(JSON.stringify({ token: 'refreshed-codex-token', user: { id: 'learner', username: 'learner', role: 'admin', must_change_password: false } }));
         return;
       }
+      if (request.url?.startsWith('/api/v1/conversation-memory/context') && request.method === 'GET') {
+        expect(request.headers.authorization).toBe('Bearer signed-codex-token');
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({
+          version: 'private-conversation-memory.v1', events: conversationEvents.slice(-24),
+          eventCount: conversationEvents.length, throughSequence: conversationEvents.at(-1)?.sequence || null,
+          truncated: false, boundary: { sharedGraphMutationAllowed: false }
+        }));
+        return;
+      }
+      if (request.url === '/api/v1/conversation-memory/events' && request.method === 'POST') {
+        expect(request.headers.authorization).toBe('Bearer signed-codex-token');
+        const event = {
+          sequence: conversationEvents.length + 1, interactionId: body.interactionId,
+          role: body.role, content: body.content, metadata: body.metadata || {}, createdAt: new Date().toISOString()
+        };
+        conversationEvents.push(event);
+        response.writeHead(201, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ event, idempotent: false, boundary: { sharedGraphMutationAllowed: false } }));
+        return;
+      }
+      if (request.url?.startsWith('/api/v1/conversation-memory/transcript') && request.method === 'GET') {
+        expect(request.headers.authorization).toBe('Bearer signed-codex-token');
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ events: conversationEvents, count: conversationEvents.length, hasMore: false, nextBefore: null }));
+        return;
+      }
       if (request.url === '/api/v1/local-ai/feedback' && request.method === 'POST') {
         receivedFeedback = body;
         expect(request.headers.authorization).toBe('Bearer signed-codex-token');
@@ -319,6 +365,24 @@ describe('Community Garden vertical slice', () => {
       if (request.url === '/api/v1/local-ai/feedback' && request.method === 'GET') {
         response.writeHead(200, { 'content-type': 'application/json' });
         response.end(JSON.stringify({ feedback: [], count: 0 }));
+        return;
+      }
+      if (request.url === '/api/v1/local-ai/user-graph/relationships' && request.method === 'POST') {
+        expect(request.headers.authorization).toBe('Bearer signed-codex-token');
+        expect(body.confirmed).toBe(true);
+        expect(body.associations[0]).toEqual(expect.objectContaining({ source: 'Flow', target: 'Grey' }));
+        response.writeHead(201, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({
+          sourceLayer: 'user_graph',
+          relationships: [{
+            id: 'personal-flow-grey', source: 'Flow', target: 'Grey', relationshipType: 'color_association',
+            confidence: 'high', evidence: 'Profile owner placement.', counterexample: 'The owner may revise it.',
+            mutationSource: 'user_directed', approvedByUser: 'learner-1', reviewNote: 'Explicitly approved.',
+            sourceLayer: 'user_graph'
+          }],
+          relationshipCount: 1,
+          boundary: { personalGraphMutated: true, profileOwnerConfirmed: true, sharedGraphMutationAllowed: false }
+        }));
         return;
       }
       if (request.url === '/api/v1/local-ai/user-graph' && request.method === 'POST') {
@@ -394,6 +458,26 @@ describe('Community Garden vertical slice', () => {
         return;
       }
 
+      if (request.url === '/api/v1/analytics/events') {
+        expect(request.headers.authorization).toBe('Bearer test-service-token');
+        expect(Array.isArray(body.events)).toBe(true);
+        expect(body).not.toHaveProperty('input');
+        response.writeHead(201, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ recorded: body.events.length, contentStored: false }));
+        return;
+      }
+
+      if (request.url === '/api/v1/analytics/summary') {
+        expect(request.headers.authorization).toBe('Bearer signed-codex-token');
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({
+          version: 'garden-analytics.v1', window: { label: 'Last 24 hours' },
+          humanActivity: {}, cultivations: {}, rooms: [], servicePerformance: [], errors: [],
+          feedback: {}, returning: {}, personalGrowth: {}, privacy: { messageContentStored: false }
+        }));
+        return;
+      }
+
       receivedEvaluation = body.evaluation;
       expect(body.graphRead.matchedNodeIds).toEqual(['rose']);
       expect(body.graphRead.supportedRouteIds).toEqual(['rose-midnight']);
@@ -434,6 +518,7 @@ describe('Community Garden vertical slice', () => {
       const shell = await shellResponse.text();
       expect(shellResponse.status).toBe(200);
       expect(shellResponse.headers.get('permissions-policy')).toBe('camera=(), microphone=(self), geolocation=()');
+      expect(shellResponse.headers.get('set-cookie')).toContain('garden_visitor=');
       expect(shell).toContain('Community Garden');
       expect(shell).toContain('id="garden"');
       expect(shell).toContain('Garden Entrance');
@@ -446,6 +531,11 @@ describe('Community Garden vertical slice', () => {
       expect(shell).toContain('Community soil');
       expect(shell).toContain('data-garden-room="research"');
       expect(shell).toContain('data-garden-room="account"');
+      expect(shell).toContain('data-garden-room="analytics"');
+      expect(shell).toContain('Refresh Garden analytics');
+      expect(shell).toContain('Outside weather');
+      expect(shell).toContain('Inside growth');
+      expect(shell).toContain('Message content stored');
       expect(shell).toContain('Open Account sign-in');
       expect(shell).toContain('id="accountIdentity"');
       expect(shell).toContain("window.location.hostname === '127.0.0.1'");
@@ -466,7 +556,8 @@ describe('Community Garden vertical slice', () => {
       expect(shell).toContain('id="moduleGovernance"');
       expect(shell).toContain('Submit assembled module to Governance');
       expect(shell).toContain('Reversible language loop');
-      expect(shell).toContain('Your local AI / Qwen3 reasoning');
+      expect(shell).toContain('ARI / relational translator');
+      expect(shell).toContain('ARI mathematical order');
       expect(shell).toContain('id="localAiInput" rows="4" maxlength="10000"');
       expect(shell).toContain('Verified training dataset');
       expect(shell).toContain('Convert current color atlas');
@@ -480,6 +571,13 @@ describe('Community Garden vertical slice', () => {
       expect(shell).toContain('Conversational adapter versions');
       expect(shell).toContain('record.metadata.task');
       expect(shell).toContain('id="translateMicButton"');
+
+      const roomVisit = await fetch(`http://127.0.0.1:${mirrorAddress.port}/analytics/visit`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin' },
+        body: JSON.stringify({ room: 'analytics' })
+      });
+      expect(roomVisit.status).toBe(202);
       expect(shell).toContain('id="localAiMicButton"');
       expect(shell).toContain('navigator.mediaDevices.getUserMedia');
       expect(shell).toContain('window.SpeechRecognition || window.webkitSpeechRecognition');
@@ -504,6 +602,7 @@ describe('Community Garden vertical slice', () => {
         version: string;
         name: string;
         purpose: string;
+        technicalPerson: { name: string; role: string; languageEngine: string; foundation: string; toolRegistry: string };
         protectedRoots: string[];
         boundary: { graphMutationAllowed: boolean };
       };
@@ -511,8 +610,40 @@ describe('Community Garden vertical slice', () => {
       expect(gardenIdentityBody.version).toBe('garden-entrance.v1');
       expect(gardenIdentityBody.name).toBe('Community Garden');
       expect(gardenIdentityBody.purpose).toContain('grow useful fruit for people');
+      expect(gardenIdentityBody.technicalPerson).toEqual({
+        name: 'ARI', role: 'relational translator', languageEngine: 'Qwen',
+        foundation: '/api/v1/ari/foundation', toolRegistry: '/api/v1/ari/tools'
+      });
       expect(gardenIdentityBody.protectedRoots).toContain('service credentials');
       expect(gardenIdentityBody.boundary.graphMutationAllowed).toBe(false);
+
+      const ariFoundation = await fetch(`http://127.0.0.1:${mirrorAddress.port}/api/v1/ari/foundation`);
+      const ariFoundationBody = await ariFoundation.json() as {
+        foundation: { version: string; identity: { name: string }; boundary: { qwenIsIdentity: boolean } };
+        boundary: { automaticLearningAllowed: boolean };
+      };
+      expect(ariFoundation.status).toBe(200);
+      expect(ariFoundationBody.foundation.version).toBe('ari-foundation.v1');
+      expect(ariFoundationBody.foundation.identity.name).toBe('ARI');
+      expect(ariFoundationBody.foundation.boundary.qwenIsIdentity).toBe(false);
+      expect(ariFoundationBody.boundary.automaticLearningAllowed).toBe(false);
+
+      const ariTools = await fetch(`http://127.0.0.1:${mirrorAddress.port}/api/v1/ari/tools`);
+      const ariToolsBody = await ariTools.json() as {
+        version: string;
+        coordinator: string;
+        team: Array<{ id: string; coordinator: boolean }>;
+        tools: Array<{ id: string; owner: string; status: string; permissions: { writes: string[] } }>;
+        boundary: { sharedGraphMutationAllowed: boolean };
+      };
+      expect(ariTools.status).toBe(200);
+      expect(ariToolsBody.version).toBe('ari-tool-registry.v1');
+      expect(ariToolsBody.coordinator).toBe('ARI');
+      expect(ariToolsBody.team.filter(member => member.coordinator).map(member => member.id)).toEqual(['ARI']);
+      expect(ariToolsBody.tools.find(tool => tool.id === 'fen.trace-language')?.status).toBe('ready');
+      expect(ariToolsBody.tools.find(tool => tool.id === 'aura.capture-speech')?.status).toBe('client_managed');
+      expect(ariToolsBody.tools.find(tool => tool.id === 'cara.place-personal-relationship')?.permissions.writes).toEqual(['personal_graph']);
+      expect(ariToolsBody.boundary.sharedGraphMutationAllowed).toBe(false);
 
       const untrustedGardenMutation = await fetch(`http://127.0.0.1:${mirrorAddress.port}/garden/fruit`, {
         method: 'POST',
@@ -530,7 +661,7 @@ describe('Community Garden vertical slice', () => {
         version: string;
         seed: { received: boolean; codePointCount: number };
         fruit: { type: string; language: string; text: string };
-        cultivation: { personalContextConsulted: boolean; persisted: boolean; sharedGraphMutated: boolean };
+        cultivation: { translator: { name: string; languageEngine: string; foundationVersion: string }; personalContextConsulted: boolean; persisted: boolean; sharedGraphMutated: boolean };
         boundary: { mode: string; graphMutationAllowed: boolean };
         model?: unknown;
         trace?: unknown;
@@ -546,6 +677,9 @@ describe('Community Garden vertical slice', () => {
         language: 'english',
         text: 'Reflection is moving as an open climate.'
       });
+      expect(gardenFruitBody.cultivation.translator).toEqual(expect.objectContaining({
+        name: 'ARI', languageEngine: 'Qwen', foundationVersion: 'ari-foundation.v1'
+      }));
       expect(gardenFruitBody.cultivation).toEqual(expect.objectContaining({
         personalContextConsulted: false,
         persisted: false,
@@ -557,6 +691,7 @@ describe('Community Garden vertical slice', () => {
       expect(gardenFruitBody).not.toHaveProperty('feedback');
       expect(gardenFruitBody).not.toHaveProperty('evidence');
       expect(gardenFruitBody).not.toHaveProperty('timings');
+      expect(gardenFruitBody).not.toHaveProperty('team');
 
       const oversizedGardenFruit = await fetch(`http://127.0.0.1:${mirrorAddress.port}/garden/fruit`, {
         method: 'POST',
@@ -587,11 +722,27 @@ describe('Community Garden vertical slice', () => {
           graphSource: string;
           learnedAlignment: { consulted: boolean; status: string; contractVerified: boolean; adapter: string };
           conversationAdapter: { status: string; versionId: string | null; servedModel: string };
+          ariFoundation: { consulted: boolean; version: string; source: string };
+          qwenCandidateTranslation: { roundTripExact: boolean; mathematicalOrder: Array<{ originalPosition: number; value: number }> };
+        };
+        translator: { name: string; domain: string; foundationVersion: string };
+        team: {
+          registryVersion: string;
+          coordinator: string;
+          participatingMembers: string[];
+          receipts: Array<{
+            version: string; teamMember: string; status: string; objective: string;
+            access: { readScopes: string[]; writeScopes: string[] };
+            boundary: { sharedGraphMutationAllowed: boolean };
+          }>;
         };
         boundary: { semanticMutationAllowed: boolean };
       };
       expect(localAi.status).toBe(200);
       expect(localAiBody.model).toEqual({ provider: 'ollama', name: 'qwen3:4b-instruct', local: true });
+      expect(localAiBody.translator).toEqual(expect.objectContaining({
+        name: 'ARI', domain: 'Community Garden', foundationVersion: 'ari-foundation.v1'
+      }));
       expect(localAiBody.response).toEqual({ language: 'english', text: 'Reflection is moving as an open climate.' });
       expect(localAiBody.trace.roundTripExact).toBe(true);
       expect(localAiBody.trace.graphSource).toBe('chromabridge_knowledge');
@@ -606,12 +757,30 @@ describe('Community Garden vertical slice', () => {
         versionId: null,
         servedModel: 'qwen3:4b-instruct'
       }));
+      expect(localAiBody.trace.ariFoundation).toEqual({
+        consulted: true,
+        version: 'ari-foundation.v1',
+        status: 'active',
+        source: 'reviewed_codex_cultivation'
+      });
+      expect(localAiBody.trace.qwenCandidateTranslation).toEqual(expect.objectContaining({
+        roundTripExact: true,
+        mathematicalOrder: [{ originalPosition: 1, value: 32 }]
+      }));
       expect(localAiBody.relationalEvidence).toEqual(expect.objectContaining({
         matchedNodeCount: 1,
         confirmedRouteCount: 0,
         relationshipClaimsSupported: false
       }));
       expect(localAiBody.relationalEvidence.notice).toContain('no relationship is established');
+      expect(localAiBody.team.registryVersion).toBe('ari-tool-registry.v1');
+      expect(localAiBody.team.coordinator).toBe('ARI');
+      expect(localAiBody.team.participatingMembers).toEqual(['FEN', 'CARA', 'CORA', 'VERA', 'LEA']);
+      expect(localAiBody.team.receipts).toHaveLength(6);
+      expect(localAiBody.team.receipts.every(receipt => receipt.status === 'completed')).toBe(true);
+      expect(localAiBody.team.receipts.every(receipt => receipt.boundary.sharedGraphMutationAllowed === false)).toBe(true);
+      expect(JSON.stringify(localAiBody.team.receipts)).not.toContain('Amber Glow');
+      expect(JSON.stringify(localAiBody.team.receipts)).not.toContain('Reflection is moving as an open climate.');
       expect(localAiBody.boundary.semanticMutationAllowed).toBe(false);
       expect(localAiBody.feedback.eligible).toBe(true);
       expect(localAiBody.feedback.receipt.signature.length).toBeGreaterThan(20);
@@ -624,6 +793,8 @@ describe('Community Garden vertical slice', () => {
       expect(receivedLocalContext?.signal.numericSequence.length).toBeGreaterThan(0);
       expect(receivedLocalContext?.relationships.sourceLayer).toBe('chromabridge_knowledge');
       expect(receivedLocalContext?.learnedAlignment.contractVerified).toBe(true);
+      expect(receivedLocalContext?.ariFoundation.identity.name).toBe('ARI');
+      expect(receivedLocalContext?.ariFoundation.roles.qwen).toContain('supplies candidate words');
       expect(receivedAlignmentRequest?.mode).toBe('authority_boundary');
       expect(receivedAlignmentRequest?.record.name).toBe('Amber Glow');
       expect(alignmentRequestCount).toBe(1);
@@ -761,6 +932,8 @@ describe('Community Garden vertical slice', () => {
       expect(gardenApiCatalog.status).toBe(200);
       expect(gardenApiCatalogBody.entrances.person.cultivate).toBe('/api/v1/me/cultivate');
       expect(gardenApiCatalogBody.entrances.person.garden).toBe('/api/v1/me/garden');
+      expect(gardenApiCatalogBody.entrances.person.placeRelationships).toBe('/api/v1/me/garden/relationships');
+      expect(gardenApiCatalogBody.entrances.person.transcript).toBe('/api/v1/me/transcript');
       expect(gardenApiCatalogBody.entrances.person.createAccount).toBe('/api/v1/me/account');
       expect(gardenApiCatalogBody.entrances.people.cultivate).toBe('/api/v1/community/cultivate');
 
@@ -805,6 +978,14 @@ describe('Community Garden vertical slice', () => {
       expect(personalSession.status).toBe(200);
       expect(personalSessionBody.user.username).toBe('learner');
 
+      const analyticsSummary = await fetch(`http://127.0.0.1:${mirrorAddress.port}/analytics/summary`, {
+        headers: { cookie: session! }
+      });
+      const analyticsSummaryBody = await analyticsSummary.json() as Record<string, any>;
+      expect(analyticsSummary.status).toBe(200);
+      expect(analyticsSummaryBody.outsideWeather.status).toBe('not_configured');
+      expect(analyticsSummaryBody.outsideWeather.privacy.rawIpQueried).toBe(false);
+
       const communityCultivation = await fetch(`http://127.0.0.1:${mirrorAddress.port}/api/v1/community/cultivate`, {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin', cookie: session! },
@@ -817,6 +998,10 @@ describe('Community Garden vertical slice', () => {
       expect(communityCultivationBody.cultivation.sharedGraphMutated).toBe(false);
       expect(communityCultivationBody.boundary.mode).toBe('community_api_read_only');
 
+      conversationEvents.push({
+        sequence: 1, interactionId: 'prior-personal-observation', role: 'user',
+        content: 'personal comparison seed', metadata: {}, createdAt: new Date().toISOString()
+      });
       const personalCultivation = await fetch(`http://127.0.0.1:${mirrorAddress.port}/api/v1/me/cultivate`, {
         method: 'POST',
         headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin', cookie: session! },
@@ -825,9 +1010,31 @@ describe('Community Garden vertical slice', () => {
       const personalCultivationBody = await personalCultivation.json() as Record<string, any>;
       expect(personalCultivation.status).toBe(200);
       expect(personalCultivationBody.cultivation.personalContextConsulted).toBe(true);
-      expect(personalCultivationBody.cultivation.persisted).toBe(false);
+      expect(personalCultivationBody.cultivation.persisted).toBe(true);
+      expect(personalCultivationBody.cultivation.persistenceLayer).toBe('private_conversation_transcript');
       expect(personalCultivationBody.cultivation.sharedGraphMutated).toBe(false);
+      expect(personalCultivationBody.comparisonReceipt).toEqual(expect.objectContaining({
+        version: 'ari-comparison.v1', operation: 'bounded_structural_comparison'
+      }));
+      expect(personalCultivationBody.comparisonReceipt.comparisons[0]).toEqual(expect.objectContaining({
+        observationSequence: 1, sharedTokens: expect.arrayContaining(['personal', 'seed'])
+      }));
+      expect(personalCultivationBody.comparisonReceipt.boundary).toEqual(expect.objectContaining({
+        comparisonCreatesMeaning: false, graphMutationAllowed: false, automaticLearningAllowed: false
+      }));
       expect(personalCultivationBody.boundary.crossPersonAccessAllowed).toBe(false);
+      expect(receivedLocalContext?.comparisonLedger.comparisons[0].observationSequence).toBe(1);
+
+      const personalTranscript = await fetch(`http://127.0.0.1:${mirrorAddress.port}/api/v1/me/transcript`, {
+        headers: { cookie: session! }
+      });
+      const personalTranscriptBody = await personalTranscript.json() as Record<string, any>;
+      expect(personalTranscript.status).toBe(200);
+      expect(personalTranscriptBody.transcript.events.slice(-2).map((event: Record<string, any>) => event.role)).toEqual(['user', 'assistant']);
+      expect(personalTranscriptBody.transcript.events.at(-1).comparison).toEqual(expect.objectContaining({
+        version: 'ari-comparison.v1', comparedObservationSequences: [1], graphMutationAllowed: false
+      }));
+      expect(personalTranscriptBody.boundary.crossPersonAccessAllowed).toBe(false);
 
       const personalGarden = await fetch(`http://127.0.0.1:${mirrorAddress.port}/api/v1/me/garden`, {
         headers: { cookie: session! }
@@ -839,6 +1046,28 @@ describe('Community Garden vertical slice', () => {
       }));
       expect(personalGardenBody.garden.relationships[0]).not.toHaveProperty('sourceFeedbackId');
       expect(personalGardenBody.boundary.crossPersonAccessAllowed).toBe(false);
+
+      const personalPlacement = await fetch(`http://127.0.0.1:${mirrorAddress.port}/api/v1/me/garden/relationships`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin', cookie: session! },
+        body: JSON.stringify({
+          confirmed: true,
+          reviewNote: 'Explicitly approved.',
+          associations: [{
+            source: 'Flow', target: 'Grey', relationshipType: 'color_association', confidence: 'high',
+            evidence: 'Profile owner placement.', counterexample: 'The owner may revise it.'
+          }]
+        })
+      });
+      const personalPlacementBody = await personalPlacement.json() as Record<string, any>;
+      expect(personalPlacement.status).toBe(201);
+      expect(personalPlacementBody.garden.relationships[0]).toEqual(expect.objectContaining({
+        source: 'Flow', target: 'Grey', mutationSource: 'user_directed', profileOwnerConfirmed: true
+      }));
+      expect(personalPlacementBody.mutation).toEqual({ applied: true, profileOwnerConfirmed: true, relationshipCount: 1 });
+      expect(personalPlacementBody.boundary).toEqual(expect.objectContaining({
+        personalGraphMutated: true, sharedGraphMutationAllowed: false, colorAtlasMutationAllowed: false
+      }));
 
       const changedPassword = await fetch(`http://127.0.0.1:${mirrorAddress.port}/account/change-password`, {
         method: 'POST',

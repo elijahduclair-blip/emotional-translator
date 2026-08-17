@@ -11,7 +11,9 @@ async function main() {
     codexServiceToken: process.env.RUNTIME_SERVICE_TOKEN || (process.env.NODE_ENV === 'production' ? '' : 'mirror-platform-local'),
     localModelUrl: process.env.LOCAL_MODEL_URL || 'http://127.0.0.1:11434',
     localModelName: process.env.LOCAL_MODEL_NAME || 'mirror-qwen3-conversation:v2',
-    alignmentModelUrl: process.env.ALIGNMENT_MODEL_URL || 'http://127.0.0.1:11435'
+    alignmentModelUrl: process.env.ALIGNMENT_MODEL_URL || 'http://127.0.0.1:11435',
+    cloudflareZoneTag: process.env.CF_ZONE_TAG || '',
+    cloudflareAnalyticsToken: process.env.CF_ANALYTICS_TOKEN || ''
   });
   const port = Number(process.env.MIRROR_RUNTIME_PORT || 3100);
   const server = createMirrorHttpServer(service);

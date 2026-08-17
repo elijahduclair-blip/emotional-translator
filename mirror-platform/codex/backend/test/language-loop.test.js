@@ -22,6 +22,15 @@ test('ordered letter changes remain visible in the machine sequence', () => {
   assert.notDeepEqual(cat.encoding.numericSequence, bat.encoding.numericSequence);
 });
 
+test('Qwen quotation marks remain reversible instead of blocking ARI cultivation', () => {
+  const plain = runStructuralLanguageLoop('ARI said, "*What is moving?*"');
+  assert.equal(plain.decoding.english, 'ARI said, "*What is moving?*"');
+  assert.equal(plain.decoding.roundTripExact, true);
+
+  const directional = '“Climate,” and ‘relation.’';
+  assert.equal(transcribeUebToEnglish(transcribeEnglishToUeb(directional)), directional);
+});
+
 test('the language loop accepts expanded conversations and rejects more than 10000 code points', () => {
   const expanded = runStructuralLanguageLoop('a'.repeat(2_001));
   assert.equal(expanded.originalEnglish.length, 2_001);

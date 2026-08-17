@@ -1,6 +1,7 @@
 import { createServer, IncomingMessage, ServerResponse } from 'node:http';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import crypto from 'node:crypto';
 import { MirrorRuntimeService } from './services/mirror-runtime.service';
 
 const MAX_BODY_BYTES = 16 * 1024;
@@ -22,6 +23,8 @@ export function createMirrorHttpServer(service: MirrorRuntimeService) {
       const url = new URL(request.url || '/', 'http://mirror.local');
       const path = url.pathname;
       if (request.method === 'GET' && path === '/') {
+        const visitorCookies = analyticsCookies(request, false);
+        if (visitorCookies.length) response.setHeader('set-cookie', visitorCookies);
         response.writeHead(200, {
           'content-type': 'text/html; charset=utf-8',
           ...securityHeaders()
@@ -38,13 +41,45 @@ export function createMirrorHttpServer(service: MirrorRuntimeService) {
         return sendJson(response, 200, gardenIdentity());
       }
 
+      if (request.method === 'GET' && path === '/api/v1/ari/foundation') {
+        return sendJson(response, 200, ariFoundationView(await service.getRuntime().getAriFoundation()));
+      }
+
+      if (request.method === 'GET' && path === '/api/v1/ari/tools') {
+        return sendJson(response, 200, service.getRuntime().getAriToolRegistry());
+      }
+
+      if (request.method === 'POST' && path === '/analytics/visit') {
+        requireSameOriginMutation(request);
+        const body = await readJson(request);
+        const room = String(body.room || '');
+        await service.getRuntime().recordRoomVisit(
+          room,
+          analyticsContext(request, analyticsEntrance(request, 'combined_shell')),
+          optionalSession(request)
+        );
+        return sendJson(response, 202, { recorded: true, contentStored: false });
+      }
+
+      if (request.method === 'GET' && path === '/analytics/summary') {
+        const token = requireSession(request);
+        const insideGrowth = await service.getRuntime().codexRequest('/api/v1/analytics/summary', { userToken: token });
+        if (insideGrowth.status >= 400) return proxyResult(response, insideGrowth);
+        const outsideWeather = await service.getRuntime().getOutsideWeather(24);
+        return sendJson(response, 200, { ...insideGrowth.body, outsideWeather });
+      }
+
       if (request.method === 'POST' && path === '/garden/fruit') {
         requireSameOriginMutation(request);
         limitGardenFruit(request, response);
         const input = await readGardenInput(request);
 
         const session = optionalSession(request);
-        const result = await service.getRuntime().respondWithLocalModel({ input }, session);
+        const result = await service.getRuntime().respondWithLocalModel(
+          { input },
+          session,
+          analyticsContext(request, analyticsEntrance(request, 'combined_shell'))
+        );
         if (result.status >= 400) return proxyResult(response, result);
         return sendJson(response, 200, publicGardenFruit(input, result.body, Boolean(session)));
       }
@@ -57,7 +92,11 @@ export function createMirrorHttpServer(service: MirrorRuntimeService) {
         requireSameOriginMutation(request);
         limitGardenFruit(request, response);
         const input = await readGardenInput(request);
-        const result = await service.getRuntime().respondWithLocalModel({ input });
+        const result = await service.getRuntime().respondWithLocalModel(
+          { input },
+          undefined,
+          analyticsContext(request, 'community_api')
+        );
         if (result.status >= 400) return proxyResult(response, result);
         return sendJson(response, 200, communityApiFruit(input, result.body));
       }
@@ -67,7 +106,11 @@ export function createMirrorHttpServer(service: MirrorRuntimeService) {
         limitGardenFruit(request, response);
         const token = requireSession(request);
         const input = await readGardenInput(request);
-        const result = await service.getRuntime().respondWithLocalModel({ input }, token);
+        const result = await service.getRuntime().respondWithLocalModel(
+          { input },
+          token,
+          analyticsContext(request, 'personal_entrance')
+        );
         if (result.status >= 400) return proxyResult(response, result);
         return sendJson(response, 200, personalApiFruit(input, result.body));
       }
@@ -77,6 +120,29 @@ export function createMirrorHttpServer(service: MirrorRuntimeService) {
         const result = await service.getRuntime().codexRequest('/api/v1/local-ai/user-graph', { userToken: token });
         if (result.status >= 400) return proxyResult(response, result);
         return sendJson(response, 200, personalGardenSummary(result.body));
+      }
+
+      if (request.method === 'POST' && path === '/api/v1/me/garden/relationships') {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        const result = await service.getRuntime().codexRequest('/api/v1/local-ai/user-graph/relationships', {
+          method: 'POST',
+          body: await readJson(request, MAX_FOUNDATION_BODY_BYTES),
+          userToken: token
+        });
+        if (result.status >= 400) return proxyResult(response, result);
+        return sendJson(response, 201, personalGardenMutationSummary(result.body));
+      }
+
+      if (request.method === 'GET' && path === '/api/v1/me/transcript') {
+        const token = requireSession(request);
+        const query = new URLSearchParams();
+        if (url.searchParams.has('limit')) query.set('limit', String(url.searchParams.get('limit')));
+        if (url.searchParams.has('before')) query.set('before', String(url.searchParams.get('before')));
+        const suffix = query.size ? `?${query}` : '';
+        const result = await service.getRuntime().codexRequest(`/api/v1/conversation-memory/transcript${suffix}`, { userToken: token });
+        if (result.status >= 400) return proxyResult(response, result);
+        return sendJson(response, 200, personalTranscript(result.body));
       }
 
       if (request.method === 'POST' && path === '/api/v1/me/session') {
@@ -113,6 +179,22 @@ export function createMirrorHttpServer(service: MirrorRuntimeService) {
         }));
       }
 
+      if (request.method === 'POST' && path === '/api/v1/agent/auth') {
+        requireSameOriginMutation(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/auth/agent-claim/start', {
+          method: 'POST',
+          body: await readJson(request)
+        }));
+      }
+
+      if (request.method === 'POST' && path === '/api/v1/agent/auth/claim') {
+        requireSameOriginMutation(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/auth/agent-claim/complete', {
+          method: 'POST',
+          body: await readJson(request)
+        }));
+      }
+
       if (request.method === 'GET' && path === '/api/v1/me/session') {
         const token = requireSession(request);
         return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/auth/me', { userToken: token }));
@@ -136,9 +218,11 @@ export function createMirrorHttpServer(service: MirrorRuntimeService) {
 
       if (request.method === 'POST' && path === '/local-ai/respond') {
         requireSameOriginMutation(request);
+        const session = optionalSession(request);
         return proxyResult(response, await service.getRuntime().respondWithLocalModel(
           await readJson(request, MAX_FOUNDATION_BODY_BYTES),
-          optionalSession(request)
+          session,
+          analyticsContext(request, 'local_ai')
         ));
       }
 
@@ -516,6 +600,35 @@ function optionalSession(request: IncomingMessage) {
   return cookies.mirror_session || undefined;
 }
 
+function analyticsContext(request: IncomingMessage, entrance: 'combined_shell' | 'public_entrance' | 'personal_entrance' | 'community_api' | 'local_ai') {
+  const cookies = parseCookies(request);
+  return {
+    entrance,
+    visitorToken: String(request.headers['x-garden-visitor'] || cookies.garden_visitor || ''),
+    sessionToken: String(request.headers['x-garden-session'] || cookies.garden_visit || '')
+  };
+}
+
+function analyticsEntrance(request: IncomingMessage, fallback: 'combined_shell' | 'public_entrance') {
+  return request.headers['x-garden-entrance'] === 'public_entrance' ? 'public_entrance' : fallback;
+}
+
+function analyticsCookies(request: IncomingMessage, secure: boolean) {
+  const cookies = parseCookies(request);
+  const values: string[] = [];
+  const suffix = `HttpOnly; SameSite=Lax; Path=/; ${secure ? 'Secure; ' : ''}`;
+  if (!cookies.garden_visitor) values.push(`garden_visitor=${crypto.randomUUID()}; ${suffix}Max-Age=31536000`);
+  if (!cookies.garden_visit) values.push(`garden_visit=${crypto.randomUUID()}; ${suffix}Max-Age=1800`);
+  return values;
+}
+
+function parseCookies(request: IncomingMessage) {
+  return Object.fromEntries(String(request.headers.cookie || '').split(';').map(value => value.trim()).filter(Boolean).map(value => {
+    const index = value.indexOf('=');
+    return index < 0 ? [value, ''] : [value.slice(0, index), decodeURIComponent(value.slice(index + 1))];
+  }));
+}
+
 function sessionCookie(token: string, clear = false) {
   const parts = [`mirror_session=${encodeURIComponent(token)}`, 'HttpOnly', 'SameSite=Strict', 'Path=/', `Max-Age=${clear ? 0 : 43_200}`];
   if (process.env.NODE_ENV === 'production') parts.push('Secure');
@@ -540,6 +653,13 @@ function gardenIdentity() {
     name: 'Community Garden',
     kind: 'public_cultivation_interface',
     purpose: 'Receive seeds of information, cultivate them through protected relational systems, and grow useful fruit for people.',
+      technicalPerson: {
+        name: 'ARI',
+        role: 'relational translator',
+        languageEngine: 'Qwen',
+        foundation: '/api/v1/ari/foundation',
+        toolRegistry: '/api/v1/ari/tools'
+    },
     publicSurface: {
       identity: '/garden/identity',
       fruit: '/garden/fruit',
@@ -565,6 +685,8 @@ function gardenApiIdentity() {
   return {
     version: 'garden-api.v1',
     name: 'Community Garden API',
+    ariFoundation: '/api/v1/ari/foundation',
+    ariTools: '/api/v1/ari/tools',
     entrances: {
       person: {
         session: '/api/v1/me/session',
@@ -572,6 +694,8 @@ function gardenApiIdentity() {
         verifyAccount: '/api/v1/me/account/verify',
         cultivate: '/api/v1/me/cultivate',
         garden: '/api/v1/me/garden',
+        placeRelationships: '/api/v1/me/garden/relationships',
+        transcript: '/api/v1/me/transcript',
         authentication: 'HttpOnly same-origin session cookie'
       },
       people: {
@@ -589,7 +713,21 @@ function gardenApiIdentity() {
   };
 }
 
+function ariFoundationView(foundation: Record<string, any>) {
+  return {
+    foundation,
+    boundary: {
+      mode: 'public_reviewed_foundation',
+      rawCodexTranscriptImported: false,
+      automaticLearningAllowed: false,
+      semanticMutationAllowed: false,
+      sharedGraphMutationAllowed: false
+    }
+  };
+}
+
 function publicGardenFruit(input: string, result: Record<string, any>, personalContextConsulted: boolean) {
+  const transcriptSaved = result.conversationMemory?.saved === true;
   return {
     version: 'garden-entrance.v1',
     seed: {
@@ -603,10 +741,17 @@ function publicGardenFruit(input: string, result: Record<string, any>, personalC
     },
     cultivation: {
       stages: ['received', 'translated', 'related', 'composed'],
+      translator: {
+        name: String(result.translator?.name || 'ARI'),
+        domain: String(result.translator?.domain || 'Community Garden'),
+        languageEngine: 'Qwen',
+        foundationVersion: String(result.translator?.foundationVersion || 'unresolved')
+      },
       graphSource: String(result.trace?.graphSource || 'unresolved'),
       relationshipNotice: String(result.relationalEvidence?.notice || 'No relational evidence summary was returned.'),
       personalContextConsulted,
-      persisted: false,
+      persisted: transcriptSaved,
+      persistenceLayer: transcriptSaved ? 'private_conversation_transcript' : 'none',
       sharedGraphMutated: false
     },
     boundary: {
@@ -640,17 +785,132 @@ function personalApiFruit(input: string, result: Record<string, any>) {
     cultivation: {
       ...fruit.cultivation,
       personalContextConsulted: true,
-      persisted: false,
+      persisted: result.conversationMemory?.saved === true,
+      persistenceLayer: result.conversationMemory?.saved === true ? 'private_conversation_transcript' : 'none',
+      contextEventCount: Number(result.conversationMemory?.contextEventCount || 0),
+      transcriptSequence: Number(result.conversationMemory?.assistantEventSequence || 0) || null,
       sharedGraphMutated: false
     },
+    comparisonReceipt: personalComparisonReceipt(result.comparisonReceipt),
     boundary: {
       ...fruit.boundary,
       mode: 'personal_api_private_context',
       crossPersonAccessAllowed: false,
       automaticLearningAllowed: false,
-      reason: 'The personal cultivation API may read only the authenticated person reviewed overlay. It does not automatically save the seed or change shared knowledge.'
+      reason: 'The personal cultivation API saves the ordered exchange only in the authenticated person private transcript. It does not change shared knowledge or learn automatically.'
     }
   };
+}
+
+function personalTranscript(body: Record<string, any>) {
+  const events = Array.isArray(body.events) ? body.events.slice(0, 200) : [];
+  return {
+    version: 'garden-api.v1',
+    transcript: {
+      events: events.map((event: Record<string, any>) => ({
+        sequence: Number(event.sequence),
+        interactionId: String(event.interactionId || ''),
+        role: event.role === 'assistant' ? 'assistant' : 'user',
+        content: String(event.content || ''),
+        comparison: personalComparisonMemory(event.metadata?.comparison),
+        createdAt: event.createdAt || null
+      })),
+      count: events.length,
+      hasMore: body.hasMore === true,
+      nextBefore: Number(body.nextBefore) || null,
+      order: 'oldest_to_newest_within_page'
+    },
+    boundary: {
+      mode: 'account_scoped_append_only_transcript',
+      crossPersonAccessAllowed: false,
+      sharedGraphMutationAllowed: false,
+      automaticLearningAllowed: false
+    }
+  };
+}
+
+function personalComparisonReceipt(value: Record<string, any> | null | undefined) {
+  if (!value || value.version !== 'ari-comparison.v1') return null;
+  const comparisons = Array.isArray(value.comparisons) ? value.comparisons.slice(0, 5) : [];
+  return {
+    version: 'ari-comparison.v1',
+    operation: 'bounded_structural_comparison',
+    selection: {
+      availablePersonObservations: boundedNonnegative(value.selection?.availablePersonObservations, 40),
+      comparedObservationCount: comparisons.length,
+      maximumComparisons: 5,
+      contextTruncated: value.selection?.contextTruncated === true
+    },
+    comparisons: comparisons.map((comparison: Record<string, any>) => ({
+      observationSequence: boundedPositive(comparison.observationSequence),
+      relevanceScore: boundedRatio(comparison.relevanceScore),
+      sharedTokens: safeStringList(comparison.dimensions?.sharedTokens, 12),
+      sharedPhrases: safeStringList(comparison.dimensions?.sharedPhrases, 12),
+      differenceCount: boundedNonnegative(comparison.differenceCount, 256)
+    })).filter((comparison: Record<string, any>) => comparison.observationSequence !== null),
+    recurringLanguage: {
+      tokens: safeRecurringLanguage(value.recurringLanguage?.tokens),
+      phrases: safeRecurringLanguage(value.recurringLanguage?.phrases)
+    },
+    summary: {
+      strongestObservationSequence: boundedPositive(value.summary?.strongestObservationSequence),
+      notice: String(value.summary?.notice || '').slice(0, 500)
+    },
+    boundary: {
+      mode: 'observation_only',
+      comparisonCreatesMeaning: false,
+      semanticMutationAllowed: false,
+      graphMutationAllowed: false,
+      automaticLearningAllowed: false
+    }
+  };
+}
+
+function personalComparisonMemory(value: Record<string, any> | null | undefined) {
+  if (!value || value.version !== 'ari-comparison.v1') return null;
+  return {
+    version: 'ari-comparison.v1',
+    mode: 'observation_only',
+    comparedObservationSequences: (Array.isArray(value.comparedObservationSequences) ? value.comparedObservationSequences : [])
+      .map(boundedPositive).filter((sequence: number | null): sequence is number => sequence !== null).slice(0, 5),
+    strongestObservationSequence: boundedPositive(value.strongestObservationSequence),
+    repeatedTokenCount: boundedNonnegative(value.repeatedTokenCount, 12),
+    repeatedPhraseCount: boundedNonnegative(value.repeatedPhraseCount, 12),
+    comparisonCreatesMeaning: false,
+    graphMutationAllowed: false
+  };
+}
+
+function safeRecurringLanguage(value: unknown) {
+  return (Array.isArray(value) ? value : []).slice(0, 12).map((item: Record<string, any>) => ({
+    value: String(item?.value || '').slice(0, 120),
+    supportCount: boundedNonnegative(item?.supportCount, 6),
+    observationSequences: (Array.isArray(item?.observationSequences) ? item.observationSequences : [])
+      .map(boundedPositive).filter((sequence: number | null): sequence is number => sequence !== null).slice(0, 6),
+    status: 'observation_only'
+  })).filter((item: Record<string, any>) => item.value);
+}
+
+function safeStringList(value: unknown, maximum: number) {
+  return (Array.isArray(value) ? value : [])
+    .map(item => String(item || '').slice(0, 120))
+    .filter(Boolean)
+    .slice(0, maximum);
+}
+
+function boundedPositive(value: unknown) {
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed > 0 ? parsed : null;
+}
+
+function boundedNonnegative(value: unknown, maximum: number) {
+  const parsed = Number(value);
+  return Number.isSafeInteger(parsed) && parsed >= 0 ? Math.min(parsed, maximum) : 0;
+}
+
+function boundedRatio(value: unknown) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.max(0, Math.min(1, Math.round(parsed * 1000) / 1000)) : 0;
 }
 
 function personalGardenSummary(body: Record<string, any>) {
@@ -668,6 +928,9 @@ function personalGardenSummary(body: Record<string, any>) {
         confidence: String(relationship.confidence || ''),
         evidence: String(relationship.evidence || '').slice(0, 1_000),
         counterexample: String(relationship.counterexample || '').slice(0, 1_000),
+        mutationSource: relationship.mutationSource === 'user_directed' ? 'user_directed' : 'reviewed_feedback',
+        profileOwnerConfirmed: Boolean(relationship.approvedByUser),
+        reviewNote: String(relationship.reviewNote || '').slice(0, 1_000),
         sourceLayer: 'user_graph',
         createdAt: relationship.createdAt || null
       })),
@@ -680,7 +943,33 @@ function personalGardenSummary(body: Record<string, any>) {
       sharedGraphMutationAllowed: false,
       colorAtlasMutationAllowed: false,
       automaticLearningAllowed: false,
-      reason: 'This read is scoped by the authenticated account. Personal relationships enter this overlay only through the existing reviewed learning workflow.'
+      reason: 'This read is scoped by the authenticated account. Personal relationships enter through reviewed feedback or an explicit, confirmed instruction from the profile owner.'
+    }
+  };
+}
+
+function personalGardenMutationSummary(body: Record<string, any>) {
+  const garden = personalGardenSummary({
+    relationships: body.relationships,
+    relationshipCount: body.relationshipCount,
+    consulted: true,
+    truncated: false
+  });
+  return {
+    ...garden,
+    mutation: {
+      applied: body.boundary?.personalGraphMutated === true,
+      profileOwnerConfirmed: body.boundary?.profileOwnerConfirmed === true,
+      relationshipCount: garden.garden.relationshipCount
+    },
+    boundary: {
+      ...garden.boundary,
+      mode: 'user_directed_personal_graph_mutation',
+      personalGraphMutated: body.boundary?.personalGraphMutated === true,
+      sharedGraphMutationAllowed: false,
+      colorAtlasMutationAllowed: false,
+      automaticLearningAllowed: false,
+      reason: 'The authenticated profile owner explicitly placed these relationships in their private overlay. Shared graph knowledge and fixed Color Atlas coordinates remain unchanged.'
     }
   };
 }

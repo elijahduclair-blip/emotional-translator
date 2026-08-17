@@ -45,6 +45,8 @@ export interface MirrorRuntimeConfig {
   localModelUrl?: string;
   localModelName?: string;
   alignmentModelUrl?: string;
+  cloudflareZoneTag?: string;
+  cloudflareAnalyticsToken?: string;
 }
 
 export interface CodexGraphRead {

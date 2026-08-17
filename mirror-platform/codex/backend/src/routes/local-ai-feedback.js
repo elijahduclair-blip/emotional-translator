@@ -120,6 +120,61 @@ router.get('/local-ai/learning-candidates', requireAuth, requirePasswordCurrent,
   } catch (error) { next(error); }
 });
 
+router.post('/local-ai/user-graph/relationships', requireAuth, requirePasswordCurrent, async (req, res, next) => {
+  let client;
+  try {
+    const body = requiredObject(req.body, 'A personal graph instruction is required.');
+    if (body.confirmed !== true) throw httpError(400, 'confirmed must be true for a personal graph mutation.');
+    if (!Array.isArray(body.associations) || body.associations.length < 1 || body.associations.length > 12) {
+      throw httpError(400, 'associations must contain from 1 to 12 personal relationships.');
+    }
+    const reviewNote = requiredText(body.reviewNote, 'reviewNote is required.', 1_000);
+    const proposals = body.associations.map(normalizeUserGraphProposal);
+    client = await pool.connect();
+    await client.query('BEGIN');
+    const relationships = [];
+    for (const proposal of proposals) {
+      const sourceKey = normalizeGraphKey(proposal.source);
+      const targetKey = normalizeGraphKey(proposal.target);
+      const existing = (await client.query(
+        `SELECT * FROM user_graph_relationships
+         WHERE user_id=$1 AND source_key=$2 AND target_key=$3 AND relationship_type=$4 AND record_status='active'
+         ORDER BY created_at,id LIMIT 1 FOR UPDATE`,
+        [req.user.sub, sourceKey, targetKey, proposal.relationshipType]
+      )).rows[0];
+      const result = existing
+        ? await client.query(
+          `UPDATE user_graph_relationships
+           SET source_label=$2,target_label=$3,confidence=$4,evidence=$5,counterexample=$6,
+               mutation_source='user_directed',approved_by_user=$7,review_note=$8,updated_at=NOW()
+           WHERE id=$1 RETURNING *`,
+          [existing.id, proposal.source, proposal.target, proposal.confidence, proposal.evidence,
+            proposal.counterexample, req.user.sub, reviewNote]
+        )
+        : await client.query(
+          `INSERT INTO user_graph_relationships
+            (id,user_id,source_label,source_key,target_label,target_key,relationship_type,confidence,evidence,counterexample,
+             source_feedback_id,learning_candidate_id,mutation_source,approved_by_user,review_note)
+           VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,NULL,NULL,'user_directed',$2,$11)
+           RETURNING *`,
+          [crypto.randomUUID(), req.user.sub, proposal.source, sourceKey, proposal.target, targetKey,
+            proposal.relationshipType, proposal.confidence, proposal.evidence, proposal.counterexample, reviewNote]
+        );
+      relationships.push(formatUserGraphRelationship(result.rows[0]));
+    }
+    await client.query('COMMIT');
+    res.status(201).json({
+      sourceLayer: 'user_graph',
+      relationships,
+      relationshipCount: relationships.length,
+      boundary: personalMutationBoundary('The profile owner explicitly placed these reviewed relationships in their personal overlay. ARI may consult them immediately.')
+    });
+  } catch (error) {
+    if (client) await client.query('ROLLBACK');
+    next(error);
+  } finally { client?.release(); }
+});
+
 router.patch('/local-ai/learning-candidates/:id/review', requireAuth, requireAdmin, async (req, res, next) => {
   let client;
   try {
@@ -436,6 +491,9 @@ function formatUserGraphRelationship(row) {
     counterexample: row.counterexample,
     sourceFeedbackId: row.source_feedback_id,
     learningCandidateId: row.learning_candidate_id,
+    mutationSource: row.mutation_source || 'reviewed_feedback',
+    approvedByUser: row.approved_by_user || null,
+    reviewNote: row.review_note || null,
     sourceLayer: 'user_graph',
     createdAt: row.created_at
   };
@@ -506,6 +564,20 @@ function learningBoundary(reason) {
     sharedGraphMutationAllowed: false,
     colorAtlasMutationAllowed: false,
     personalOverlayRequiresApproval: true,
+    reason
+  };
+}
+
+function personalMutationBoundary(reason) {
+  return {
+    mode: 'user_directed_personal_graph_mutation',
+    personalGraphMutated: true,
+    profileOwnerConfirmed: true,
+    automaticLearningAllowed: false,
+    trainingStarted: false,
+    modelWeightsChanged: false,
+    sharedGraphMutationAllowed: false,
+    colorAtlasMutationAllowed: false,
     reason
   };
 }

@@ -112,6 +112,47 @@ test('signed feedback remains governed through review and dataset preparation', 
     assert.equal(longPersonalGraph.body.relationshipCount, 1);
     assert.equal((await request('/local-ai/user-graph?text=young', learner)).body.relationshipCount, 0);
     assert.equal((await request('/local-ai/user-graph?text=amber%20glow', other)).body.relationshipCount, 0);
+    const unconfirmedPlacement = await request('/local-ai/user-graph/relationships', learner, {
+      method: 'POST',
+      body: {
+        confirmed: false,
+        reviewNote: 'This must not be applied without explicit confirmation.',
+        associations: [{
+          source: 'Flow', target: 'Grey', relationshipType: 'color_association', confidence: 'high',
+          evidence: 'The profile owner explicitly placed Flow with Grey.',
+          counterexample: 'Revise the route if the profile owner later changes this association.'
+        }]
+      }
+    });
+    assert.equal(unconfirmedPlacement.status, 400);
+    const directPlacement = await request('/local-ai/user-graph/relationships', learner, {
+      method: 'POST',
+      body: {
+        confirmed: true,
+        reviewNote: 'The profile owner directly approved these Theory of Alignment associations.',
+        associations: [
+          {
+            source: 'Flow', target: 'Grey', relationshipType: 'color_association', confidence: 'high',
+            evidence: 'The profile owner explicitly placed Flow with Grey.',
+            counterexample: 'Revise the route if the profile owner later changes this association.'
+          },
+          {
+            source: 'Momentum', target: 'Red', relationshipType: 'color_association', confidence: 'high',
+            evidence: 'The profile owner explicitly placed Momentum with Red.',
+            counterexample: 'Revise the route if the profile owner later changes this association.'
+          }
+        ]
+      }
+    });
+    assert.equal(directPlacement.status, 201, JSON.stringify(directPlacement.body));
+    assert.equal(directPlacement.body.relationshipCount, 2);
+    assert.equal(directPlacement.body.relationships[0].mutationSource, 'user_directed');
+    assert.equal(directPlacement.body.boundary.personalGraphMutated, true);
+    assert.equal(directPlacement.body.boundary.sharedGraphMutationAllowed, false);
+    const directPersonalGraph = await request('/local-ai/user-graph?text=flow%20momentum', learner);
+    assert.equal(directPersonalGraph.body.relationshipCount, 2);
+    assert.ok(directPersonalGraph.body.relationships.every(relationship => relationship.mutationSource === 'user_directed'));
+    assert.equal((await request('/local-ai/user-graph?text=flow%20momentum', other)).body.relationshipCount, 0);
     const sharedAfter = await Promise.all([
       query(`SELECT COUNT(*)::int AS count FROM nodes WHERE record_status='active'`),
       query(`SELECT COUNT(*)::int AS count FROM edges WHERE record_status='active'`)

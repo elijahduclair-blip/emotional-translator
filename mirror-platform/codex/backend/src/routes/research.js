@@ -2,13 +2,14 @@ import express from 'express';
 import crypto from 'crypto';
 import { query } from '../db/pool.js';
 import { requireAdmin, requireAuth, requirePasswordCurrent } from '../middleware/auth.js';
+import { optionalWebBotAuthHeaders } from '../lib/web-bot-auth.js';
 
 const router = express.Router();
 const ALLOWED_SOURCES = new Set(['wikipedia', 'crossref']);
 const ALLOWED_CONFIDENCE = new Set(['low', 'medium', 'high']);
 const ALLOWED_RESEARCH_KINDS = new Set(['general', 'history_index']);
 const ALLOWED_HISTORY_LANES = new Set(['religion', 'arts']);
-const USER_AGENT = 'EmotionalTranslatorResearch/1.0 (https://elijahduclair-blip.github.io/emotional-translator/)';
+const USER_AGENT = 'ARIResearch/1.0 (+https://acommunitygarden.garden/ari)';
 const SEARCH_CACHE_TTL_MS = 10 * 60 * 1000;
 const SEARCH_LIMIT_WINDOW_MS = 10 * 60 * 1000;
 const SEARCH_LIMIT_MAX = 30;
@@ -176,7 +177,10 @@ async function externalFetch(url) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 12000);
   try {
-    const response = await fetch(url, { headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' }, signal: controller.signal });
+    const response = await fetch(url, {
+      headers: { 'User-Agent': USER_AGENT, Accept: 'application/json', ...optionalWebBotAuthHeaders(url) },
+      signal: controller.signal
+    });
     if (!response.ok) throw httpError(502, `Research source returned ${response.status}.`);
     return await response.json();
   } finally { clearTimeout(timer); }

@@ -13,3 +13,4 @@ publish-github-pages/
 *.log
 Untitled-1.txt
 .pnpm-store/
+garden-outside-weather/

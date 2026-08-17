@@ -397,6 +397,18 @@
     .research-card-actions button { width: auto; justify-self: start; }
     .research-review-actions { display: flex; flex-wrap: wrap; gap: 7px; }
     .research-review-actions button { width: auto; }
+    .analytics-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin-top: 16px; }
+    .analytics-card { min-height: 190px; padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.025); }
+    .analytics-card h3 { margin: 0 0 5px; font-family: Georgia, "Times New Roman", serif; font-size: 1.08rem; font-weight: 500; }
+    .analytics-card-number { color: var(--green); font-size: .7rem; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
+    .analytics-card .evidence-list { margin-top: 10px; }
+    .analytics-card .empty-state { margin: 16px 0 0; color: var(--muted); }
+    .analytics-list { display: grid; gap: 7px; margin-top: 12px; }
+    .analytics-row { display: grid; grid-template-columns: minmax(90px, 1fr) auto; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--line); color: var(--muted); }
+    .analytics-row:last-child { border-bottom: 0; }
+    .analytics-row strong { color: var(--ink); text-align: right; }
+    .analytics-section-title { margin: 24px 0 4px; font-family: Georgia, "Times New Roman", serif; font-size: 1.45rem; font-weight: 500; }
+    .analytics-section-intro { margin: 0 0 12px; color: var(--muted); max-width: 78ch; }
     .braille-output { min-height: 56px; margin: 12px 0; padding: 12px; border-radius: 10px; background: #090c11; font-size: 2rem; letter-spacing: .12em; overflow-wrap: anywhere; }
     .cell-strip { display: flex; flex-wrap: wrap; gap: 7px; }
     .cell-card { width: 54px; padding: 6px; border: 1px solid var(--line); border-radius: 9px; text-align: center; }
@@ -428,6 +440,13 @@
     .foundation-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(270px, .75fr); gap: 16px; }
     .foundation-panel { padding: 16px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.025); }
     .foundation-panel h3 { margin: 0 0 10px; font-family: Georgia, "Times New Roman", serif; font-weight: 500; }
+    .ari-team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 9px; margin-top: 12px; }
+    .ari-team-card { padding: 11px; border: 1px solid var(--line); border-radius: 11px; background: rgba(255,255,255,.02); }
+    .ari-team-card strong { display: block; color: var(--climate); letter-spacing: .08em; }
+    .ari-team-card small { display: block; margin-top: 5px; color: var(--muted); }
+    .ari-tool-scopes { margin-top: 7px; color: var(--muted); font-size: .74rem; line-height: 1.45; }
+    .ari-receipts { display: grid; gap: 7px; margin-top: 10px; }
+    .ari-receipt { padding: 8px 10px; border-left: 3px solid var(--climate); background: rgba(255,255,255,.025); font-size: .8rem; color: var(--muted); }
     .word-sequence { display: flex; flex-wrap: wrap; gap: 6px; margin: 12px 0; }
     .word-token { padding: 5px 8px; border: 1px solid var(--line); border-radius: 999px; color: var(--ink); background: var(--panel); font-size: .82rem; }
     .signature-list { display: grid; gap: 9px; max-height: 620px; overflow: auto; }
@@ -523,7 +542,7 @@
       .service-strip { gap: 8px; }
       .service span:last-child { display: none; }
       .workspace-grid { grid-template-columns: 1fr; }
-      .braille-grid, .foundation-grid, .account-grid, .garden-entrance, .garden-bed-grid, .garden-lanes, .research-grid { grid-template-columns: 1fr; }
+      .braille-grid, .foundation-grid, .account-grid, .garden-entrance, .garden-bed-grid, .garden-lanes, .research-grid, .analytics-grid { grid-template-columns: 1fr; }
       .garden-loop { grid-template-columns: 1fr; }
       .garden-loop-step:not(:last-child)::after { right: auto; left: 16px; top: auto; bottom: -10px; content: "↓"; }
       .flow { grid-template-columns: 1fr; }
@@ -561,6 +580,7 @@
         <p class="nav-label">Garden beds</p>
         <a class="room-link" data-room="garden" href="#garden"><span class="room-dot"></span>Garden</a>
         <a class="room-link" data-room="account" data-account-state="signed-out" href="#account" aria-label="Account, sign in"><span class="room-dot"></span><span>Account</span><span id="accountIdentity" class="account-identity">Sign in</span></a>
+        <a class="room-link" data-room="analytics" href="#analytics"><span class="room-dot"></span>Analytics</a>
         <a class="room-link" data-room="research" href="#research"><span class="room-dot"></span>Research</a>
         <a class="room-link" data-room="translate" href="#translate"><span class="room-dot"></span>Translate</a>
         <a class="room-link" data-room="atlas" href="#atlas"><span class="room-dot"></span>Color Atlas</a>
@@ -601,10 +621,11 @@
             </div>
             <div class="garden-bed-grid" aria-label="Community Garden beds">
               <a class="garden-bed" href="#account"><span class="garden-bed-kicker">Personal gate</span><strong>Account</strong><span>Sign in once for research, progress, governance, and personal learning records.</span></a>
+              <a class="garden-bed" href="#analytics"><span class="garden-bed-kicker">Garden observatory</span><strong>Analytics</strong><span>Separate human activity, cultivation health, room use, and service performance from traffic hitting the outer fence.</span></a>
               <a class="garden-bed" href="#research"><span class="garden-bed-kicker">Reference library</span><strong>Outside References</strong><span>Use Wikipedia and Crossref for accountable orientation while keeping references outside the approved graph.</span></a>
               <a class="garden-bed" href="#translate"><span class="garden-bed-kicker">Climate bed</span><strong>Translate</strong><span>Bring language in and trace its revisable relational color climate.</span></a>
               <a class="garden-bed" href="#atlas"><span class="garden-bed-kicker">Knowledge bed</span><strong>Color Atlas</strong><span>Inspect governed graph placement, routes, coordinates, and provenance.</span></a>
-              <a class="garden-bed" href="#localAi"><span class="garden-bed-kicker">Conversation bed</span><strong>Local AI</strong><span>Talk with Qwen3 through the reversible structural and evidence loop.</span></a>
+              <a class="garden-bed" href="#localAi"><span class="garden-bed-kicker">Conversation bed</span><strong>ARI</strong><span>Talk with ARI while Qwen supplies words inside the reversible structural and evidence loop.</span></a>
               <a class="garden-bed" href="#moduleGovernance"><span class="garden-bed-kicker">Garden gate</span><strong>Governance</strong><span>Review proposals before anything can enter an approved or learned lane.</span></a>
               <a class="garden-bed" href="#memory"><span class="garden-bed-kicker">Personal seed bank</span><strong>Memory</strong><span>Keep compact personal records separate from shared semantic knowledge.</span></a>
               <a class="garden-bed" href="#braille"><span class="garden-bed-kicker">Notation bed</span><strong>Braille Math</strong><span>Learn and translate bounded UEB and Nemeth structures.</span></a>
@@ -725,6 +746,40 @@
             <div class="boundary"><strong>Account boundary</strong><br>Signing in authorizes personal and governed actions. It does not approve evidence, train the model, or mutate the shared Color Atlas.</div>
           </section>
 
+          <section id="analytics" class="zone foundation-room" data-garden-room="analytics">
+            <div class="zone-label"><span class="zone-number">8</span>Analytics / Garden observatory</div>
+            <p class="intro">See what is growing inside the Garden without mistaking automated traffic at the outer fence for people. This administrator view uses aggregate, content-free activity records.</p>
+            <div class="braille-actions">
+              <button id="refreshAnalytics" type="button">Refresh Garden analytics</button>
+              <span id="analyticsStatus" class="braille-status" role="status" aria-live="polite">Administrator sign-in is required.</span>
+            </div>
+            <h2 class="analytics-section-title">Outside weather</h2>
+            <p class="analytics-section-intro">Aggregated Cloudflare edge conditions: what approached the Garden, what was blocked, and whether the origin was reached. This layer does not decide who is human.</p>
+            <div class="analytics-grid" aria-label="Outside weather measures">
+              <article class="analytics-card"><span class="analytics-card-number">1 · Reach</span><h3>Requests and unique clients</h3><div id="weatherReach"><p class="empty-state">No weather loaded.</p></div></article>
+              <article class="analytics-card"><span class="analytics-card-number">2 · Regions</span><h3>Countries and networks</h3><div id="weatherRegions"><p class="empty-state">No weather loaded.</p></div></article>
+              <article class="analytics-card"><span class="analytics-card-number">3 · Paths</span><h3>Requested paths</h3><div id="weatherPaths"><p class="empty-state">No weather loaded.</p></div></article>
+              <article class="analytics-card"><span class="analytics-card-number">4 · Status</span><h3>HTTP response status</h3><div id="weatherStatusCodes"><p class="empty-state">No weather loaded.</p></div></article>
+              <article class="analytics-card"><span class="analytics-card-number">5 · Cache</span><h3>Cache conditions</h3><div id="weatherCache"><p class="empty-state">No weather loaded.</p></div></article>
+              <article class="analytics-card"><span class="analytics-card-number">6 · Connection</span><h3>Protocol and TLS</h3><div id="weatherProtocol"><p class="empty-state">No weather loaded.</p></div></article>
+              <article class="analytics-card"><span class="analytics-card-number">7 · Separation</span><h3>Edge versus origin failures</h3><div id="weatherFailures"><p class="empty-state">No weather loaded.</p></div></article>
+              <article class="analytics-card"><span class="analytics-card-number">8 · Pressure</span><h3>Threat and bot boundary</h3><div id="weatherThreats"><p class="empty-state">No weather loaded.</p></div></article>
+            </div>
+            <h2 class="analytics-section-title">Inside growth</h2>
+            <p class="analytics-section-intro">The eight measures produced after someone enters: cultivation, rooms, services, reviews, accounts, and personal plots.</p>
+            <div class="analytics-grid">
+              <article class="analytics-card"><span class="analytics-card-number">1 · People</span><h3>Human visits and accounts</h3><div id="analyticsHuman"><p class="empty-state">No summary loaded.</p></div></article>
+              <article class="analytics-card"><span class="analytics-card-number">2 · Fruit</span><h3>Successful cultivations</h3><div id="analyticsCultivations"><p class="empty-state">No summary loaded.</p></div></article>
+              <article class="analytics-card"><span class="analytics-card-number">3 · Beds</span><h3>Rooms people enter</h3><div id="analyticsRooms"><p class="empty-state">No summary loaded.</p></div></article>
+              <article class="analytics-card"><span class="analytics-card-number">4 · Roots</span><h3>Service response time</h3><div id="analyticsServices"><p class="empty-state">No summary loaded.</p></div></article>
+              <article class="analytics-card"><span class="analytics-card-number">5 · Pressure</span><h3>Errors by service and status</h3><div id="analyticsErrors"><p class="empty-state">No summary loaded.</p></div></article>
+              <article class="analytics-card"><span class="analytics-card-number">6 · Review</span><h3>Approved and rejected responses</h3><div id="analyticsFeedback"><p class="empty-state">No summary loaded.</p></div></article>
+              <article class="analytics-card"><span class="analytics-card-number">7 · Return</span><h3>Returning people and plot growth</h3><div id="analyticsReturning"><p class="empty-state">No summary loaded.</p></div></article>
+              <article class="analytics-card"><span class="analytics-card-number">8 · Boundary</span><h3>Privacy and content collection</h3><div id="analyticsPrivacy"><p class="empty-state">Message content is not part of analytics.</p></div></article>
+            </div>
+            <div class="boundary"><strong>Analytics boundary</strong><br>These counts measure use and system health. They do not become graph evidence, personal traits, emotional labels, or semantic meaning.</div>
+          </section>
+
           <section id="research" class="zone foundation-room" data-garden-room="research">
             <div class="zone-label"><span class="zone-number">R</span>Research / external reference library</div>
             <p class="intro">Use Wikipedia and Crossref as external references for definitions, background, terminology, and known relationships. A saved reference is not automatically evidence for a graph claim.</p>
@@ -756,20 +811,28 @@
           </section>
 
           <section id="localAi" class="zone foundation-room" data-garden-room="localAi">
-            <div class="zone-label"><span class="zone-number">L</span>Your local AI / Qwen3 reasoning</div>
-            <p class="intro">Your English passes through the reversible Braille and number trace, receives bounded graph and WordNet evidence, and is then reasoned over by Qwen3 running on this computer.</p>
+            <div class="zone-label"><span class="zone-number">A</span>ARI / relational translator</div>
+            <p class="intro">ARI lives inside Community Garden. Qwen supplies candidate words and information; ARI accounts for them through the reversible Braille and mathematical trace, then returns language fitted to the person without changing the facts.</p>
+            <div id="ariFoundationStatus" class="braille-status" role="status" aria-live="polite">Loading ARI's reviewed founding curriculum...</div>
+            <div class="foundation-panel runtime-language-panel">
+              <h3>ARI's support team and tools</h3>
+              <p class="hint">ARI coordinates every task. Each specialist receives only its declared read and write scopes, and every server-side use returns a content-free receipt.</p>
+              <div id="ariToolRegistryStatus" class="braille-status" role="status" aria-live="polite">Loading ARI's Tool Registry...</div>
+              <div id="ariToolRegistry" class="ari-team-grid"></div>
+              <div class="boundary"><strong>Tool boundary</strong><br>Support tools cannot grant themselves access, cross into another person's memory, mutate the shared graph, change the fixed Color Atlas, or rewrite source code.</div>
+            </div>
             <div class="foundation-panel runtime-language-panel">
               <form id="localAiForm">
-                <label class="field"><span>Talk to your local AI</span><textarea id="localAiInput" rows="4" maxlength="10000" placeholder="For example: What climate is moving through reflection?"></textarea></label>
+                <label class="field"><span>Talk to ARI</span><textarea id="localAiInput" rows="4" maxlength="10000" placeholder="For example: What climate is moving through reflection?"></textarea></label>
                 <div class="braille-actions">
                   <button id="localAiMicButton" class="microphone-button" type="button" aria-pressed="true" aria-controls="localAiInput">Turn microphone off</button>
-                  <button id="localAiButton" type="submit">Ask local Qwen3</button>
+                  <button id="localAiButton" type="submit">Ask ARI</button>
                 </div>
               </form>
               <div id="localAiMicStatus" class="microphone-status" role="status" aria-live="polite">Always-on listening is enabled. Community Garden does not store raw audio; speech recognition is handled by your browser.</div>
-              <div id="localAiStatus" class="braille-status" role="status" aria-live="polite">Ready to reason locally.</div>
+              <div id="localAiStatus" class="braille-status" role="status" aria-live="polite">ARI is ready to translate locally.</div>
               <div id="localAiOutput"></div>
-              <div class="boundary"><strong>Local reasoning boundary</strong><br>Qwen3 can interpret and respond, but it cannot directly rewrite source code, graph meaning, or memory.</div>
+              <div class="boundary"><strong>ARI domain boundary</strong><br>ARI operates inside Community Garden. Qwen supplies words but does not own ARI's identity, memory, graph, or authority.</div>
             </div>
           </section>
 
@@ -979,6 +1042,12 @@ Gold memory moves through reflection.</textarea></label>
         title: 'Enter the Garden through one clear gate.',
         intro: 'Sign in once for protected research, progress, governance, and personal learning records.'
       },
+      analytics: {
+        label: 'Analytics',
+        eyebrow: 'Community Garden / observatory',
+        title: 'What is growing inside the Garden?',
+        intro: 'Measure human activity, healthy cultivation, room use, service pressure, and returning growth without storing message content or confusing scanners with people.'
+      },
       research: {
         label: 'Research',
         eyebrow: 'Community Garden / external reference library',
@@ -1034,7 +1103,10 @@ Gold memory moves through reflection.</textarea></label>
 
     bindGardenNavigation();
     bindGardenEntrance();
+    bindAnalyticsRoom();
     checkRuntime();
+    checkAriFoundation();
+    checkAriTools();
     loadBrailleRoom();
     bindLocalAiRoom();
     bindResearchRoom();
@@ -1057,6 +1129,10 @@ Gold memory moves through reflection.</textarea></label>
       const entranceForm = document.querySelector('#gardenEntranceForm');
       entranceForm.addEventListener('submit', growGardenFruit);
       loadGardenIdentity();
+    }
+
+    function bindAnalyticsRoom() {
+      document.querySelector('#refreshAnalytics').addEventListener('click', loadAnalytics);
     }
 
     async function loadGardenIdentity() {
@@ -1104,6 +1180,7 @@ Gold memory moves through reflection.</textarea></label>
       await refreshAccount();
       const room = window.location.hash.slice(1).split('?')[0];
       if (room === 'research' && currentAccount) await loadResearchItems();
+      if (room === 'analytics' && currentAccount?.role === 'admin') await loadAnalytics();
     }
 
     function activateGardenRoom() {
@@ -1130,6 +1207,17 @@ Gold memory moves through reflection.</textarea></label>
       setText('pageIntro', copy.intro);
       document.title = `${copy.label} | Community Garden`;
       if (room === 'research' && currentAccount) loadResearchItems();
+      recordGardenRoomVisit(room);
+    }
+
+    async function recordGardenRoomVisit(room) {
+      try {
+        await fetch('/analytics/visit', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin' },
+          body: JSON.stringify({ room })
+        });
+      } catch {}
     }
 
     form.addEventListener('submit', async event => {
@@ -1184,6 +1272,51 @@ Gold memory moves through reflection.</textarea></label>
         setServiceState('localModelService', 'error');
         setServiceState('alignmentModelService', 'error');
         setText('learnedAlignmentStatus', 'Learned adapter health could not be checked.');
+      }
+    }
+
+    async function checkAriFoundation() {
+      try {
+        const response = await fetch('/api/v1/ari/foundation');
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.error || 'ARI foundation unavailable.');
+        const foundation = body.foundation || {};
+        setText('ariFoundationStatus', `${foundation.identity?.name || 'ARI'} foundation ${foundation.version || 'unresolved'} is active · domain: ${foundation.identity?.domain || 'Community Garden'} · word engine: Qwen.`);
+      } catch (error) {
+        setText('ariFoundationStatus', error.message || 'ARI founding curriculum could not be loaded.');
+      }
+    }
+
+    async function checkAriTools() {
+      try {
+        const response = await fetch('/api/v1/ari/tools');
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.error || 'ARI Tool Registry unavailable.');
+        const tools = Array.isArray(body.tools) ? body.tools : [];
+        const team = Array.isArray(body.team) ? body.team : [];
+        const toolsByOwner = tools.reduce((groups, tool) => {
+          (groups[tool.owner] ||= []).push(tool);
+          return groups;
+        }, {});
+        document.querySelector('#ariToolRegistry').innerHTML = team.map(member => {
+          const memberTools = toolsByOwner[member.id] || [];
+          const status = member.coordinator
+            ? 'Coordinates the team'
+            : memberTools.length
+              ? memberTools.map(tool => `${tool.name} (${String(tool.status).replace('_', ' ')})`).join('; ')
+              : 'No direct tool registered';
+          const reads = [...new Set(memberTools.flatMap(tool => tool.permissions?.reads || []))];
+          const writes = [...new Set(memberTools.flatMap(tool => tool.permissions?.writes || []))];
+          return `<article class="ari-team-card">
+            <strong>${escapeHtml(member.id)}</strong>
+            <span>${escapeHtml(member.expandedName)}</span>
+            <small>${escapeHtml(member.role)}</small>
+            <div class="ari-tool-scopes">${escapeHtml(status)}<br>Reads: ${escapeHtml(reads.join(', ') || 'coordinated receipts')}<br>Writes: ${escapeHtml(writes.join(', ') || 'none')}</div>
+          </article>`;
+        }).join('');
+        setText('ariToolRegistryStatus', `${body.counts?.members || team.length} team members · ${body.counts?.ready || 0} server tools ready · ${body.counts?.clientManaged || 0} browser-managed tool.`);
+      } catch (error) {
+        setText('ariToolRegistryStatus', error.message || 'ARI Tool Registry could not be loaded.');
       }
     }
 
@@ -1356,12 +1489,12 @@ Gold memory moves through reflection.</textarea></label>
         event.preventDefault();
         const button = document.querySelector('#localAiButton');
         button.disabled = true;
-        setText('localAiStatus', 'Tracing English, checking relational knowledge, then asking local Qwen3…');
+        setText('localAiStatus', 'ARI is preserving the statement, consulting context, and asking Qwen for candidate words…');
         try {
           const body = await mirrorFetch('/local-ai/respond', { input: document.querySelector('#localAiInput').value });
           renderLocalAi(body);
           const handoff = body.trace?.learnedAlignment;
-          setText('localAiStatus', `${body.model.name} responded locally in English.${handoff?.status === 'verified' ? ' Learned alignment boundary verified.' : ''}`);
+          setText('localAiStatus', `ARI responded locally using ${body.model.name} for words.${handoff?.status === 'verified' ? ' Learned alignment boundary verified.' : ''}`);
           setServiceState('localModelService', 'ready');
           setServiceState('runtimeService', 'ready');
           setServiceState('chromaService', 'ready');
@@ -1600,16 +1733,20 @@ Gold memory moves through reflection.</textarea></label>
       currentLocalAiExchange = body;
       currentInvention = null;
       const trace = body.trace || {};
+      const ariTranslation = trace.qwenCandidateTranslation || {};
       const seconds = typeof body.timings?.totalDurationNanoseconds === 'number'
         ? (body.timings.totalDurationNanoseconds / 1e9).toFixed(2)
         : 'unreported';
       document.querySelector('#localAiOutput').innerHTML = `
         <div class="foundation-panel">
-          <h3>English response</h3>
+          <h3>ARI response</h3>
           <p>${escapeHtml(body.response?.text)}</p>
           <dl class="evidence-list">
-            <div class="evidence-line"><dt>Model</dt><dd>${escapeHtml(body.model?.name)} · local</dd></div>
-            <div class="evidence-line"><dt>Braille cells</dt><dd>${trace.cellCount || 0}</dd></div>
+            <div class="evidence-line"><dt>Technical person</dt><dd>${escapeHtml(body.translator?.name || 'ARI')} · ${escapeHtml(body.translator?.domain || 'Community Garden')}</dd></div>
+            <div class="evidence-line"><dt>Word engine</dt><dd>${escapeHtml(body.model?.name)} · local Qwen</dd></div>
+            <div class="evidence-line"><dt>Founding curriculum</dt><dd>${escapeHtml(trace.ariFoundation?.version || 'unresolved')} · ${trace.ariFoundation?.consulted ? 'consulted' : 'not consulted'}</dd></div>
+            <div class="evidence-line"><dt>Input Braille cells</dt><dd>${trace.cellCount || 0}</dd></div>
+            <div class="evidence-line"><dt>Qwen-word Braille cells</dt><dd>${ariTranslation.totalCells || 0}</dd></div>
             <div class="evidence-line"><dt>English round trip</dt><dd>${trace.roundTripExact ? 'exact' : 'different'}</dd></div>
             <div class="evidence-line"><dt>Graph source</dt><dd>${escapeHtml(trace.graphSource)}</dd></div>
             <div class="evidence-line"><dt>Learned handoff</dt><dd>${escapeHtml(trace.learnedAlignment?.status || 'not applicable')}${trace.learnedAlignment?.contractVerified ? ' · contract verified' : ''}</dd></div>
@@ -1617,8 +1754,13 @@ Gold memory moves through reflection.</textarea></label>
             <div class="evidence-line"><dt>Route evidence</dt><dd>${escapeHtml(body.relationalEvidence?.notice || 'No relational evidence summary returned.')}</dd></div>
             <div class="evidence-line"><dt>Duration</dt><dd>${seconds} seconds</dd></div>
           </dl>
-          <p class="hint">Braille trace</p><div class="runtime-braille" lang="en-brai">${escapeHtml(trace.braille)}</div>
-          <p class="hint">Ordered machine numbers</p><div class="mask-sequence" aria-label="Ordered local-AI signal numbers">${(trace.numericSequence || []).map((mask, index) => `<span class="mask-cell" aria-label="Cell ${index + 1}; number ${mask}"><strong>${mask}</strong></span>`).join('')}</div>
+          <details class="account-box">
+            <summary>Support team receipts (${body.team?.receipts?.length || 0})</summary>
+            <div class="ari-receipts">${(body.team?.receipts || []).map(receipt => `<div class="ari-receipt"><strong>${escapeHtml(receipt.teamMember)}</strong> · ${escapeHtml(receipt.objective)} · ${escapeHtml(receipt.status)} · ${Number(receipt.durationMs || 0)} ms<br>Reads: ${escapeHtml((receipt.access?.readScopes || []).join(', ') || 'none')} · Writes: ${escapeHtml((receipt.access?.writeScopes || []).join(', ') || 'none')}</div>`).join('') || '<p class="hint">No support receipts returned.</p>'}</div>
+          </details>
+          <p class="hint">Person statement / original Braille trace</p><div class="runtime-braille" lang="en-brai">${escapeHtml(trace.braille)}</div>
+          <p class="hint">Qwen candidate words / ARI Braille translation</p><div class="runtime-braille" lang="en-brai">${escapeHtml(ariTranslation.braille)}</div>
+          <p class="hint">ARI mathematical order · number with original cell position</p><div class="mask-sequence" aria-label="ARI mathematical order of Qwen word cells">${(ariTranslation.mathematicalOrder || []).slice(0, 128).map(item => `<span class="mask-cell" aria-label="Number ${item.value}; original cell ${item.originalPosition}"><strong>${item.value}</strong><small>#${item.originalPosition}</small></span>`).join('')}</div>
           <div class="account-box">
             <h3>Imagination stage</h3>
             <p class="hint">When no reviewed route exists, Qwen may imagine one low- or medium-confidence possibility. It must include evidence and a condition that would prove it wrong.</p>
@@ -1628,7 +1770,7 @@ Gold memory moves through reflection.</textarea></label>
           </div>
           <div class="account-box">
             <h3>Teach this response</h3>
-            <p class="hint">Approval or correction creates a proposed training record. Administrator review is still required before it can enter a conversational-adapter dataset.</p>
+            <p class="hint">Approval or correction teaches ARI through a proposed cultivation record. Administrator review is still required before it can enter a conversational-adapter dataset.</p>
             <label class="field"><span>Correction, if needed</span><textarea id="localAiCorrection" rows="3" maxlength="8000" placeholder="Write the response your AI should have given."></textarea></label>
             <div class="braille-actions"><button id="approveLocalAi" type="button">Approve response</button><button id="correctLocalAi" type="button">Submit correction</button></div>
             <div id="localAiFeedbackStatus" class="braille-status" role="status" aria-live="polite">${currentAccount ? 'Ready for your review.' : 'Sign in before teaching the model.'}</div>
@@ -1699,6 +1841,183 @@ Gold memory moves through reflection.</textarea></label>
         document.querySelector('#correctLocalAi').disabled = true;
         if (currentAccount.role === 'admin') await loadFeedbackQueue();
       } catch (error) { setText('localAiFeedbackStatus', error.message); }
+    }
+
+    async function loadAnalytics() {
+      if (!currentAccount) {
+        setText('analyticsStatus', 'Sign in with the administrator account to view aggregate analytics.');
+        return;
+      }
+      if (currentAccount.role !== 'admin') {
+        setText('analyticsStatus', 'Administrator access is required for aggregate Garden analytics.');
+        return;
+      }
+      const button = document.querySelector('#refreshAnalytics');
+      button.disabled = true;
+      setText('analyticsStatus', 'Reading the eight content-free measures...');
+      try {
+        const response = await fetch('/analytics/summary');
+        const raw = await response.text();
+        let body;
+        try { body = JSON.parse(raw || '{}'); }
+        catch { throw new Error(`The analytics service returned an unreadable response (${response.status}).`); }
+        if (!response.ok) throw new Error(body.error || `Analytics request failed (${response.status}).`);
+        renderAnalytics(body);
+        const started = body.window?.telemetryStartedAt ? ` · inside telemetry began ${new Date(body.window.telemetryStartedAt).toLocaleString()}` : '';
+        const weatherState = body.outsideWeather?.status === 'not_configured'
+          ? 'outside weather awaits its Cloudflare token'
+          : body.outsideWeather?.status === 'partial'
+            ? 'outside weather is partially available'
+            : body.outsideWeather?.cached
+              ? 'outside weather loaded from the ten-minute cache'
+              : 'outside weather is current';
+        setText('analyticsStatus', `Inside growth: ${body.window?.label || 'current window'} · ${weatherState}${started}`);
+      } catch (error) {
+        setText('analyticsStatus', error.message);
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    function renderAnalytics(body) {
+      renderOutsideWeather(body.outsideWeather || {});
+      const human = body.humanActivity || {};
+      document.querySelector('#analyticsHuman').innerHTML = analyticsRows([
+        ['Human page views', human.pageViews || 0],
+        ['Unique browser visitors', human.uniqueVisitors || 0],
+        ['Visit sessions', human.sessions || 0],
+        ['Accounts (all time)', human.accounts || 0],
+        ['Verified accounts (all time)', human.verifiedAccounts || 0],
+        ['New accounts (24h)', human.newAccounts || 0]
+      ]);
+
+      const cultivation = body.cultivations || {};
+      const entranceRows = (cultivation.entrances || []).map(item => [analyticsLabel(item.entrance || 'unknown'), `${item.successful || 0} / ${item.attempts || 0}`]);
+      document.querySelector('#analyticsCultivations').innerHTML = analyticsRows([
+        ['Successful', cultivation.successful || 0],
+        ['Attempts', cultivation.attempts || 0],
+        ['Success rate', `${cultivation.successRate || 0}%`],
+        ...entranceRows
+      ]);
+
+      document.querySelector('#analyticsRooms').innerHTML = (body.rooms || []).length
+        ? analyticsRows(body.rooms.map(item => [analyticsLabel(item.room), item.visits || 0]))
+        : '<p class="empty-state">Room telemetry begins with the next browser visit.</p>';
+
+      document.querySelector('#analyticsServices').innerHTML = (body.servicePerformance || []).length
+        ? (body.servicePerformance || []).map(item => `<div class="analytics-row"><span>${escapeHtml(analyticsLabel(item.service))}<br><small>${item.calls || 0} calls</small></span><strong>${item.average_ms || 0} ms avg<br><small>${item.p95_ms || 0} ms p95</small></strong></div>`).join('')
+        : '<p class="empty-state">Service timing begins with the next cultivation.</p>';
+
+      document.querySelector('#analyticsErrors').innerHTML = (body.errors || []).length
+        ? analyticsRows(body.errors.map(item => [`${analyticsLabel(item.service)} · HTTP ${item.status_code || 'unknown'}`, item.count || 0]))
+        : '<p class="empty-state">No instrumented service errors in this window.</p>';
+
+      const feedback = body.feedback || {};
+      document.querySelector('#analyticsFeedback').innerHTML = analyticsRows([
+        ['Awaiting review (all time)', feedback.proposed || 0],
+        ['Approved by review (all time)', feedback.accepted || 0],
+        ['Rejected by review (all time)', feedback.rejected || 0]
+      ]);
+
+      const returning = body.returning || {};
+      const growth = body.personalGrowth || {};
+      document.querySelector('#analyticsReturning').innerHTML = analyticsRows([
+        ['Returning visitors (recorded)', returning.returning_visitors || 0],
+        ['Returning accounts (recorded)', returning.returning_accounts || 0],
+        ['Active personal routes (current)', growth.activePersonalRoutes || 0],
+        ['Plots with routes (current)', growth.plotsWithRoutes || 0],
+        ['Completed lessons (current)', growth.completedLessons || 0]
+      ]);
+
+      const privacy = body.privacy || {};
+      document.querySelector('#analyticsPrivacy').innerHTML = analyticsRows([
+        ['Message content stored', privacy.messageContentStored ? 'Yes' : 'No'],
+        ['Raw IP stored', privacy.rawIpStored ? 'Yes' : 'No'],
+        ['User agent stored', privacy.userAgentStored ? 'Yes' : 'No'],
+        ['Anonymous identity', privacy.anonymousIdentifiers || 'No raw identifier']
+      ]) + `<p class="hint">${escapeHtml(privacy.boundary || '')}</p>`;
+    }
+
+    function renderOutsideWeather(weather) {
+      const ids = ['weatherReach', 'weatherRegions', 'weatherPaths', 'weatherStatusCodes', 'weatherCache', 'weatherProtocol', 'weatherFailures', 'weatherThreats'];
+      if (weather.status === 'not_configured') {
+        ids.forEach(id => { document.querySelector(`#${id}`).innerHTML = '<p class="empty-state">Waiting for the backend-only Cloudflare analytics token.</p>'; });
+        return;
+      }
+
+      const section = name => {
+        const value = weather.sections?.[name];
+        return value?.status === 'ready' ? value.data || {} : null;
+      };
+      const unavailable = '<p class="empty-state">This Cloudflare measure is temporarily unavailable. Other measures remain visible.</p>';
+
+      const reach = section('requestsAndVisitors');
+      document.querySelector('#weatherReach').innerHTML = reach ? analyticsRows([
+        ['Requests', reach.requests || 0],
+        ['Page views', reach.pageViews || 0],
+        ['Daily unique counts (summed)', reach.uniqueVisitors || 0],
+        ['Encrypted requests', reach.encryptedRequests || 0],
+        ['Transfer', formatAnalyticsBytes(reach.bytes || 0)]
+      ]) : unavailable;
+
+      const regions = section('countriesAndNetworks');
+      document.querySelector('#weatherRegions').innerHTML = regions ? analyticsRows([
+        ...(regions.countries || []).slice(0, 7).map(item => [item.label, item.count]),
+        ['ASN', regions.asn || 'unavailable_on_free_plan']
+      ]) : unavailable;
+
+      const paths = section('requestedPaths');
+      document.querySelector('#weatherPaths').innerHTML = paths && (paths.paths || []).length
+        ? analyticsRows((paths.paths || []).slice(0, 8).map(item => [`${item.method} ${item.path} · ${item.country}`, item.requests]))
+        : paths ? '<p class="empty-state">No requested paths returned in this window.</p>' : unavailable;
+
+      const codes = section('statusCodes');
+      document.querySelector('#weatherStatusCodes').innerHTML = codes ? analyticsRows(
+        (codes.codes || []).map(item => [`HTTP ${item.status}`, item.requests])
+      ) : unavailable;
+
+      const cache = section('cacheStatus');
+      document.querySelector('#weatherCache').innerHTML = cache ? analyticsRows(
+        (cache.statuses || []).map(item => [analyticsLabel(item.label), item.count])
+      ) : unavailable;
+
+      const protocol = section('protocolAndTLS');
+      document.querySelector('#weatherProtocol').innerHTML = protocol ? analyticsRows([
+        ...(protocol.httpVersions || []).map(item => [item.label, item.count]),
+        ...(protocol.tlsVersions || []).map(item => [item.label === 'none' ? 'Plain HTTP' : item.label, item.count])
+      ]) : unavailable;
+
+      const failures = section('edgeVsOriginFailures');
+      document.querySelector('#weatherFailures').innerHTML = failures && (failures.failures || []).length
+        ? analyticsRows((failures.failures || []).map(item => [
+            `${analyticsLabel(item.classification)} · edge ${item.edgeStatus} / origin ${item.originStatus}`,
+            item.requests
+          ])) + '<p class="hint">Origin not reached is not labeled as a Tunnel failure without a confirming Cloudflare error code.</p>'
+        : failures ? '<p class="empty-state">No edge or origin failures returned in this window.</p>' : unavailable;
+
+      const threats = section('botAndThreat');
+      document.querySelector('#weatherThreats').innerHTML = threats ? analyticsRows([
+        ['Threats flagged', threats.threats || 0],
+        ['Bot classification', threats.botClassification || 'unknown'],
+        ['Bot score', threats.botScore || 'unavailable_on_free_plan'],
+        ['Firewall events shown', (threats.firewallEvents || []).length],
+        ...((threats.reputation || []).slice(0, 4).map(item => [`IP reputation: ${analyticsLabel(item.label)}`, item.count]))
+      ]) + '<p class="hint">No raw IPs, User-Agent strings, messages, responses, or authentication data are queried.</p>' : unavailable;
+    }
+
+    function analyticsRows(rows) {
+      return `<div class="analytics-list">${rows.map(([label, value]) => `<div class="analytics-row"><span>${escapeHtml(String(label))}</span><strong>${escapeHtml(String(value))}</strong></div>`).join('')}</div>`;
+    }
+
+    function analyticsLabel(value) {
+      return String(value || 'unknown').replace(/([a-z])([A-Z])/g, '$1 $2').replaceAll('_', ' ').replace(/\b\w/g, letter => letter.toUpperCase());
+    }
+
+    function formatAnalyticsBytes(value) {
+      const bytes = Number(value) || 0;
+      if (bytes < 1000) return `${bytes} B`;
+      if (bytes < 1000000) return `${(bytes / 1000).toFixed(1)} KB`;
+      return `${(bytes / 1000000).toFixed(2)} MB`;
     }
 
     async function loadBrailleRoom() {
@@ -1847,7 +2166,7 @@ Gold memory moves through reflection.</textarea></label>
         updateAccountPresence();
         setText('accountStatus', `Signed in as ${body.user.username}. Progress can synchronize.`);
         document.querySelector('#accountPassword').value = '';
-        if (body.user.role === 'admin') await Promise.all([loadModuleQueue(), loadFeedbackQueue(), loadLearningCandidates(), loadConversationVersions(), loadResearchItems()]);
+        if (body.user.role === 'admin') await Promise.all([loadModuleQueue(), loadFeedbackQueue(), loadLearningCandidates(), loadConversationVersions(), loadResearchItems(), loadAnalytics()]);
         else await loadResearchItems();
       } catch (error) { setText('accountStatus', error.message); }
     }
@@ -1900,6 +2219,7 @@ Gold memory moves through reflection.</textarea></label>
       setText('conversationVersionStatus', 'Administrator sign-in is required to inspect training readiness.');
       setText('researchSearchStatus', 'Sign in before consulting outside sources.');
       setText('researchItemsStatus', 'Sign in to inspect your saved references.');
+      setText('analyticsStatus', 'Administrator sign-in is required.');
       document.querySelector('#moduleQueue').innerHTML = '';
       document.querySelector('#feedbackQueue').innerHTML = '';
       document.querySelector('#learningCandidateQueue').innerHTML = '';
@@ -1919,7 +2239,7 @@ Gold memory moves through reflection.</textarea></label>
           currentAccount = body.user;
           updateAccountPresence();
           setText('accountStatus', `Signed in as ${body.user.username}. Progress can synchronize.`);
-          if (loadProtected && body.user.role === 'admin') await Promise.all([loadModuleQueue(), loadFeedbackQueue(), loadLearningCandidates(), loadConversationVersions(), loadResearchItems()]);
+          if (loadProtected && body.user.role === 'admin') await Promise.all([loadModuleQueue(), loadFeedbackQueue(), loadLearningCandidates(), loadConversationVersions(), loadResearchItems(), loadAnalytics()]);
           else if (loadProtected) await loadResearchItems();
           return currentAccount;
         }

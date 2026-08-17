@@ -12,6 +12,7 @@ const genericAccountMessage = { message: 'If the account can receive this reques
 const accountActionKey = req => `${req.ip || req.socket.remoteAddress || 'unknown'}:${String(req.body?.email || '').trim().toLowerCase()}`;
 const limitSignup = createRateLimiter({ name: 'account signup', windowMs: 60 * 60 * 1000, maxRequests: 5, keyGenerator: accountActionKey });
 const limitRecovery = createRateLimiter({ name: 'account recovery', windowMs: 60 * 60 * 1000, maxRequests: 5, keyGenerator: accountActionKey });
+const limitAgentClaim = createRateLimiter({ name: 'agent claim', windowMs: 60 * 60 * 1000, maxRequests: 5, keyGenerator: accountActionKey });
 
 router.get('/auth/status', async (req, res, next) => {
   try {
@@ -96,6 +97,59 @@ router.post('/auth/reset-password', limitRecovery, async (req, res, next) => {
       [userId, passwordHash]
     );
     res.json({ reset: true });
+  } catch (error) { next(error); }
+});
+
+router.post('/auth/agent-claim/start', limitAgentClaim, async (req, res, next) => {
+  try {
+    const email = normalizeEmail(req.body?.email);
+    const claimId = crypto.randomUUID();
+    const result = await query(
+      'SELECT id,email FROM users WHERE email=$1 AND password_hash IS NOT NULL AND email_verified_at IS NOT NULL',
+      [email]
+    );
+    const user = result.rows[0];
+    if (user) {
+      const token = crypto.randomBytes(32).toString('base64url');
+      const hash = crypto.createHash('sha256').update(token).digest('hex');
+      await query('UPDATE auth_action_tokens SET consumed_at=NOW() WHERE user_id=$1 AND purpose=$2 AND consumed_at IS NULL', [user.id, 'agent_claim']);
+      await query(
+        `INSERT INTO auth_action_tokens (id,user_id,purpose,token_hash,expires_at)
+         VALUES ($1,$2,'agent_claim',$3,NOW()+(10 * 60 * INTERVAL '1 second'))`,
+        [claimId, user.id, hash]
+      );
+      await sendAccountActionEmail({ to: user.email, purpose: 'agent_claim', token });
+    }
+    res.status(202).json({
+      claimId,
+      status: 'pending_user_verification',
+      expiresIn: 600,
+      message: 'If the verified account can receive this request, a one-time verification token has been sent.'
+    });
+  } catch (error) { next(error); }
+});
+
+router.post('/auth/agent-claim/complete', limitAgentClaim, async (req, res, next) => {
+  try {
+    const claimId = String(req.body?.claimId || '');
+    const token = String(req.body?.verificationToken || '');
+    if (!/^[0-9a-f-]{36}$/i.test(claimId) || !token) throw httpError(400, 'The agent claim is invalid or expired.');
+    const hash = crypto.createHash('sha256').update(token).digest('hex');
+    const claimed = await query(
+      `UPDATE auth_action_tokens SET consumed_at=NOW()
+       WHERE id=$1 AND token_hash=$2 AND purpose='agent_claim' AND consumed_at IS NULL AND expires_at>NOW()
+       RETURNING user_id`,
+      [claimId, hash]
+    );
+    const userId = claimed.rows[0]?.user_id;
+    if (!userId) throw httpError(400, 'The agent claim is invalid or expired.');
+    const result = await query(
+      `SELECT id,username,email,role,token_version,must_change_password
+       FROM users WHERE id=$1 AND password_hash IS NOT NULL AND email_verified_at IS NOT NULL`,
+      [userId]
+    );
+    if (!result.rows.length) throw httpError(400, 'The agent claim is invalid or expired.');
+    res.json(sessionResponse(result.rows[0]));
   } catch (error) { next(error); }
 });
 

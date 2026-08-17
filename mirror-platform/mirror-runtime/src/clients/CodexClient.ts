@@ -100,6 +100,25 @@ export class CodexClient {
     return { status: response.status, body };
   }
 
+  async recordAnalyticsEvents(
+    events: Array<Record<string, unknown>>,
+    context: { visitorToken?: string; sessionToken?: string; userToken?: string } = {}
+  ): Promise<void> {
+    if (!this.serviceToken || !events.length) return;
+    const response = await this.fetcher(`${this.apiUrl}/api/v1/analytics/events`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${this.serviceToken}`, 'content-type': 'application/json' },
+      body: JSON.stringify({
+        events,
+        visitorToken: context.visitorToken || null,
+        sessionToken: context.sessionToken || null,
+        userToken: context.userToken || null
+      })
+    });
+    const body = await readJsonResponse(response, 'Codex analytics') as { error?: string };
+    if (!response.ok) throw new Error(`Codex analytics failed (${response.status}): ${body.error || 'Unknown error'}`);
+  }
+
   async getActiveConversationAdapter(): Promise<Record<string, any> | null> {
     if (!this.serviceToken) return null;
     const response = await this.fetcher(`${this.apiUrl}/api/v1/local-ai/training/active`, {

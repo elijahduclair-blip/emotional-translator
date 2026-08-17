@@ -68,6 +68,26 @@ describe('CodexClient compact persistence', () => {
     expect(active?.ollamaModelName).toBe('mirror-qwen3-v1');
   });
 
+  it('records only content-free analytics metadata through the runtime service boundary', async () => {
+    let request: Record<string, any> = {};
+    let authorization = '';
+    const client = new CodexClient('http://codex.test', 'service-token', async (_url, init) => {
+      authorization = String((init?.headers as Record<string, string>)?.authorization || '');
+      request = JSON.parse(String(init?.body || '{}'));
+      return new Response(JSON.stringify({ recorded: 1, contentStored: false }), {
+        status: 201, headers: { 'content-type': 'application/json' }
+      });
+    });
+    await client.recordAnalyticsEvents([
+      { eventType: 'page_view', room: 'analytics', success: true }
+    ], { visitorToken: '11111111-1111-4111-8111-111111111111', sessionToken: '22222222-2222-4222-8222-222222222222' });
+
+    expect(authorization).toBe('Bearer service-token');
+    expect(request.events).toEqual([{ eventType: 'page_view', room: 'analytics', success: true }]);
+    expect(request).not.toHaveProperty('input');
+    expect(request).not.toHaveProperty('message');
+  });
+
   it('keeps only graph evidence references for runtime memory', () => {
     const compact = compactGraphRead(graphRead());
 

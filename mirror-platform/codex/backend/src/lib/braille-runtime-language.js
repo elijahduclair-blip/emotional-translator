@@ -18,6 +18,15 @@ const PUNCTUATION = Object.freeze({ ',': '⠂', ';': '⠆', ':': '⠒', '.': '�
 const LETTER_BY_CELL = new Map(Object.entries(LETTERS).map(([letter, cell]) => [cell, letter]));
 const DIGIT_BY_CELL = new Map(Object.entries(DIGITS).map(([digit, cell]) => [cell, digit]));
 const PUNCTUATION_BY_CELL = new Map(Object.entries(PUNCTUATION).map(([mark, cell]) => [cell, mark]));
+const MULTICELL_PUNCTUATION = Object.freeze({
+  '"': '\u2820\u2836',
+  '*': '\u2810\u2814',
+  '\u201c': '\u2818\u2826',
+  '\u201d': '\u2818\u2834',
+  '\u2018': '\u2820\u2826',
+  '\u2019': '\u2820\u2834'
+});
+const PUNCTUATION_BY_SEQUENCE = new Map(Object.entries(MULTICELL_PUNCTUATION).map(([mark, cells]) => [cells, mark]));
 const COMPARISON_WORDS = Object.freeze({
   '>=': 'is greater than or equal to', '<=': 'is less than or equal to',
   '!=': 'is not equal to', '=': 'equals', '>': 'is greater than', '<': 'is less than'
@@ -117,6 +126,11 @@ export function transcribeEnglishToUeb(value) {
       output += PUNCTUATION['.'];
       continue;
     }
+    if (MULTICELL_PUNCTUATION[character]) {
+      output += MULTICELL_PUNCTUATION[character];
+      numericMode = false;
+      continue;
+    }
     const lower = character.toLowerCase();
     if (LETTERS[lower]) {
       if (numericMode) output += GRADE_ONE;
@@ -158,6 +172,15 @@ export function transcribeUebToEnglish(value) {
     const offset = cell.codePointAt(0) - 0x2800;
     if (offset < 0 || offset > 0x3F) throw httpError(422, `Expected a six-dot Braille cell at position ${index + 1}.`);
     if (cell === BLANK) { output += ' '; numericMode = false; capitalNext = false; continue; }
+    const punctuationSequence = `${cell}${cells[index + 1] || ''}`;
+    const multiCellPunctuation = PUNCTUATION_BY_SEQUENCE.get(punctuationSequence);
+    if (multiCellPunctuation) {
+      output += multiCellPunctuation;
+      index += 1;
+      numericMode = false;
+      capitalNext = false;
+      continue;
+    }
     if (cell === CAPITAL) { capitalNext = true; continue; }
     if (cell === NUMERIC) { numericMode = true; continue; }
     if (cell === GRADE_ONE) { numericMode = false; continue; }

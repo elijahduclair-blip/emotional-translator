@@ -86,6 +86,12 @@ Personal API sessions use `POST`, `GET`, and `DELETE /api/v1/me/session`. New ac
 
 The public entrance includes a **My profile** portal at `/#profile`. A visitor can create an account, receive a single-use 24-hour email-verification link, and sign in after verification. Account holders can view their profile identity and private relationship count, cultivate through the personal-context API, inspect their reviewed personal routes, refresh their plot, and sign out. The signed-out page renders no personal data, and the profile workspace is available only while the owner-scoped session is valid. Public account creation requires working SMTP configuration; the route fails closed without it and removes an unverified record when mail delivery fails.
 
+#### ARI Tool Registry
+
+`GET /api/v1/ari/tools` publishes ARI's bounded support-team manifest. ARI remains the only coordinator; LEA supplies candidate language, CORA compares ordered observations, CARA reads or explicitly places owner-confirmed private relationships, MIRA manages the authenticated private transcript, VERA checks evidence boundaries, FEN produces reversible structural traces, and AURA remains a browser-permission-controlled speech tool. Each tool declares its readable and writable scopes plus its authentication and confirmation requirements.
+
+The local ARI conversation path invokes these registered tools instead of calling their services anonymously. Every invocation returns an `ari-tool-receipt.v1` containing the tool, objective, scopes, status, and timing. Receipts deliberately exclude task inputs and outputs. They cannot grant cross-person access, shared-graph mutation, Color Atlas mutation, or source-code mutation. Public fruit responses continue to omit internal receipts; the combined local shell can display them for inspection.
+
 For a temporary development preview, Cloudflare's official Quick Tunnel command can target only this gateway:
 
 ```bash

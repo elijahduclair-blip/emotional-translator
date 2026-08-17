@@ -262,12 +262,15 @@ export async function createSchema() {
       CREATE TABLE IF NOT EXISTS auth_action_tokens (
         id TEXT PRIMARY KEY,
         user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
-        purpose TEXT NOT NULL CHECK (purpose IN ('verify_email','reset_password')),
+        purpose TEXT NOT NULL CHECK (purpose IN ('verify_email','reset_password','agent_claim')),
         token_hash TEXT NOT NULL UNIQUE,
         expires_at TIMESTAMP NOT NULL,
         consumed_at TIMESTAMP,
         created_at TIMESTAMP DEFAULT NOW()
       );
+      ALTER TABLE auth_action_tokens DROP CONSTRAINT IF EXISTS auth_action_tokens_purpose_check;
+      ALTER TABLE auth_action_tokens ADD CONSTRAINT auth_action_tokens_purpose_check
+        CHECK (purpose IN ('verify_email','reset_password','agent_claim'));
       CREATE INDEX IF NOT EXISTS idx_auth_action_tokens_user ON auth_action_tokens(user_id,purpose,created_at DESC);
     `);
 
@@ -306,6 +309,24 @@ export async function createSchema() {
         updated_at TIMESTAMP DEFAULT NOW()
       );
       CREATE UNIQUE INDEX IF NOT EXISTS idx_user_profiles_user_id ON user_profiles(user_id);
+    `);
+
+    // Account-scoped episodic memory. Events are append-only and ordered by the
+    // database sequence; they never become shared graph or semantic records.
+    await query(`
+      CREATE TABLE IF NOT EXISTS private_conversation_events (
+        sequence_no BIGSERIAL PRIMARY KEY,
+        id TEXT NOT NULL UNIQUE,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        interaction_id TEXT NOT NULL,
+        role TEXT NOT NULL CHECK (role IN ('user','assistant')),
+        content TEXT NOT NULL,
+        metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP DEFAULT NOW(),
+        UNIQUE (user_id,interaction_id,role)
+      );
+      CREATE INDEX IF NOT EXISTS idx_private_conversation_events_user_sequence
+        ON private_conversation_events(user_id,sequence_no DESC);
     `);
 
     // User Concepts
@@ -419,6 +440,24 @@ export async function createSchema() {
         created_at TIMESTAMP DEFAULT NOW(),
         updated_at TIMESTAMP DEFAULT NOW()
       );
+      ALTER TABLE user_graph_relationships ALTER COLUMN source_feedback_id DROP NOT NULL;
+      ALTER TABLE user_graph_relationships ALTER COLUMN learning_candidate_id DROP NOT NULL;
+      ALTER TABLE user_graph_relationships ADD COLUMN IF NOT EXISTS mutation_source TEXT NOT NULL DEFAULT 'reviewed_feedback';
+      ALTER TABLE user_graph_relationships ADD COLUMN IF NOT EXISTS approved_by_user TEXT REFERENCES users(id);
+      ALTER TABLE user_graph_relationships ADD COLUMN IF NOT EXISTS review_note TEXT;
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint WHERE conname = 'user_graph_relationships_provenance_check'
+        ) THEN
+          ALTER TABLE user_graph_relationships
+            ADD CONSTRAINT user_graph_relationships_provenance_check CHECK (
+              (mutation_source = 'reviewed_feedback' AND source_feedback_id IS NOT NULL AND learning_candidate_id IS NOT NULL)
+              OR
+              (mutation_source = 'user_directed' AND approved_by_user IS NOT NULL AND review_note IS NOT NULL)
+            );
+        END IF;
+      END $$;
       CREATE INDEX IF NOT EXISTS idx_user_graph_relationships_user ON user_graph_relationships(user_id,record_status,created_at DESC);
 
       INSERT INTO local_ai_learning_candidates
@@ -489,6 +528,34 @@ export async function createSchema() {
       ALTER TABLE foundation_sessions ADD COLUMN IF NOT EXISTS analysis_version TEXT;
       ALTER TABLE foundation_sessions ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();
       CREATE INDEX IF NOT EXISTS idx_foundation_sessions_created_at ON foundation_sessions(created_at DESC);
+    `);
+
+    // Privacy-preserving Garden analytics. This ledger never stores message content,
+    // raw IP addresses, user agents, email addresses, or service credentials.
+    await query(`
+      CREATE TABLE IF NOT EXISTS garden_analytics_events (
+        id TEXT PRIMARY KEY,
+        event_type TEXT NOT NULL CHECK (event_type IN ('page_view','cultivation','service_call','error')),
+        visitor_key TEXT,
+        session_key TEXT,
+        user_id TEXT REFERENCES users(id) ON DELETE SET NULL,
+        room TEXT,
+        service TEXT,
+        entrance TEXT,
+        status_code INTEGER CHECK (status_code BETWEEN 100 AND 599),
+        duration_ms INTEGER CHECK (duration_ms >= 0),
+        success BOOLEAN,
+        metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+        created_at TIMESTAMP DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_garden_analytics_created_at
+        ON garden_analytics_events(created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_garden_analytics_event_type
+        ON garden_analytics_events(event_type,created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_garden_analytics_room
+        ON garden_analytics_events(room,created_at DESC) WHERE room IS NOT NULL;
+      CREATE INDEX IF NOT EXISTS idx_garden_analytics_service
+        ON garden_analytics_events(service,created_at DESC) WHERE service IS NOT NULL;
     `);
 
     console.log('? Schema created successfully');

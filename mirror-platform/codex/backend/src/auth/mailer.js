@@ -5,14 +5,21 @@ export const capturedMail = [];
 
 export async function sendAccountActionEmail({ to, purpose, token }) {
   const publicUrl = String(process.env.PUBLIC_APP_URL || 'http://127.0.0.1:3100').replace(/\/$/, '');
+  const agentClaim = purpose === 'agent_claim';
   const path = purpose === 'verify_email' ? '/#profile-verify' : '/#braille-reset';
-  const action = purpose === 'verify_email' ? 'Verify your Community Garden account' : 'Reset your Community Garden password';
+  const action = purpose === 'verify_email'
+    ? 'Verify your Community Garden account'
+    : agentClaim
+      ? 'Approve an AI bot login to Community Garden'
+      : 'Reset your Community Garden password';
   const url = `${publicUrl}${path}?token=${encodeURIComponent(token)}`;
   const message = {
     from: process.env.SMTP_FROM || 'Community Garden <no-reply@localhost>',
     to,
     subject: action,
-    text: `${action}: ${url}\n\nIf you did not request this, you can ignore this message.`
+    text: agentClaim
+      ? `${action}\n\nOne-time verification token: ${token}\n\nGive this token only to the AI bot you asked to connect. It expires in 10 minutes and can be used once. If you did not request this, ignore this message.`
+      : `${action}: ${url}\n\nIf you did not request this, you can ignore this message.`
   };
 
   if (process.env.NODE_ENV === 'test' || process.env.SMTP_CAPTURE_ONLY === 'true') {

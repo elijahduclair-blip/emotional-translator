@@ -15,10 +15,14 @@ const sharedEnvironment = {
   GARDEN_GATEWAY_PORT: process.env.GARDEN_GATEWAY_PORT || '3200',
   PUBLIC_APP_URL: process.env.PUBLIC_APP_URL || backendEnvironment.PUBLIC_APP_URL || 'https://acommunitygarden.garden',
   RUNTIME_SERVICE_TOKEN: process.env.RUNTIME_SERVICE_TOKEN || backendEnvironment.RUNTIME_SERVICE_TOKEN || 'mirror-platform-local',
+  GARDEN_OAUTH_SECRET: process.env.GARDEN_OAUTH_SECRET || backendEnvironment.GARDEN_OAUTH_SECRET || process.env.RUNTIME_SERVICE_TOKEN || backendEnvironment.RUNTIME_SERVICE_TOKEN || 'mirror-platform-local',
+  GARDEN_WEB_BOT_AUTH_SECRET: process.env.GARDEN_WEB_BOT_AUTH_SECRET || backendEnvironment.GARDEN_WEB_BOT_AUTH_SECRET || '',
   LOCAL_MODEL_URL: process.env.LOCAL_MODEL_URL || 'http://127.0.0.1:11434',
   LOCAL_MODEL_NAME: process.env.LOCAL_MODEL_NAME || 'mirror-qwen3-conversation:v2',
   ALIGNMENT_MODEL_URL: process.env.ALIGNMENT_MODEL_URL || 'http://127.0.0.1:11435',
-  ALIGNMENT_MODEL_DEVICE: process.env.ALIGNMENT_MODEL_DEVICE || 'cpu'
+  ALIGNMENT_MODEL_DEVICE: process.env.ALIGNMENT_MODEL_DEVICE || 'cpu',
+  CF_ZONE_TAG: process.env.CF_ZONE_TAG || backendEnvironment.CF_ZONE_TAG || '',
+  CF_ANALYTICS_TOKEN: process.env.CF_ANALYTICS_TOKEN || backendEnvironment.CF_ANALYTICS_TOKEN || ''
 };
 
 const python = process.platform === 'win32'

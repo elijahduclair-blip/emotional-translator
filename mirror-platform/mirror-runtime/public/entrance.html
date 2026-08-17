@@ -3,8 +3,22 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Community Garden receives seeds of information and grows useful fruit for people.">
-  <title>Community Garden Entrance</title>
+  <title>Community Garden | ARI Relational Translator</title>
+  <meta name="description" content="Community Garden is the home of ARI, a relational translator that uses the Theory of Alignment, color-climate context, accountable structure, and reviewed personal memory.">
+  <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+  <meta name="theme-color" content="#0c0e12">
+  <link rel="canonical" href="https://acommunitygarden.garden/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Community Garden">
+  <meta property="og:title" content="Community Garden | ARI Relational Translator">
+  <meta property="og:description" content="Plant information and cultivate useful, accountable responses through ARI and the Theory of Alignment.">
+  <meta property="og:url" content="https://acommunitygarden.garden/">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Community Garden | ARI Relational Translator">
+  <meta name="twitter:description" content="Plant information and cultivate useful, accountable responses through ARI and the Theory of Alignment.">
+  <script type="application/ld+json">
+    {"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://acommunitygarden.garden/#website","url":"https://acommunitygarden.garden/","name":"Community Garden","description":"A protected environment for relational translation, learning, and accountable personal cultivation."},{"@type":"WebApplication","@id":"https://acommunitygarden.garden/#ari","name":"ARI","alternateName":"Accountable Relational Intelligence","url":"https://acommunitygarden.garden/ari","applicationCategory":"EducationalApplication","operatingSystem":"Web","description":"ARI translates supplied language through accountable structure, governed relationships, and user context inside Community Garden."},{"@type":"WebPage","@id":"https://acommunitygarden.garden/#page","url":"https://acommunitygarden.garden/","name":"Community Garden Entrance","isPartOf":{"@id":"https://acommunitygarden.garden/#website"},"mainEntity":{"@id":"https://acommunitygarden.garden/#ari"}}]}
+  </script>
   <style>
     :root {
       color-scheme: dark;
@@ -29,7 +43,7 @@
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
     .topbar { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 18px clamp(18px,4vw,54px); border-bottom: 1px solid var(--line); }
-    .brand { display: flex; align-items: center; gap: 11px; font-size: .74rem; font-weight: 800; letter-spacing: .15em; text-transform: uppercase; }
+    .brand { display: flex; align-items: center; gap: 11px; color: inherit; font-size: .74rem; font-weight: 800; letter-spacing: .15em; text-decoration: none; text-transform: uppercase; }
     .mark { width: 29px; height: 29px; border-radius: 50%; background: conic-gradient(var(--peach),var(--gold),#76a9dd,var(--green),var(--peach)); box-shadow: inset 0 0 0 7px #11151b; }
     .top-actions, .portal-nav { display: flex; align-items: center; gap: 9px; }
     .nav-button { padding: 9px 14px; border: 1px solid transparent; color: var(--muted); background: transparent; font-size: .78rem; }
@@ -80,17 +94,27 @@
     .garden-route strong { display: block; color: var(--ink); font-size: .9rem; }
     .garden-route span { display: block; margin-top: 5px; color: var(--muted); font-size: .76rem; line-height: 1.5; }
     .profile-response { min-height: 90px; margin: 18px 0 0; white-space: pre-wrap; }
+    .comparison-receipt { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .comparison-receipt h3 { margin: 7px 0 8px; font: 500 1.25rem/1.15 Georgia,"Times New Roman",serif; }
+    .comparison-receipt .garden-list { margin-top: 12px; }
+    .comparison-receipt .boundary { margin-bottom: 0; }
+    .comparison-facts { display: flex; flex-wrap: wrap; gap: 7px; margin: 12px 0; }
+    .comparison-facts span { padding: 6px 9px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font-size: .7rem; }
+    .transcript-comparison { display: block; margin-top: 7px; color: var(--green); font-size: .69rem; line-height: 1.45; }
     .account-modes { display: flex; gap: 8px; margin: 20px 0 4px; padding: 4px; border: 1px solid var(--line); border-radius: 999px; }
     .account-modes button { flex: 1 1 0; padding: 9px 12px; color: var(--muted); background: transparent; font-size: .8rem; }
     .account-modes button[aria-pressed="true"] { color: #111319; background: var(--ink); }
     .requirements { margin: 9px 0 0; color: var(--muted); font-size: .72rem; line-height: 1.5; }
+    .learn-nav { display: flex; flex-wrap: wrap; gap: 10px 18px; margin-top: 26px; padding: 18px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+    .learn-nav a { color: var(--muted); font-size: .78rem; text-underline-offset: 4px; }
+    .learn-nav a:hover { color: var(--ink); }
     footer { display: flex; justify-content: space-between; gap: 20px; margin-top: 28px; color: #777d86; font-size: .74rem; }
     @media (max-width: 760px) { .topbar { align-items: flex-start; flex-direction: column; } .top-actions { width: 100%; justify-content: space-between; } .entrance, .profile-grid { grid-template-columns: 1fr; } .cycle { grid-template-columns: 1fr; } .actions, footer { align-items: stretch; flex-direction: column; } .actions button { width: 100%; } }
   </style>
 </head>
 <body>
   <header class="topbar">
-    <div class="brand"><span class="mark" aria-hidden="true"></span>Community Garden</div>
+    <a class="brand" href="/"><span class="mark" aria-hidden="true"></span>Community Garden</a>
     <div class="top-actions">
       <nav class="portal-nav" aria-label="Garden portals">
         <button class="nav-button" type="button" data-portal="public" aria-current="page">Public garden</button>
@@ -190,9 +214,25 @@
             <h2>Grow with your context</h2>
             <label for="personalSeed">Question, observation, or unfinished thought</label>
             <textarea id="personalSeed" maxlength="10000" required placeholder="This reading may consult your reviewed personal relationships."></textarea>
-            <div class="actions"><span id="personalSeedStatus" class="message" role="status" aria-live="polite">The seed will not be saved automatically.</span><button id="personalGrowButton" type="submit">Cultivate privately</button></div>
+            <div class="actions"><span id="personalSeedStatus" class="message" role="status" aria-live="polite">Each exchange is added in order to your private conversation transcript.</span><button id="personalGrowButton" type="submit">Cultivate privately</button></div>
             <p id="personalFruit" class="profile-response" aria-live="polite">Your private-context response will appear here.</p>
+            <section id="personalComparisonReceipt" class="comparison-receipt" aria-live="polite" hidden>
+              <span class="kicker">Comparison receipt</span>
+              <h3>What ARI compared</h3>
+              <p id="personalComparisonSummary" class="requirements"></p>
+              <div id="personalComparisonFacts" class="comparison-facts"></div>
+              <ol id="personalComparisonList" class="garden-list" aria-label="Earlier observations compared with the current statement"></ol>
+              <div class="boundary"><strong>Observation-only boundary</strong><br>Repeated language and structural difference do not create meaning, assign a personality, or change the personal or shared graph.</div>
+            </section>
           </form>
+
+          <section class="panel">
+            <span class="kicker">Conversation memory</span>
+            <h2>Your continuous private transcript</h2>
+            <p class="requirements">Every person statement and AI response stays in its original order. It supplies private context but never becomes community soil or automatic learning.</p>
+            <div class="actions"><span id="personalTranscriptStatus" class="message" role="status" aria-live="polite">Loading your ordered conversation...</span><span><button id="loadEarlierTranscript" class="secondary" type="button" hidden>Load earlier</button> <button id="refreshPersonalTranscript" class="secondary" type="button">Refresh</button></span></div>
+            <ol id="personalTranscriptList" class="garden-list" aria-label="Private conversation transcript"></ol>
+          </section>
 
           <section class="panel">
             <span class="kicker">My relationship garden</span>
@@ -203,6 +243,12 @@
         </div>
       </div>
     </section>
+    <nav class="learn-nav" aria-label="Learn about Community Garden">
+      <a href="/about">About the Garden</a>
+      <a href="/ari">Meet ARI</a>
+      <a href="/theory-of-alignment">Theory of Alignment</a>
+      <a href="/privacy">Privacy and boundaries</a>
+    </nav>
     <footer><span>Emotion is treated as moving environment, not fixed identity.</span><span>Community Garden · garden-entrance.v1</span></footer>
   </main>
   <script>
@@ -218,6 +264,10 @@
     const personalSeedForm = document.querySelector('#personalSeedForm');
     const personalGrowButton = document.querySelector('#personalGrowButton');
     const refreshPersonalGarden = document.querySelector('#refreshPersonalGarden');
+    const refreshPersonalTranscript = document.querySelector('#refreshPersonalTranscript');
+    const loadEarlierTranscript = document.querySelector('#loadEarlierTranscript');
+    let personalTranscriptEvents = [];
+    let personalTranscriptNextBefore = null;
     form.addEventListener('submit', growFruit);
     profileLoginForm.addEventListener('submit', signInProfile);
     profileSignupForm.addEventListener('submit', createProfileAccount);
@@ -227,6 +277,8 @@
     profileSignOut.addEventListener('click', signOutProfile);
     personalSeedForm.addEventListener('submit', growPersonalFruit);
     refreshPersonalGarden.addEventListener('click', loadPersonalGarden);
+    refreshPersonalTranscript.addEventListener('click', () => loadPersonalTranscript(true));
+    loadEarlierTranscript.addEventListener('click', () => loadPersonalTranscript(false));
     portalButtons.forEach(item => item.addEventListener('click', () => {
       window.location.hash = item.dataset.portal === 'profile' ? 'profile' : 'garden';
     }));
@@ -234,6 +286,66 @@
     activatePortalFromHash();
     loadIdentity();
     initializeProfile();
+    registerPublicWebMcpTools();
+
+    async function registerPublicWebMcpTools() {
+      const modelContext = document.modelContext || navigator.modelContext;
+      if (!modelContext || typeof modelContext.registerTool !== 'function') return;
+
+      const tools = [
+        publicWebMcpTool(
+          'garden_identity',
+          'Read Community Garden public identity, purpose, adaptation model, and non-mutation boundary.',
+          '/garden/identity'
+        ),
+        publicWebMcpTool(
+          'ari_foundation',
+          'Read ARI public foundation rules for ordered, relational, and boundary-aware translation.',
+          '/api/v1/ari/foundation'
+        ),
+        publicWebMcpTool(
+          'ari_tool_registry',
+          'Inspect ARI public team roles, tool status, declared scopes, and immutable safety boundaries.',
+          '/api/v1/ari/tools'
+        )
+      ];
+
+      for (const tool of tools) {
+        try {
+          await modelContext.registerTool(tool);
+        } catch (error) {
+          console.warn(`WebMCP tool ${tool.name} could not be registered.`, error);
+        }
+      }
+    }
+
+    function publicWebMcpTool(name, description, path) {
+      return {
+        name,
+        description,
+        inputSchema: {
+          type: 'object',
+          properties: {},
+          additionalProperties: false
+        },
+        annotations: {
+          readOnlyHint: true,
+          untrustedContentHint: false
+        },
+        async execute() {
+          const response = await fetch(path, {
+            headers: { accept: 'application/json' },
+            credentials: 'omit'
+          });
+          const body = await readGardenResponse(response);
+          if (!response.ok) throw new Error(body.error || `Public Garden read failed (${response.status}).`);
+          return {
+            content: [{ type: 'text', text: JSON.stringify(body) }],
+            structuredContent: body
+          };
+        }
+      };
+    }
 
     async function loadIdentity() {
       try {
@@ -288,6 +400,17 @@
         else item.removeAttribute('aria-current');
       });
       if (active === 'profile') document.querySelector('#profilePortal').focus?.();
+      recordPublicRoom(active);
+    }
+
+    async function recordPublicRoom(room) {
+      try {
+        await fetch('/analytics/visit', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json', 'x-garden-request': 'public-entrance' },
+          body: JSON.stringify({ room: room === 'profile' ? 'profile' : 'public' })
+        });
+      } catch {}
     }
 
     function showAccountMode(mode) {
@@ -312,6 +435,7 @@
         if (!response.ok) throw new Error(body.error || 'Profile unavailable.');
         showSignedInProfile(body.user || {});
         await loadPersonalGarden();
+        await loadPersonalTranscript(true);
       } catch (error) {
         showSignedOutProfile(error.message === 'Profile unavailable.' ? error.message : undefined);
       }
@@ -335,6 +459,7 @@
         document.querySelector('#profilePassword').value = '';
         showSignedInProfile(body.user || {});
         await loadPersonalGarden();
+        await loadPersonalTranscript(true);
       } catch (error) {
         setText('profileLoginStatus', error.message);
       } finally {
@@ -448,6 +573,11 @@
       document.querySelector('#profileIdentityPanel').hidden = true;
       document.querySelector('#profileWorkspace').hidden = true;
       document.querySelector('#personalGardenList').replaceChildren();
+      document.querySelector('#personalTranscriptList').replaceChildren();
+      document.querySelector('#personalComparisonReceipt').hidden = true;
+      personalTranscriptEvents = [];
+      personalTranscriptNextBefore = null;
+      loadEarlierTranscript.hidden = true;
       setText('profileRelationshipCount', '0');
       setText('profileLoginStatus', message || 'Your session stays in a protected browser cookie.');
     }
@@ -459,6 +589,7 @@
       personalGrowButton.disabled = true;
       setText('personalSeedStatus', 'Cultivating with your reviewed private context...');
       setText('personalFruit', 'Your private plot is translating, relating, and composing a response.');
+      document.querySelector('#personalComparisonReceipt').hidden = true;
       try {
         const response = await fetch('/api/v1/me/cultivate', {
           method: 'POST',
@@ -472,13 +603,111 @@
         }
         if (!response.ok) throw new Error(body.error || 'Personal cultivation failed.');
         setText('personalFruit', body.fruit?.text || 'The Garden returned an empty private harvest.');
-        setText('personalSeedStatus', 'Private-context fruit returned · seed not saved · shared graph unchanged.');
+        renderPersonalComparison(body.comparisonReceipt);
+        setText('personalSeedStatus', 'Exchange saved to your private transcript · shared graph unchanged · no automatic learning.');
+        await loadPersonalTranscript(true);
       } catch (error) {
         setText('personalFruit', error.message);
-        setText('personalSeedStatus', 'Your private and shared roots remain unchanged.');
+        setText('personalSeedStatus', 'The shared graph remains unchanged. A submitted person statement may remain in the private audit if processing began.');
       } finally {
         personalGrowButton.disabled = false;
       }
+    }
+
+    function renderPersonalComparison(receipt) {
+      const panel = document.querySelector('#personalComparisonReceipt');
+      const list = document.querySelector('#personalComparisonList');
+      const facts = document.querySelector('#personalComparisonFacts');
+      list.replaceChildren();
+      facts.replaceChildren();
+      if (!receipt || receipt.version !== 'ari-comparison.v1') {
+        panel.hidden = true;
+        return;
+      }
+
+      const comparisons = Array.isArray(receipt.comparisons) ? receipt.comparisons : [];
+      const recurringTokens = Array.isArray(receipt.recurringLanguage?.tokens) ? receipt.recurringLanguage.tokens : [];
+      const recurringPhrases = Array.isArray(receipt.recurringLanguage?.phrases) ? receipt.recurringLanguage.phrases : [];
+      setText('personalComparisonSummary', receipt.summary?.notice || 'ARI returned a bounded structural comparison receipt.');
+      [
+        `${comparisons.length} earlier observation${comparisons.length === 1 ? '' : 's'} compared`,
+        `${recurringTokens.length} recurring exact word${recurringTokens.length === 1 ? '' : 's'}`,
+        `${recurringPhrases.length} recurring exact phrase${recurringPhrases.length === 1 ? '' : 's'}`
+      ].forEach(value => {
+        const chip = document.createElement('span');
+        chip.textContent = value;
+        facts.append(chip);
+      });
+
+      comparisons.forEach(comparison => {
+        const item = document.createElement('li');
+        item.className = 'garden-route';
+        const heading = document.createElement('strong');
+        heading.textContent = `Observation #${comparison.observationSequence} - ${Math.round(Number(comparison.relevanceScore || 0) * 100)}% structural relevance`;
+        const detail = document.createElement('span');
+        const sharedWords = Array.isArray(comparison.sharedTokens) && comparison.sharedTokens.length
+          ? `Shared words: ${comparison.sharedTokens.join(', ')}` : 'No exact shared words';
+        const sharedPhrases = Array.isArray(comparison.sharedPhrases) && comparison.sharedPhrases.length
+          ? `Shared phrases: ${comparison.sharedPhrases.join(', ')}` : 'No exact shared phrases';
+        detail.textContent = `${sharedWords}. ${sharedPhrases}. ${comparison.differenceCount || 0} ordered change${comparison.differenceCount === 1 ? '' : 's'}.`;
+        item.append(heading, detail);
+        list.append(item);
+      });
+      panel.hidden = false;
+    }
+
+    async function loadPersonalTranscript(reset = true) {
+      refreshPersonalTranscript.disabled = true;
+      loadEarlierTranscript.disabled = true;
+      setText('personalTranscriptStatus', reset ? 'Loading your ordered conversation...' : 'Loading earlier conversation events...');
+      try {
+        const before = reset || !personalTranscriptNextBefore ? '' : `&before=${encodeURIComponent(personalTranscriptNextBefore)}`;
+        const response = await fetch(`/api/v1/me/transcript?limit=100${before}`);
+        const body = await response.json();
+        if (response.status === 401) return showSignedOutProfile('Your session ended. Sign in again to reopen your plot.');
+        if (!response.ok) throw new Error(body.error || 'Private transcript unavailable.');
+        const page = Array.isArray(body.transcript?.events) ? body.transcript.events : [];
+        personalTranscriptEvents = reset ? page : [...page, ...personalTranscriptEvents];
+        personalTranscriptNextBefore = body.transcript?.nextBefore || null;
+        loadEarlierTranscript.hidden = body.transcript?.hasMore !== true;
+        renderPersonalTranscript(personalTranscriptEvents);
+        setText('personalTranscriptStatus', personalTranscriptEvents.length
+          ? `${personalTranscriptEvents.length} ordered event${personalTranscriptEvents.length === 1 ? '' : 's'} visible${body.transcript?.hasMore ? ' · earlier events available' : ''}.`
+          : 'No private conversation events yet.');
+      } catch (error) {
+        setText('personalTranscriptStatus', error.message);
+      } finally {
+        refreshPersonalTranscript.disabled = false;
+        loadEarlierTranscript.disabled = false;
+      }
+    }
+
+    function renderPersonalTranscript(events) {
+      const list = document.querySelector('#personalTranscriptList');
+      list.replaceChildren();
+      events.forEach(event => {
+        const item = document.createElement('li');
+        item.className = 'garden-route';
+        const heading = document.createElement('strong');
+        heading.textContent = `${event.sequence}. ${event.role === 'assistant' ? 'ARI' : 'You'}`;
+        const content = document.createElement('span');
+        content.textContent = event.content || '';
+        const time = document.createElement('small');
+        time.textContent = event.createdAt ? new Date(event.createdAt).toLocaleString() : '';
+        item.append(heading, content, time);
+        if (event.role === 'assistant' && event.comparison?.version === 'ari-comparison.v1') {
+          const comparison = document.createElement('small');
+          comparison.className = 'transcript-comparison';
+          const sequences = Array.isArray(event.comparison.comparedObservationSequences)
+            ? event.comparison.comparedObservationSequences.map(sequence => `#${sequence}`).join(', ')
+            : '';
+          comparison.textContent = sequences
+            ? `Comparison audit: earlier observations ${sequences} - observation only - graph unchanged`
+            : 'Comparison audit: first identified observation - no earlier person observation available';
+          item.append(comparison);
+        }
+        list.append(item);
+      });
     }
 
     async function loadPersonalGarden() {

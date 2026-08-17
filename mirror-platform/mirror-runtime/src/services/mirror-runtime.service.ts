@@ -17,6 +17,8 @@ export class MirrorRuntimeService {
       localModelUrl: config?.localModelUrl,
       localModelName: config?.localModelName,
       alignmentModelUrl: config?.alignmentModelUrl,
+      cloudflareZoneTag: config?.cloudflareZoneTag,
+      cloudflareAnalyticsToken: config?.cloudflareAnalyticsToken,
     });
   }
 
