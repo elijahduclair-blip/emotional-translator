@@ -102,9 +102,9 @@ export const ARI_TEAM: AriTeamMember[] = [
 export const DEFAULT_ARI_TOOLS: AriToolDefinition[] = [
   {
     id: 'lea.compose-candidate-language', owner: 'LEA', name: 'Compose candidate language',
-    description: 'Ask the bounded local Qwen engine for candidate English wording. ARI remains the final speaker.', execution: 'server',
+    description: 'Ask the local Qwen engine for an open natural-language candidate before ARI applies closed Garden validation.', execution: 'server',
     permissions: {
-      reads: ['ari_foundation', 'conversation_context', 'structural_trace', 'relational_evidence', 'comparison_ledger'],
+      reads: ['current_statement', 'conversation_context', 'personal_ari_branch', 'repair_instruction'],
       writes: [], requiresAuthenticatedAccount: false, requiresOwnerConfirmation: false
     }
   },
@@ -134,9 +134,9 @@ export const DEFAULT_ARI_TOOLS: AriToolDefinition[] = [
   },
   {
     id: 'mira.read-private-context', owner: 'MIRA', name: 'Read private conversation context',
-    description: 'Read a bounded window of the authenticated person ordered transcript.', execution: 'server',
+    description: 'Read a bounded window of the authenticated person ordered transcript, attributed developmental archive, and relevant private journal files.', execution: 'server',
     permissions: {
-      reads: ['private_transcript'], writes: [],
+      reads: ['private_transcript', 'private_developmental_archive', 'private_journal_files'], writes: [],
       requiresAuthenticatedAccount: true, requiresOwnerConfirmation: false
     }
   },
@@ -158,8 +158,32 @@ export const DEFAULT_ARI_TOOLS: AriToolDefinition[] = [
     }
   },
   {
+    id: 'vera.validate-candidate-language', owner: 'VERA', name: 'Validate candidate language',
+    description: 'Apply ARI closed output rules after open language composition and return unsupported candidates for repair.', execution: 'server',
+    permissions: {
+      reads: ['candidate_language', 'current_statement', 'conversation_context', 'governance_contract', 'relational_evidence'], writes: [],
+      requiresAuthenticatedAccount: false, requiresOwnerConfirmation: false
+    }
+  },
+  {
     id: 'fen.trace-language', owner: 'FEN', name: 'Trace language structure',
     description: 'Create the reversible English, UEB, numeric, and ordered structural trace.', execution: 'server',
+    permissions: {
+      reads: ['current_statement'], writes: [],
+      requiresAuthenticatedAccount: false, requiresOwnerConfirmation: false
+    }
+  },
+  {
+    id: 'fen.build-bridge', owner: 'FEN', name: 'Build BRIGDE structure',
+    description: 'Build reusable groups from independent six-position dots and connect ordered occurrences without assigning semantic meaning.', execution: 'server',
+    permissions: {
+      reads: ['current_statement'], writes: [],
+      requiresAuthenticatedAccount: false, requiresOwnerConfirmation: false
+    }
+  },
+  {
+    id: 'fen.expand-acronyms', owner: 'FEN', name: 'Expand open acronym graph',
+    description: 'Treat every word as an open acronym, inspect a finite degree of vision, and preserve the unresolved frontier for continued expansion.', execution: 'server',
     permissions: {
       reads: ['current_statement'], writes: [],
       requiresAuthenticatedAccount: false, requiresOwnerConfirmation: false

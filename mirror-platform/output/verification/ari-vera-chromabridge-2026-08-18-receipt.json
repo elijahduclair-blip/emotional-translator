@@ -1,0 +1,4362 @@
+{
+  "receiptVersion": "vera.chromabridge-export.v1",
+  "verifier": {
+    "agent": "ARI",
+    "teamMember": "VERA",
+    "expandedName": "Verification and Relational Authority"
+  },
+  "generatedAt": "2026-08-30T19:38:36.602288+00:00",
+  "source": {
+    "document": "1-ChromaBridge-Export-2026-08-18-00-02.pdf",
+    "sha256": "7307b0edff19331ede55155fdd579548a782ef0eed4aee4a5d660877cdd92984",
+    "pageCount": 60,
+    "declaredRecordCount": 9948,
+    "extractedRecordCount": 9948
+  },
+  "decision": {
+    "status": "review_required",
+    "structuralVerification": "verified",
+    "relationshipVerification": "review_required",
+    "semanticVerification": "needs_independent_evidence",
+    "graphMutationAllowed": false,
+    "reason": "The export is structurally readable and internally accountable, but its relationship and color-meaning claims are not independently proven by the PDF that contains them."
+  },
+  "checks": {
+    "recordCountMatches": true,
+    "tiers": {
+      "base": 8,
+      "bridge": 6636,
+      "shade": 457,
+      "words": 2847
+    },
+    "malformedCoreRecords": 0,
+    "semanticCodeFormulaMismatches": 0,
+    "coordinatesOutsideCanonicalRange": 35,
+    "exactDuplicateRows": 2,
+    "relationshipExtractionConfidence": {
+      "high": 9775,
+      "medium": 173
+    },
+    "normalizedUniqueNames": 7624,
+    "relationships": {
+      "parents": {
+        "total": 65309,
+        "resolvedInsideExport": 65290,
+        "unresolvedInsideExport": 19,
+        "unresolvedTargets": [
+          {
+            "target": "6a5da7d2401547dbdcec79e8",
+            "usedBy": [
+              {
+                "name": "terminate",
+                "page": 36,
+                "row": 88
+              }
+            ]
+          },
+          {
+            "target": "convert",
+            "usedBy": [
+              {
+                "name": "proselytization",
+                "page": 28,
+                "row": 142
+              }
+            ]
+          },
+          {
+            "target": "deadly",
+            "usedBy": [
+              {
+                "name": "fatal",
+                "page": 15,
+                "row": 36
+              }
+            ]
+          },
+          {
+            "target": "emit",
+            "usedBy": [
+              {
+                "name": "radiate",
+                "page": 29,
+                "row": 50
+              }
+            ]
+          },
+          {
+            "target": "fearful",
+            "usedBy": [
+              {
+                "name": "timid",
+                "page": 36,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "flawed",
+            "usedBy": [
+              {
+                "name": "faulty",
+                "page": 15,
+                "row": 43
+              }
+            ]
+          },
+          {
+            "target": "hesitant",
+            "usedBy": [
+              {
+                "name": "timid",
+                "page": 36,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "imperfect",
+            "usedBy": [
+              {
+                "name": "faulty",
+                "page": 15,
+                "row": 43
+              }
+            ]
+          },
+          {
+            "target": "lethal",
+            "usedBy": [
+              {
+                "name": "fatal",
+                "page": 15,
+                "row": 36
+              }
+            ]
+          },
+          {
+            "target": "shy",
+            "usedBy": [
+              {
+                "name": "timid",
+                "page": 36,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "The Dark Descent",
+            "usedBy": [
+              {
+                "name": "PersonaBase.DarkDescent-Danger",
+                "page": 27,
+                "row": 29
+              },
+              {
+                "name": "PersonaBase.DarkDescent-Fear",
+                "page": 27,
+                "row": 30
+              },
+              {
+                "name": "PersonaBase.DarkDescent-Shadow",
+                "page": 27,
+                "row": 31
+              }
+            ]
+          },
+          {
+            "target": "The Silent Mirror",
+            "usedBy": [
+              {
+                "name": "PersonaBase.SilentMirror-Fear",
+                "page": 27,
+                "row": 32
+              },
+              {
+                "name": "PersonaBase.SilentMirror-Shadow",
+                "page": 27,
+                "row": 33
+              },
+              {
+                "name": "PersonaBase.SilentMirror-Trust",
+                "page": 27,
+                "row": 34
+              }
+            ]
+          },
+          {
+            "target": "The Undercurrent",
+            "usedBy": [
+              {
+                "name": "PersonaBase.Undercurrent-Growth",
+                "page": 27,
+                "row": 35
+              },
+              {
+                "name": "PersonaBase.Undercurrent-Hope",
+                "page": 27,
+                "row": 36
+              },
+              {
+                "name": "PersonaBase.Undercurrent-Light",
+                "page": 27,
+                "row": 37
+              }
+            ]
+          }
+        ]
+      },
+      "synonyms": {
+        "total": 6860,
+        "resolvedInsideExport": 6703,
+        "unresolvedInsideExport": 157,
+        "unresolvedTargets": [
+          {
+            "target": "absorbedly",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "accredit",
+            "usedBy": [
+              {
+                "name": "authorize",
+                "page": 3,
+                "row": 148
+              }
+            ]
+          },
+          {
+            "target": "additional one",
+            "usedBy": [
+              {
+                "name": "another",
+                "page": 2,
+                "row": 134
+              }
+            ]
+          },
+          {
+            "target": "admit",
+            "usedBy": [
+              {
+                "name": "confide",
+                "page": 7,
+                "row": 142
+              }
+            ]
+          },
+          {
+            "target": "affiliate",
+            "usedBy": [
+              {
+                "name": "insider",
+                "page": 20,
+                "row": 82
+              }
+            ]
+          },
+          {
+            "target": "Amaranth",
+            "usedBy": [
+              {
+                "name": "Insight",
+                "page": 20,
+                "row": 84
+              }
+            ]
+          },
+          {
+            "target": "analyze",
+            "usedBy": [
+              {
+                "name": "evaluate",
+                "page": 14,
+                "row": 10
+              }
+            ]
+          },
+          {
+            "target": "announcer",
+            "usedBy": [
+              {
+                "name": "herald",
+                "page": 18,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "appraise",
+            "usedBy": [
+              {
+                "name": "evaluate",
+                "page": 14,
+                "row": 10
+              }
+            ]
+          },
+          {
+            "target": "apprehensive",
+            "usedBy": [
+              {
+                "name": "timid",
+                "page": 36,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "aptitude",
+            "usedBy": [
+              {
+                "name": "qualification",
+                "page": 29,
+                "row": 31
+              }
+            ]
+          },
+          {
+            "target": "armored",
+            "usedBy": [
+              {
+                "name": "defended",
+                "page": 10,
+                "row": 21
+              }
+            ]
+          },
+          {
+            "target": "ask",
+            "usedBy": [
+              {
+                "name": "invite",
+                "page": 21,
+                "row": 34
+              }
+            ]
+          },
+          {
+            "target": "assignment",
+            "usedBy": [
+              {
+                "name": "handover",
+                "page": 17,
+                "row": 119
+              }
+            ]
+          },
+          {
+            "target": "attentively",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "augur",
+            "usedBy": [
+              {
+                "name": "herald",
+                "page": 18,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "badge",
+            "usedBy": [
+              {
+                "name": "tag",
+                "page": 36,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "barricaded",
+            "usedBy": [
+              {
+                "name": "defended",
+                "page": 10,
+                "row": 21
+              }
+            ]
+          },
+          {
+            "target": "bashful",
+            "usedBy": [
+              {
+                "name": "timid",
+                "page": 36,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "beseech",
+            "usedBy": [
+              {
+                "name": "invite",
+                "page": 21,
+                "row": 34
+              }
+            ]
+          },
+          {
+            "target": "bid",
+            "usedBy": [
+              {
+                "name": "invite",
+                "page": 21,
+                "row": 34
+              }
+            ]
+          },
+          {
+            "target": "blemished",
+            "usedBy": [
+              {
+                "name": "faulty",
+                "page": 15,
+                "row": 43
+              }
+            ]
+          },
+          {
+            "target": "bolthole",
+            "usedBy": [
+              {
+                "name": "hidingplace",
+                "page": 18,
+                "row": 58
+              }
+            ]
+          },
+          {
+            "target": "Bubblegum",
+            "usedBy": [
+              {
+                "name": "Innocence",
+                "page": 20,
+                "row": 66
+              }
+            ]
+          },
+          {
+            "target": "call to mind",
+            "usedBy": [
+              {
+                "name": "recall",
+                "page": 29,
+                "row": 99
+              }
+            ]
+          },
+          {
+            "target": "carving",
+            "usedBy": [
+              {
+                "name": "engraving",
+                "page": 13,
+                "row": 80
+              }
+            ]
+          },
+          {
+            "target": "catastrophic",
+            "usedBy": [
+              {
+                "name": "fatal",
+                "page": 15,
+                "row": 36
+              }
+            ]
+          },
+          {
+            "target": "Cerise",
+            "usedBy": [
+              {
+                "name": "Sympathy",
+                "page": 36,
+                "row": 15
+              }
+            ]
+          },
+          {
+            "target": "Cherry",
+            "usedBy": [
+              {
+                "name": "Resilience",
+                "page": 30,
+                "row": 103
+              }
+            ]
+          },
+          {
+            "target": "closely",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "coda",
+            "usedBy": [
+              {
+                "name": "epilogue",
+                "page": 13,
+                "row": 113
+              }
+            ]
+          },
+          {
+            "target": "commissariat",
+            "usedBy": [
+              {
+                "name": "provisions",
+                "page": 28,
+                "row": 157
+              }
+            ]
+          },
+          {
+            "target": "commission",
+            "usedBy": [
+              {
+                "name": "authorize",
+                "page": 3,
+                "row": 148
+              }
+            ]
+          },
+          {
+            "target": "confess",
+            "usedBy": [
+              {
+                "name": "confide",
+                "page": 7,
+                "row": 142
+              }
+            ]
+          },
+          {
+            "target": "conjure",
+            "usedBy": [
+              {
+                "name": "invite",
+                "page": 21,
+                "row": 34
+              }
+            ]
+          },
+          {
+            "target": "conveyance",
+            "usedBy": [
+              {
+                "name": "handover",
+                "page": 17,
+                "row": 119
+              }
+            ]
+          },
+          {
+            "target": "Coral",
+            "usedBy": [
+              {
+                "name": "Compassion",
+                "page": 7,
+                "row": 86
+              }
+            ]
+          },
+          {
+            "target": "craven",
+            "usedBy": [
+              {
+                "name": "timid",
+                "page": 36,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "credential",
+            "usedBy": [
+              {
+                "name": "qualification",
+                "page": 29,
+                "row": 31
+              }
+            ]
+          },
+          {
+            "target": "cut",
+            "usedBy": [
+              {
+                "name": "engraving",
+                "page": 13,
+                "row": 80
+              }
+            ]
+          },
+          {
+            "target": "deadly",
+            "usedBy": [
+              {
+                "name": "fatal",
+                "page": 15,
+                "row": 36
+              }
+            ]
+          },
+          {
+            "target": "deficient",
+            "usedBy": [
+              {
+                "name": "faulty",
+                "page": 15,
+                "row": 43
+              }
+            ]
+          },
+          {
+            "target": "den",
+            "usedBy": [
+              {
+                "name": "hidingplace",
+                "page": 18,
+                "row": 58
+              }
+            ]
+          },
+          {
+            "target": "describe",
+            "usedBy": [
+              {
+                "name": "recount",
+                "page": 29,
+                "row": 120
+              }
+            ]
+          },
+          {
+            "target": "destructive",
+            "usedBy": [
+              {
+                "name": "fatal",
+                "page": 15,
+                "row": 36
+              }
+            ]
+          },
+          {
+            "target": "determine",
+            "usedBy": [
+              {
+                "name": "evaluate",
+                "page": 14,
+                "row": 10
+              }
+            ]
+          },
+          {
+            "target": "diligently",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "disappeared",
+            "usedBy": [
+              {
+                "name": "vanished",
+                "page": 38,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "disastrous",
+            "usedBy": [
+              {
+                "name": "fatal",
+                "page": 15,
+                "row": 36
+              }
+            ]
+          },
+          {
+            "target": "doomed",
+            "usedBy": [
+              {
+                "name": "fatal",
+                "page": 15,
+                "row": 36
+              }
+            ]
+          },
+          {
+            "target": "eagerly",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "earnestly",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "eligibility",
+            "usedBy": [
+              {
+                "name": "qualification",
+                "page": 29,
+                "row": 31
+              }
+            ]
+          },
+          {
+            "target": "emissary",
+            "usedBy": [
+              {
+                "name": "herald",
+                "page": 18,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "engrave",
+            "usedBy": [
+              {
+                "name": "engraving",
+                "page": 13,
+                "row": 80
+              }
+            ]
+          },
+          {
+            "target": "entitle",
+            "usedBy": [
+              {
+                "name": "authorize",
+                "page": 3,
+                "row": 148
+              }
+            ]
+          },
+          {
+            "target": "entreat",
+            "usedBy": [
+              {
+                "name": "invite",
+                "page": 21,
+                "row": 34
+              }
+            ]
+          },
+          {
+            "target": "envoy",
+            "usedBy": [
+              {
+                "name": "herald",
+                "page": 18,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "etching",
+            "usedBy": [
+              {
+                "name": "engraving",
+                "page": 13,
+                "row": 80
+              }
+            ]
+          },
+          {
+            "target": "extinct",
+            "usedBy": [
+              {
+                "name": "vanished",
+                "page": 38,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "faint-hearted",
+            "usedBy": [
+              {
+                "name": "timid",
+                "page": 36,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "fateful",
+            "usedBy": [
+              {
+                "name": "fatal",
+                "page": 15,
+                "row": 36
+              }
+            ]
+          },
+          {
+            "target": "fearful",
+            "usedBy": [
+              {
+                "name": "timid",
+                "page": 36,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "feed",
+            "usedBy": [
+              {
+                "name": "nourish",
+                "page": 25,
+                "row": 34
+              }
+            ]
+          },
+          {
+            "target": "finale",
+            "usedBy": [
+              {
+                "name": "epilogue",
+                "page": 13,
+                "row": 113
+              }
+            ]
+          },
+          {
+            "target": "fixedly",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "flag",
+            "usedBy": [
+              {
+                "name": "tag",
+                "page": 36,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "flawed",
+            "usedBy": [
+              {
+                "name": "faulty",
+                "page": 15,
+                "row": 43
+              }
+            ]
+          },
+          {
+            "target": "forerunner",
+            "usedBy": [
+              {
+                "name": "herald",
+                "page": 18,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "Fuchsia",
+            "usedBy": [
+              {
+                "name": "Jubilation",
+                "page": 21,
+                "row": 78
+              }
+            ]
+          },
+          {
+            "target": "further",
+            "usedBy": [
+              {
+                "name": "another",
+                "page": 2,
+                "row": 134
+              }
+            ]
+          },
+          {
+            "target": "Garnet",
+            "usedBy": [
+              {
+                "name": "Awe",
+                "page": 4,
+                "row": 7
+              }
+            ]
+          },
+          {
+            "target": "garrisoned",
+            "usedBy": [
+              {
+                "name": "defended",
+                "page": 10,
+                "row": 21
+              }
+            ]
+          },
+          {
+            "target": "generate",
+            "usedBy": [
+              {
+                "name": "propagation",
+                "page": 28,
+                "row": 133
+              }
+            ]
+          },
+          {
+            "target": "giving",
+            "usedBy": [
+              {
+                "name": "philanthropy",
+                "page": 27,
+                "row": 63
+              }
+            ]
+          },
+          {
+            "target": "gone",
+            "usedBy": [
+              {
+                "name": "vanished",
+                "page": 38,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "handoff",
+            "usedBy": [
+              {
+                "name": "handover",
+                "page": 17,
+                "row": 119
+              }
+            ]
+          },
+          {
+            "target": "harbinger",
+            "usedBy": [
+              {
+                "name": "herald",
+                "page": 18,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "hark back",
+            "usedBy": [
+              {
+                "name": "recall",
+                "page": 29,
+                "row": 99
+              }
+            ]
+          },
+          {
+            "target": "humanitarianism",
+            "usedBy": [
+              {
+                "name": "philanthropy",
+                "page": 27,
+                "row": 63
+              }
+            ]
+          },
+          {
+            "target": "identifier",
+            "usedBy": [
+              {
+                "name": "tag",
+                "page": 36,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "impart",
+            "usedBy": [
+              {
+                "name": "confide",
+                "page": 7,
+                "row": 142
+              }
+            ]
+          },
+          {
+            "target": "imperfect",
+            "usedBy": [
+              {
+                "name": "faulty",
+                "page": 15,
+                "row": 43
+              }
+            ]
+          },
+          {
+            "target": "impress",
+            "usedBy": [
+              {
+                "name": "engraving",
+                "page": 13,
+                "row": 80
+              }
+            ]
+          },
+          {
+            "target": "imprint",
+            "usedBy": [
+              {
+                "name": "engraving",
+                "page": 13,
+                "row": 80
+              }
+            ]
+          },
+          {
+            "target": "incision",
+            "usedBy": [
+              {
+                "name": "engraving",
+                "page": 13,
+                "row": 80
+              }
+            ]
+          },
+          {
+            "target": "initiate",
+            "usedBy": [
+              {
+                "name": "insider",
+                "page": 20,
+                "row": 82
+              }
+            ]
+          },
+          {
+            "target": "inscription",
+            "usedBy": [
+              {
+                "name": "engraving",
+                "page": 13,
+                "row": 80
+              }
+            ]
+          },
+          {
+            "target": "insulated",
+            "usedBy": [
+              {
+                "name": "defended",
+                "page": 10,
+                "row": 21
+              }
+            ]
+          },
+          {
+            "target": "invite in",
+            "usedBy": [
+              {
+                "name": "invite",
+                "page": 21,
+                "row": 34
+              }
+            ]
+          },
+          {
+            "target": "keenly",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "krab",
+            "usedBy": [
+              {
+                "name": "crustacean",
+                "page": 41,
+                "row": 50
+              },
+              {
+                "name": "crustacean",
+                "page": 46,
+                "row": 111
+              }
+            ]
+          },
+          {
+            "target": "lair",
+            "usedBy": [
+              {
+                "name": "hidingplace",
+                "page": 18,
+                "row": 58
+              }
+            ]
+          },
+          {
+            "target": "lethal",
+            "usedBy": [
+              {
+                "name": "fatal",
+                "page": 15,
+                "row": 36
+              }
+            ]
+          },
+          {
+            "target": "license",
+            "usedBy": [
+              {
+                "name": "authorize",
+                "page": 3,
+                "row": 148
+              }
+            ]
+          },
+          {
+            "target": "lodging",
+            "usedBy": [
+              {
+                "name": "domicile",
+                "page": 12,
+                "row": 36
+              }
+            ]
+          },
+          {
+            "target": "look back",
+            "usedBy": [
+              {
+                "name": "recall",
+                "page": 29,
+                "row": 99
+              }
+            ]
+          },
+          {
+            "target": "malfunctioning",
+            "usedBy": [
+              {
+                "name": "faulty",
+                "page": 15,
+                "row": 43
+              }
+            ]
+          },
+          {
+            "target": "Maroon",
+            "usedBy": [
+              {
+                "name": "Zeal",
+                "page": 40,
+                "row": 122
+              }
+            ]
+          },
+          {
+            "target": "msjackso",
+            "usedBy": [
+              {
+                "name": "identity",
+                "page": 41,
+                "row": 138
+              },
+              {
+                "name": "missus",
+                "page": 52,
+                "row": 151
+              }
+            ]
+          },
+          {
+            "target": "multiply",
+            "usedBy": [
+              {
+                "name": "propagation",
+                "page": 28,
+                "row": 133
+              }
+            ]
+          },
+          {
+            "target": "necessities",
+            "usedBy": [
+              {
+                "name": "provisions",
+                "page": 28,
+                "row": 157
+              }
+            ]
+          },
+          {
+            "target": "nervous",
+            "usedBy": [
+              {
+                "name": "timid",
+                "page": 36,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "notice",
+            "usedBy": [
+              {
+                "name": "heed",
+                "page": 18,
+                "row": 17
+              }
+            ]
+          },
+          {
+            "target": "outfit",
+            "usedBy": [
+              {
+                "name": "provisions",
+                "page": 28,
+                "row": 157
+              }
+            ]
+          },
+          {
+            "target": "Peach",
+            "usedBy": [
+              {
+                "name": "Unity",
+                "page": 38,
+                "row": 55
+              }
+            ]
+          },
+          {
+            "target": "pin",
+            "usedBy": [
+              {
+                "name": "tag",
+                "page": 36,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "plate",
+            "usedBy": [
+              {
+                "name": "engraving",
+                "page": 13,
+                "row": 80
+              }
+            ]
+          },
+          {
+            "target": "portent",
+            "usedBy": [
+              {
+                "name": "herald",
+                "page": 18,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "preserved",
+            "usedBy": [
+              {
+                "name": "defended",
+                "page": 10,
+                "row": 21
+              }
+            ]
+          },
+          {
+            "target": "print",
+            "usedBy": [
+              {
+                "name": "engraving",
+                "page": 13,
+                "row": 80
+              }
+            ]
+          },
+          {
+            "target": "proclaimer",
+            "usedBy": [
+              {
+                "name": "herald",
+                "page": 18,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "proliferate",
+            "usedBy": [
+              {
+                "name": "propagation",
+                "page": 28,
+                "row": 133
+              }
+            ]
+          },
+          {
+            "target": "protected",
+            "usedBy": [
+              {
+                "name": "defended",
+                "page": 10,
+                "row": 21
+              }
+            ]
+          },
+          {
+            "target": "provender",
+            "usedBy": [
+              {
+                "name": "provisions",
+                "page": 28,
+                "row": 157
+              }
+            ]
+          },
+          {
+            "target": "raptly",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "Raspberry",
+            "usedBy": [
+              {
+                "name": "Satisfaction",
+                "page": 31,
+                "row": 101
+              }
+            ]
+          },
+          {
+            "target": "Raspberry Rose",
+            "usedBy": [
+              {
+                "name": "Gentleness",
+                "page": 16,
+                "row": 151
+              }
+            ]
+          },
+          {
+            "target": "rations",
+            "usedBy": [
+              {
+                "name": "provisions",
+                "page": 28,
+                "row": 157
+              }
+            ]
+          },
+          {
+            "target": "reach",
+            "usedBy": [
+              {
+                "name": "attain",
+                "page": 3,
+                "row": 122
+              }
+            ]
+          },
+          {
+            "target": "recapture",
+            "usedBy": [
+              {
+                "name": "recall",
+                "page": 29,
+                "row": 99
+              }
+            ]
+          },
+          {
+            "target": "recite",
+            "usedBy": [
+              {
+                "name": "recount",
+                "page": 29,
+                "row": 120
+              }
+            ]
+          },
+          {
+            "target": "rehearse",
+            "usedBy": [
+              {
+                "name": "recount",
+                "page": 29,
+                "row": 120
+              }
+            ]
+          },
+          {
+            "target": "reminisce",
+            "usedBy": [
+              {
+                "name": "recall",
+                "page": 29,
+                "row": 99
+              }
+            ]
+          },
+          {
+            "target": "report",
+            "usedBy": [
+              {
+                "name": "recount",
+                "page": 29,
+                "row": 120
+              }
+            ]
+          },
+          {
+            "target": "reproduce",
+            "usedBy": [
+              {
+                "name": "propagation",
+                "page": 28,
+                "row": 133
+              }
+            ]
+          },
+          {
+            "target": "residency",
+            "usedBy": [
+              {
+                "name": "domicile",
+                "page": 12,
+                "row": 36
+              }
+            ]
+          },
+          {
+            "target": "reticent",
+            "usedBy": [
+              {
+                "name": "timid",
+                "page": 36,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "Rose Gold",
+            "usedBy": [
+              {
+                "name": "Tenderness",
+                "page": 36,
+                "row": 77
+              }
+            ]
+          },
+          {
+            "target": "Rose Quartz",
+            "usedBy": [
+              {
+                "name": "Reconciliation",
+                "page": 29,
+                "row": 117
+              }
+            ]
+          },
+          {
+            "target": "ruinous",
+            "usedBy": [
+              {
+                "name": "fatal",
+                "page": 15,
+                "row": 36
+              }
+            ]
+          },
+          {
+            "target": "safeguarded",
+            "usedBy": [
+              {
+                "name": "defended",
+                "page": 10,
+                "row": 21
+              }
+            ]
+          },
+          {
+            "target": "Salmon",
+            "usedBy": [
+              {
+                "name": "Festivity",
+                "page": 15,
+                "row": 67
+              }
+            ]
+          },
+          {
+            "target": "sheltered",
+            "usedBy": [
+              {
+                "name": "defended",
+                "page": 10,
+                "row": 21
+              }
+            ]
+          },
+          {
+            "target": "shielded",
+            "usedBy": [
+              {
+                "name": "defended",
+                "page": 10,
+                "row": 21
+              }
+            ]
+          },
+          {
+            "target": "shy",
+            "usedBy": [
+              {
+                "name": "timid",
+                "page": 36,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "some other",
+            "usedBy": [
+              {
+                "name": "another",
+                "page": 2,
+                "row": 134
+              }
+            ]
+          },
+          {
+            "target": "steadfastly",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "sticker",
+            "usedBy": [
+              {
+                "name": "tag",
+                "page": 36,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "stocks",
+            "usedBy": [
+              {
+                "name": "provisions",
+                "page": 28,
+                "row": 157
+              }
+            ]
+          },
+          {
+            "target": "Strawberry",
+            "usedBy": [
+              {
+                "name": "Benevolence",
+                "page": 4,
+                "row": 75
+              }
+            ]
+          },
+          {
+            "target": "substandard",
+            "usedBy": [
+              {
+                "name": "faulty",
+                "page": 15,
+                "row": 43
+              }
+            ]
+          },
+          {
+            "target": "summon",
+            "usedBy": [
+              {
+                "name": "invite",
+                "page": 21,
+                "row": 34
+              }
+            ]
+          },
+          {
+            "target": "supplies",
+            "usedBy": [
+              {
+                "name": "provisions",
+                "page": 28,
+                "row": 157
+              }
+            ]
+          },
+          {
+            "target": "tab",
+            "usedBy": [
+              {
+                "name": "tag",
+                "page": 36,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "tag-label",
+            "usedBy": [
+              {
+                "name": "tag",
+                "page": 36,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "think back",
+            "usedBy": [
+              {
+                "name": "recall",
+                "page": 29,
+                "row": 99
+              }
+            ]
+          },
+          {
+            "target": "ticket",
+            "usedBy": [
+              {
+                "name": "tag",
+                "page": 36,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "transmit",
+            "usedBy": [
+              {
+                "name": "propagation",
+                "page": 28,
+                "row": 133
+              }
+            ]
+          },
+          {
+            "target": "turnover",
+            "usedBy": [
+              {
+                "name": "handover",
+                "page": 17,
+                "row": 119
+              }
+            ]
+          },
+          {
+            "target": "victuals",
+            "usedBy": [
+              {
+                "name": "provisions",
+                "page": 28,
+                "row": 157
+              }
+            ]
+          },
+          {
+            "target": "warded",
+            "usedBy": [
+              {
+                "name": "defended",
+                "page": 10,
+                "row": 21
+              }
+            ]
+          },
+          {
+            "target": "warrant",
+            "usedBy": [
+              {
+                "name": "authorize",
+                "page": 3,
+                "row": 148
+              }
+            ]
+          },
+          {
+            "target": "Watermelon",
+            "usedBy": [
+              {
+                "name": "Thankfulness",
+                "page": 36,
+                "row": 108
+              }
+            ]
+          },
+          {
+            "target": "weigh",
+            "usedBy": [
+              {
+                "name": "evaluate",
+                "page": 14,
+                "row": 10
+              }
+            ]
+          }
+        ]
+      },
+      "opposites": {
+        "total": 5084,
+        "resolvedInsideExport": 5009,
+        "unresolvedInsideExport": 75,
+        "unresolvedTargets": [
+          {
+            "target": "absentmindedly",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "appeared",
+            "usedBy": [
+              {
+                "name": "vanished",
+                "page": 38,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "assertive",
+            "usedBy": [
+              {
+                "name": "timid",
+                "page": 36,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "bases-connected",
+            "usedBy": [
+              {
+                "name": "adverb",
+                "page": 43,
+                "row": 140
+              },
+              {
+                "name": "condition",
+                "page": 46,
+                "row": 35
+              },
+              {
+                "name": "cover",
+                "page": 46,
+                "row": 88
+              },
+              {
+                "name": "create",
+                "page": 46,
+                "row": 95
+              },
+              {
+                "name": "desist",
+                "page": 47,
+                "row": 12
+              },
+              {
+                "name": "energy",
+                "page": 48,
+                "row": 27
+              },
+              {
+                "name": "event",
+                "page": 48,
+                "row": 54
+              },
+              {
+                "name": "failure",
+                "page": 48,
+                "row": 105
+              },
+              {
+                "name": "location",
+                "page": 52,
+                "row": 33
+              },
+              {
+                "name": "luminous",
+                "page": 52,
+                "row": 55
+              },
+              {
+                "name": "number",
+                "page": 53,
+                "row": 144
+              },
+              {
+                "name": "raising",
+                "page": 55,
+                "row": 120
+              },
+              {
+                "name": "sure",
+                "page": 58,
+                "row": 14
+              },
+              {
+                "name": "woody plant",
+                "page": 60,
+                "row": 51
+              }
+            ]
+          },
+          {
+            "target": "bold",
+            "usedBy": [
+              {
+                "name": "timid",
+                "page": 36,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "carelessly",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "casually",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "colorful",
+            "usedBy": [
+              {
+                "name": "Gray",
+                "page": 49,
+                "row": 143
+              }
+            ]
+          },
+          {
+            "target": "confine",
+            "usedBy": [
+              {
+                "name": "propagation",
+                "page": 28,
+                "row": 133
+              }
+            ]
+          },
+          {
+            "target": "courageous",
+            "usedBy": [
+              {
+                "name": "timid",
+                "page": 36,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "deplete",
+            "usedBy": [
+              {
+                "name": "nourish",
+                "page": 25,
+                "row": 34
+              }
+            ]
+          },
+          {
+            "target": "detach",
+            "usedBy": [
+              {
+                "name": "tag",
+                "page": 36,
+                "row": 32
+              },
+              {
+                "name": "tag",
+                "page": 36,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "distort",
+            "usedBy": [
+              {
+                "name": "recount",
+                "page": 29,
+                "row": 120
+              }
+            ]
+          },
+          {
+            "target": "distractedly",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "emerged",
+            "usedBy": [
+              {
+                "name": "vanished",
+                "page": 38,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "erase",
+            "usedBy": [
+              {
+                "name": "tag",
+                "page": 36,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "evict",
+            "usedBy": [
+              {
+                "name": "invite",
+                "page": 21,
+                "row": 34
+              }
+            ]
+          },
+          {
+            "target": "expel",
+            "usedBy": [
+              {
+                "name": "invite",
+                "page": 21,
+                "row": 34
+              }
+            ]
+          },
+          {
+            "target": "fabricate",
+            "usedBy": [
+              {
+                "name": "recount",
+                "page": 29,
+                "row": 120
+              }
+            ]
+          },
+          {
+            "target": "foreigner",
+            "usedBy": [
+              {
+                "name": "insider",
+                "page": 20,
+                "row": 82
+              }
+            ]
+          },
+          {
+            "target": "functional",
+            "usedBy": [
+              {
+                "name": "faulty",
+                "page": 15,
+                "row": 43
+              }
+            ]
+          },
+          {
+            "target": "halfheartedly",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "homeless",
+            "usedBy": [
+              {
+                "name": "domicile",
+                "page": 12,
+                "row": 36
+              }
+            ]
+          },
+          {
+            "target": "idly",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "inattentively",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "incapability",
+            "usedBy": [
+              {
+                "name": "qualification",
+                "page": 29,
+                "row": 31
+              }
+            ]
+          },
+          {
+            "target": "ineligibility",
+            "usedBy": [
+              {
+                "name": "qualification",
+                "page": 29,
+                "row": 31
+              }
+            ]
+          },
+          {
+            "target": "keeping",
+            "usedBy": [
+              {
+                "name": "handover",
+                "page": 17,
+                "row": 119
+              }
+            ]
+          },
+          {
+            "target": "known",
+            "usedBy": [
+              {
+                "name": "another",
+                "page": 2,
+                "row": 134
+              }
+            ]
+          },
+          {
+            "target": "layperson",
+            "usedBy": [
+              {
+                "name": "insider",
+                "page": 20,
+                "row": 82
+              }
+            ]
+          },
+          {
+            "target": "listlessly",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "manifested",
+            "usedBy": [
+              {
+                "name": "vanished",
+                "page": 38,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "maroon",
+            "usedBy": [
+              {
+                "name": "Teal",
+                "page": 58,
+                "row": 46
+              }
+            ]
+          },
+          {
+            "target": "materialized",
+            "usedBy": [
+              {
+                "name": "vanished",
+                "page": 38,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "miserliness",
+            "usedBy": [
+              {
+                "name": "philanthropy",
+                "page": 27,
+                "row": 63
+              }
+            ]
+          },
+          {
+            "target": "misrepresent",
+            "usedBy": [
+              {
+                "name": "recount",
+                "page": 29,
+                "row": 120
+              }
+            ]
+          },
+          {
+            "target": "msjackso",
+            "usedBy": [
+              {
+                "name": "unknown",
+                "page": 59,
+                "row": 60
+              }
+            ]
+          },
+          {
+            "target": "newcomer",
+            "usedBy": [
+              {
+                "name": "insider",
+                "page": 20,
+                "row": 82
+              }
+            ]
+          },
+          {
+            "target": "nomadic",
+            "usedBy": [
+              {
+                "name": "domicile",
+                "page": 12,
+                "row": 36
+              }
+            ]
+          },
+          {
+            "target": "novice",
+            "usedBy": [
+              {
+                "name": "insider",
+                "page": 20,
+                "row": 82
+              }
+            ]
+          },
+          {
+            "target": "omit",
+            "usedBy": [
+              {
+                "name": "recount",
+                "page": 29,
+                "row": 120
+              }
+            ]
+          },
+          {
+            "target": "ostracize",
+            "usedBy": [
+              {
+                "name": "invite",
+                "page": 21,
+                "row": 34
+              }
+            ]
+          },
+          {
+            "target": "perfunctorily",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "prologue",
+            "usedBy": [
+              {
+                "name": "epilogue",
+                "page": 13,
+                "row": 113
+              }
+            ]
+          },
+          {
+            "target": "reclamation",
+            "usedBy": [
+              {
+                "name": "handover",
+                "page": 17,
+                "row": 119
+              }
+            ]
+          },
+          {
+            "target": "rescind",
+            "usedBy": [
+              {
+                "name": "authorize",
+                "page": 3,
+                "row": 148
+              }
+            ]
+          },
+          {
+            "target": "revoke",
+            "usedBy": [
+              {
+                "name": "authorize",
+                "page": 3,
+                "row": 148
+              }
+            ]
+          },
+          {
+            "target": "smooth",
+            "usedBy": [
+              {
+                "name": "engraving",
+                "page": 13,
+                "row": 80
+              }
+            ]
+          },
+          {
+            "target": "starve",
+            "usedBy": [
+              {
+                "name": "nourish",
+                "page": 25,
+                "row": 34
+              }
+            ]
+          },
+          {
+            "target": "stinginess",
+            "usedBy": [
+              {
+                "name": "philanthropy",
+                "page": 27,
+                "row": 63
+              }
+            ]
+          },
+          {
+            "target": "superficially",
+            "usedBy": [
+              {
+                "name": "intently",
+                "page": 20,
+                "row": 141
+              }
+            ]
+          },
+          {
+            "target": "surfaced",
+            "usedBy": [
+              {
+                "name": "vanished",
+                "page": 38,
+                "row": 161
+              }
+            ]
+          },
+          {
+            "target": "survivable",
+            "usedBy": [
+              {
+                "name": "fatal",
+                "page": 15,
+                "row": 36
+              }
+            ]
+          },
+          {
+            "target": "unfitness",
+            "usedBy": [
+              {
+                "name": "qualification",
+                "page": 29,
+                "row": 31
+              }
+            ]
+          },
+          {
+            "target": "unguarded",
+            "usedBy": [
+              {
+                "name": "defended",
+                "page": 10,
+                "row": 21
+              }
+            ]
+          },
+          {
+            "target": "unlabel",
+            "usedBy": [
+              {
+                "name": "tag",
+                "page": 36,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "unmark",
+            "usedBy": [
+              {
+                "name": "tag",
+                "page": 36,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "unmarked",
+            "usedBy": [
+              {
+                "name": "engraving",
+                "page": 13,
+                "row": 80
+              }
+            ]
+          },
+          {
+            "target": "unshielded",
+            "usedBy": [
+              {
+                "name": "defended",
+                "page": 10,
+                "row": 21
+              }
+            ]
+          },
+          {
+            "target": "untag",
+            "usedBy": [
+              {
+                "name": "tag",
+                "page": 36,
+                "row": 32
+              }
+            ]
+          },
+          {
+            "target": "veto",
+            "usedBy": [
+              {
+                "name": "authorize",
+                "page": 3,
+                "row": 148
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "semanticLabels": {
+      "bases-connected": 9934,
+      "wordnet-bridge": 4392,
+      "wordnet-antonym": 1869,
+      "wordnet-synonym": 1729,
+      "phrase-word": 1030,
+      "wordnet-base-link": 220,
+      "depth:mid": 204,
+      "intensity:muted": 184,
+      "orphan-relinked": 169,
+      "intensity:balanced": 168,
+      "wordnet-intermediate": 152,
+      "depth:light": 136,
+      "wordnet-shade": 122,
+      "depth:dark": 120,
+      "intensity:vivid": 109,
+      "persona-base": 18,
+      "distance:0.36": 18,
+      "anchor-linked": 17,
+      "wordnet-concept": 17,
+      "distance:0.45": 17,
+      "distance:0.47": 16,
+      "distance:0.34": 15,
+      "distance:0.50": 15,
+      "color-word": 15,
+      "wordnet-bridge-path": 14,
+      "distance:0.66": 14,
+      "distance:0.52": 13,
+      "distance:0.35": 13,
+      "distance:0.56": 13,
+      "distance:0.48": 12,
+      "distance:0.64": 10,
+      "distance:0.54": 10,
+      "distance:0.18": 10,
+      "trait": 9,
+      "bridge": 9,
+      "distance:0.44": 9,
+      "distance:0.53": 9,
+      "distance:0.65": 9,
+      "distance:0.31": 9,
+      "canonical-anchor": 8,
+      "distance:0.46": 8,
+      "distance:0.59": 8,
+      "distance:0.29": 8,
+      "distance:0.57": 8,
+      "distance:0.43": 8,
+      "structure": 7,
+      "trust": 7,
+      "distance:0.68": 7,
+      "distance:0.30": 7,
+      "distance:0.51": 7,
+      "distance:0.74": 7,
+      "distance:0.41": 7,
+      "distance:0.38": 7,
+      "defense": 6,
+      "secondary": 6,
+      "communication": 6,
+      "distance:0.17": 6,
+      "distance:0.42": 6,
+      "distance:0.19": 6,
+      "distance:0.76": 6,
+      "distance:0.69": 6,
+      "distance:0.11": 6,
+      "distance:0.55": 6,
+      "distance:0.62": 6,
+      "distance:0.28": 6,
+      "distance:0.63": 6,
+      "warm": 6,
+      "community": 5,
+      "growth": 5,
+      "distance:0.60": 5,
+      "distance:0.49": 5,
+      "distance:0.33": 5,
+      "distance:0.12": 5,
+      "distance:0.32": 5,
+      "distance:0.23": 5,
+      "cool": 5,
+      "support": 4,
+      "perception": 4,
+      "care": 4,
+      "authority": 4,
+      "delegation": 4,
+      "aggression": 4,
+      "shelter": 4,
+      "caution": 4,
+      "vigilance": 4,
+      "belonging": 4,
+      "education": 4,
+      "awareness": 4,
+      "devotion": 4,
+      "instruction": 4,
+      "articulation": 4,
+      "decay": 4,
+      "anchor:Trust": 4,
+      "social": 4,
+      "distance:0.25": 4,
+      "distance:0.80": 4,
+      "distance:0.07": 4,
+      "distance:0.40": 4,
+      "distance:0.58": 4,
+      "distance:0.08": 4,
+      "distance:0.37": 4,
+      "distance:0.03": 4,
+      "distance:0.75": 4,
+      "primary": 4,
+      "emergence": 3,
+      "domain-root": 3,
+      "aspiration": 3,
+      "permission": 3,
+      "agency": 3,
+      "attentive": 3,
+      "anchor:Protect": 3,
+      "verification": 3,
+      "narrative": 3,
+      "secrecy": 3,
+      "civic": 3,
+      "duty": 3,
+      "learning": 3,
+      "alliance": 3,
+      "confidence": 3,
+      "disclosure": 3,
+      "revelation": 3,
+      "reflection": 3,
+      "persistence": 3,
+      "precision": 3,
+      "enclosure": 3,
+      "harm": 3,
+      "broken": 3,
+      "vulnerability": 3,
+      "guidance": 3,
+      "disperse": 3,
+      "knowledge": 3,
+      "settlement": 3,
+      "shadow": 3,
+      "assessment": 3,
+      "cognition": 3,
+      "anchor:Shadow": 3,
+      "expression": 3,
+      "decline": 3,
+      "death": 3,
+      "skill": 3,
+      "marker": 3,
+      "pattern": 3,
+      "obligation": 3,
+      "access": 3,
+      "welcome": 3,
+      "language": 3,
+      "the dark descent": 3,
+      "fear": 3,
+      "the silent mirror": 3,
+      "the undercurrent": 3,
+      "light": 3,
+      "altruism": 3,
+      "sharpness": 3,
+      "connection": 3,
+      "distance:0.61": 3,
+      "distance:0.04": 3,
+      "distance:0.70": 3,
+      "distance:0.10": 3,
+      "distance:0.05": 3,
+      "achromatic": 3,
+      "liberation": 2,
+      "conspiracy": 2,
+      "submission": 2,
+      "representation": 2,
+      "impact": 2,
+      "addition": 2,
+      "memory": 2,
+      "indifferent": 2,
+      "reserved": 2,
+      "anchor:Light": 2,
+      "symbol": 2,
+      "medical": 2,
+      "dread": 2,
+      "separate": 2,
+      "visibility": 2,
+      "manifestation": 2,
+      "appearance": 2,
+      "comprehension": 2,
+      "design": 2,
+      "ambition": 2,
+      "elevation": 2,
+      "transfer": 2,
+      "watch": 2,
+      "heed": 2,
+      "enablement": 2,
+      "conflict": 2,
+      "anchor:Growth": 2,
+      "entitlement": 2,
+      "grant": 2,
+      "binding": 2,
+      "cohesion": 2,
+      "fortification": 2,
+      "careful": 2,
+      "shape": 2,
+      "procedure": 2,
+      "membership": 2,
+      "civility": 2,
+      "politeness": 2,
+      "tenacious": 2,
+      "partnership": 2,
+      "security": 2,
+      "debt": 2,
+      "friendship": 2,
+      "fellowship": 2,
+      "agreement": 2,
+      "opposition": 2,
+      "implication": 2,
+      "steadiness": 2,
+      "deception": 2,
+      "creation": 2,
+      "collaboration": 2,
+      "confinement": 2,
+      "strategy": 2,
+      "accuracy": 2,
+      "timidity": 2,
+      "belief": 2,
+      "uncertainty": 2,
+      "intersection": 2,
+      "transition": 2,
+      "passage": 2,
+      "concealment": 2,
+      "defect": 2,
+      "defective": 2,
+      "faulty": 2,
+      "imperfect": 2,
+      "malfunction": 2,
+      "anchor:Danger": 2,
+      "protection": 2,
+      "purposeful": 2,
+      "dependence": 2,
+      "aversion": 2,
+      "expand": 2,
+      "flourish": 2,
+      "thrive": 2,
+      "cultivate": 2,
+      "emerge": 2,
+      "generate": 2,
+      "discrimination": 2,
+      "transparency": 2,
+      "ending": 2,
+      "rudeness": 2,
+      "disrespect": 2,
+      "impoliteness": 2,
+      "social-norms": 2,
+      "healing": 2,
+      "dwelling": 2,
+      "habitation": 2,
+      "vitality": 2,
+      "art": 2,
+      "qualification": 2,
+      "analysis": 2,
+      "scrutiny": 2,
+      "balance": 2,
+      "regularity": 2,
+      "utterance": 2,
+      "element": 2,
+      "peril": 2,
+      "subtlety": 2,
+      "division": 2,
+      "alarm": 2,
+      "status": 2,
+      "anchor:Fear": 2,
+      "restraint": 2,
+      "direction": 2,
+      "counsel": 2,
+      "responsibility": 2,
+      "hazard": 2,
+      "attention": 2,
+      "regard": 2,
+      "signal": 2,
+      "concealment-adjacent": 2,
+      "stasis": 2,
+      "constraint": 2,
+      "rigidity": 2,
+      "focus": 2,
+      "steadfast": 2,
+      "greeting": 2,
+      "seclusion": 2,
+      "treasure": 2,
+      "remainder": 2,
+      "residue": 2,
+      "solitude": 2,
+      "stealth": 2,
+      "anticipation": 2,
+      "scarcity": 2,
+      "marginalization": 2,
+      "nurturing": 2,
+      "sustain": 2,
+      "nourishment": 2,
+      "provide": 2,
+      "wholeness": 2,
+      "integration": 2,
+      "exclusion": 2,
+      "boundary": 2,
+      "contribution": 2,
+      "generosity": 2,
+      "clarity": 2,
+      "supply": 2,
+      "affix": 2,
+      "modification": 2,
+      "spread": 2,
+      "transmit": 2,
+      "diffuse": 2,
+      "radiate": 2,
+      "mind": 2,
+      "geometry": 2,
+      "requirement": 2,
+      "standard": 2,
+      "competence": 2,
+      "Trust-orbital": 2,
+      "energy": 2,
+      "warmth": 2,
+      "recurrence": 2,
+      "interaction": 2,
+      "recognition": 2,
+      "cold": 2,
+      "environment": 2,
+      "context": 2,
+      "withdrawn": 2,
+      "network": 2,
+      "distance:0.91": 2,
+      "distance:0.14": 2,
+      "distance:0.20": 2,
+      "distance:0.13": 2,
+      "distance:0.90": 2,
+      "distance:0.26": 2,
+      "distance:0.73": 2,
+      "distance:0.85": 2,
+      "distance:0.67": 2,
+      "distance:0.22": 2,
+      "metallic": 2,
+      "neutral": 2,
+      "reform": 1,
+      "friction": 1,
+      "refinement": 1,
+      "complicity": 1,
+      "compliance": 1,
+      "supplement": 1,
+      "correction": 1,
+      "influence": 1,
+      "emotion": 1,
+      "attachment": 1,
+      "lingering": 1,
+      "sensation": 1,
+      "aloof": 1,
+      "distant": 1,
+      "unsociable": 1,
+      "literacy": 1,
+      "diplomacy": 1,
+      "mediation": 1,
+      "amputation": 1,
+      "severing": 1,
+      "mutilation": 1,
+      "surgery": 1,
+      "loss": 1,
+      "injury": 1,
+      "removal": 1,
+      "dismemberment": 1,
+      "limb": 1,
+      "sever": 1,
+      "cut": 1,
+      "trauma": 1,
+      "anxiety": 1,
+      "soul": 1,
+      "inner-self": 1,
+      "another": 1,
+      "additional": 1,
+      "other": 1,
+      "alternative": 1,
+      "extra": 1,
+      "different": 1,
+      "further": 1,
+      "variation": 1,
+      "otherness": 1,
+      "supplementary": 1,
+      "distinct": 1,
+      "alternative-choice": 1,
+      "nervousness": 1,
+      "apprehension": 1,
+      "unease": 1,
+      "presence": 1,
+      "display": 1,
+      "extension": 1,
+      "appendage": 1,
+      "understanding": 1,
+      "built-environment": 1,
+      "striving": 1,
+      "allocation": 1,
+      "designation": 1,
+      "appointment": 1,
+      "attribution": 1,
+      "divination": 1,
+      "superstition": 1,
+      "achievement": 1,
+      "attainment": 1,
+      "success": 1,
+      "goal-oriented": 1,
+      "fulfillment": 1,
+      "active-pursuit": 1,
+      "cognitive-action": 1,
+      "accessibility": 1,
+      "feasibility": 1,
+      "attend": 1,
+      "pay attention": 1,
+      "listen": 1,
+      "present": 1,
+      "participate": 1,
+      "observe": 1,
+      "sound": 1,
+      "acoustics": 1,
+      "enhancement": 1,
+      "amplification": 1,
+      "reinforcement": 1,
+      "authorization": 1,
+      "verb-form": 1,
+      "social-power": 1,
+      "foundation": 1,
+      "ground": 1,
+      "principle": 1,
+      "combat": 1,
+      "Danger-adjacent": 1,
+      "concrete-active": 1,
+      "origin": 1,
+      "inception": 1,
+      "beneficent": 1,
+      "benevolent": 1,
+      "kind": 1,
+      "charitable": 1,
+      "altruistic": 1,
+      "recipient": 1,
+      "heir": 1,
+      "benefactor": 1,
+      "gift": 1,
+      "confer": 1,
+      "donate": 1,
+      "give": 1,
+      "offer": 1,
+      "endowment": 1,
+      "union": 1,
+      "bonded": 1,
+      "connected": 1,
+      "attached": 1,
+      "joined": 1,
+      "united": 1,
+      "linked": 1,
+      "tied": 1,
+      "bound": 1,
+      "adhesion": 1,
+      "candidacy": 1,
+      "prudent": 1,
+      "mold": 1,
+      "projection": 1,
+      "casting": 1,
+      "causality": 1,
+      "mechanism": 1,
+      "determinism": 1,
+      "validation": 1,
+      "assurance": 1,
+      "organization": 1,
+      "photosynthesis": 1,
+      "biology": 1,
+      "history": 1,
+      "documentation": 1,
+      "record": 1,
+      "encryption": 1,
+      "citizen": 1,
+      "virtue": 1,
+      "ethics": 1,
+      "courtesy": 1,
+      "clutch": 1,
+      "grasp": 1,
+      "clasp": 1,
+      "grip": 1,
+      "hold": 1,
+      "seize": 1,
+      "clench": 1,
+      "grab": 1,
+      "snatch": 1,
+      "cling": 1,
+      "embrace": 1,
+      "press": 1,
+      "squeeze": 1,
+      "clutching": 1,
+      "firm": 1,
+      "systematization": 1,
+      "regulation": 1,
+      "formalization": 1,
+      "cooperation": 1,
+      "guarantee": 1,
+      "asset": 1,
+      "pledge": 1,
+      "financial": 1,
+      "institution": 1,
+      "concurrence": 1,
+      "intimacy": 1,
+      "confiding": 1,
+      "private-communication": 1,
+      "trust-sharing": 1,
+      "reveal": 1,
+      "impart": 1,
+      "confess": 1,
+      "challenge": 1,
+      "nuance": 1,
+      "reliability": 1,
+      "plotting": 1,
+      "assembly": 1,
+      "consideration": 1,
+      "continuation": 1,
+      "temperature": 1,
+      "coolness": 1,
+      "composure": 1,
+      "calm": 1,
+      "mildness": 1,
+      "color-temperature": 1,
+      "mutual-aid": 1,
+      "trapping": 1,
+      "truth": 1,
+      "sanctuary": 1,
+      "flight": 1,
+      "fearfulness": 1,
+      "skepticism": 1,
+      "traversal": 1,
+      "readiness": 1,
+      "curtail": 1,
+      "cut short": 1,
+      "shorten": 1,
+      "reduce": 1,
+      "diminish": 1,
+      "truncate": 1,
+      "abbreviate": 1,
+      "abridge": 1,
+      "limit": 1,
+      "restrict": 1,
+      "lessen": 1,
+      "decrease": 1,
+      "prune": 1,
+      "trim": 1,
+      "damaged": 1,
+      "deterioration": 1,
+      "impaired": 1,
+      "ruined": 1,
+      "degraded": 1,
+      "fragility": 1,
+      "unreliability": 1,
+      "protection-failure": 1,
+      "obscuration": 1,
+      "dimming": 1,
+      "shadowing": 1,
+      "defended": 1,
+      "shielded": 1,
+      "guarded": 1,
+      "secure": 1,
+      "safe": 1,
+      "preserved": 1,
+      "active-defense": 1,
+      "ward": 1,
+      "cover": 1,
+      "armor": 1,
+      "deliberate": 1,
+      "intentional": 1,
+      "planned": 1,
+      "considered": 1,
+      "thoughtful": 1,
+      "conscious": 1,
+      "calculated": 1,
+      "measured": 1,
+      "methodical": 1,
+      "unhurried": 1,
+      "premeditated": 1,
+      "willful": 1,
+      "voluntary": 1,
+      "rescue": 1,
+      "salvation": 1,
+      "reliance": 1,
+      "hatred": 1,
+      "develops": 1,
+      "grow": 1,
+      "evolve": 1,
+      "mature": 1,
+      "progress": 1,
+      "advance": 1,
+      "unfold": 1,
+      "arise": 1,
+      "form": 1,
+      "produce": 1,
+      "ripen": 1,
+      "diligent": 1,
+      "industrious": 1,
+      "hardworking": 1,
+      "persevering": 1,
+      "orientation": 1,
+      "course": 1,
+      "follower": 1,
+      "cessation": 1,
+      "discontinuity": 1,
+      "interruption": 1,
+      "manners": 1,
+      "hostility": 1,
+      "dissipate": 1,
+      "scatter": 1,
+      "dissolution": 1,
+      "energy-loss": 1,
+      "differentiation": 1,
+      "contrast": 1,
+      "caregiver": 1,
+      "toy": 1,
+      "childhood": 1,
+      "domicile": 1,
+      "residence": 1,
+      "housing": 1,
+      "home": 1,
+      "abode": 1,
+      "place": 1,
+      "privacy": 1,
+      "territory": 1,
+      "binary": 1,
+      "polarity": 1,
+      "selfishness": 1,
+      "narcissism": 1,
+      "conceit": 1,
+      "self-absorption": 1,
+      "surfacing": 1,
+      "development": 1,
+      "arising": 1,
+      "legislation": 1,
+      "performance": 1,
+      "execution": 1,
+      "containment": 1,
+      "surrounding": 1,
+      "power": 1,
+      "force": 1,
+      "dynamics": 1,
+      "printmaking": 1,
+      "mark-making": 1,
+      "inscription": 1,
+      "carving": 1,
+      "impression": 1,
+      "craft": 1,
+      "darkness": 1,
+      "depth": 1,
+      "right": 1,
+      "claim": 1,
+      "privilege": 1,
+      "title": 1,
+      "warrant": 1,
+      "due": 1,
+      "allowance": 1,
+      "desert": 1,
+      "merit": 1,
+      "prerogative": 1,
+      "mandate": 1,
+      "commission": 1,
+      "conclusion": 1,
+      "literary": 1,
+      "afterword": 1,
+      "closing": 1,
+      "denouement": 1,
+      "postscript": 1,
+      "coda": 1,
+      "finale": 1,
+      "wrap-up": 1,
+      "evaluate": 1,
+      "assess": 1,
+      "appraise": 1,
+      "judge": 1,
+      "analyze": 1,
+      "examine": 1,
+      "determine": 1,
+      "valuation": 1,
+      "judgment": 1,
+      "review": 1,
+      "rate": 1,
+      "estimate": 1,
+      "measure": 1,
+      "consider": 1,
+      "uniformity": 1,
+      "exclude": 1,
+      "reject": 1,
+      "ostracize": 1,
+      "alienate": 1,
+      "disown": 1,
+      "exploit": 1,
+      "use": 1,
+      "utilize": 1,
+      "manipulate": 1,
+      "advantage": 1,
+      "abuse": 1,
+      "leverage": 1,
+      "art-movement": 1,
+      "contributor": 1,
+      "variable": 1,
+      "dimness": 1,
+      "pallor": 1,
+      "conviction": 1,
+      "spiritual": 1,
+      "religion": 1,
+      "fatal": 1,
+      "deadly": 1,
+      "lethal": 1,
+      "mortality": 1,
+      "doom": 1,
+      "destruction": 1,
+      "terminal": 1,
+      "inevitable": 1,
+      "catastrophic": 1,
+      "destructive": 1,
+      "final": 1,
+      "fateful": 1,
+      "ruinous": 1,
+      "disastrous": 1,
+      "mortal": 1,
+      "flawed": 1,
+      "unreliable": 1,
+      "error": 1,
+      "impairment": 1,
+      "deficiency": 1,
+      "inadequacy": 1,
+      "luminescence": 1,
+      "adherence": 1,
+      "subordination": 1,
+      "companionship": 1,
+      "external": 1,
+      "alien": 1,
+      "strange": 1,
+      "portion": 1,
+      "delicacy": 1,
+      "intimidation": 1,
+      "coercion": 1,
+      "threshold": 1,
+      "allure": 1,
+      "fascination": 1,
+      "convention": 1,
+      "grave": 1,
+      "solemn": 1,
+      "serious": 1,
+      "somber": 1,
+      "searching": 1,
+      "blindness": 1,
+      "leadership": 1,
+      "mentorship": 1,
+      "navigation": 1,
+      "delivery": 1,
+      "surrender": 1,
+      "custody": 1,
+      "handoff": 1,
+      "relinquishment": 1,
+      "control": 1,
+      "possession": 1,
+      "entrustment": 1,
+      "hazardous": 1,
+      "dangerous": 1,
+      "risky": 1,
+      "perilous": 1,
+      "unsafe": 1,
+      "treacherous": 1,
+      "precarious": 1,
+      "harmful": 1,
+      "threatening": 1,
+      "jeopardy": 1,
+      "menace": 1,
+      "volatile": 1,
+      "adverse": 1,
+      "deleterious": 1,
+      "dangerous-condition": 1,
+      "listening": 1,
+      "notice": 1,
+      "observation": 1,
+      "mindfulness": 1,
+      "obey": 1,
+      "heedless": 1,
+      "careless": 1,
+      "thoughtless": 1,
+      "reckless": 1,
+      "negligent": 1,
+      "inattentive": 1,
+      "unmindful": 1,
+      "oblivious": 1,
+      "neglect": 1,
+      "negligence": 1,
+      "disregard": 1,
+      "unaware": 1,
+      "unconcerned": 1,
+      "rash": 1,
+      "irresponsible": 1,
+      "imprudent": 1,
+      "inconsiderate": 1,
+      "altitude": 1,
+      "summit": 1,
+      "verticality": 1,
+      "herald": 1,
+      "announce": 1,
+      "proclaim": 1,
+      "messenger": 1,
+      "forerunner": 1,
+      "harbinger": 1,
+      "omen": 1,
+      "portend": 1,
+      "foretell": 1,
+      "arrive": 1,
+      "communicate": 1,
+      "forebode": 1,
+      "presage": 1,
+      "lineage": 1,
+      "tradition": 1,
+      "Fear-orbital": 1,
+      "hiding": 1,
+      "Psychology-&-Mind-domain": 1,
+      "dishonor": 1,
+      "low-born": 1,
+      "shame": 1,
+      "social-status": 1,
+      "degradation": 1,
+      "humiliation": 1,
+      "immobilization": 1,
+      "paralysis": 1,
+      "freeze": 1,
+      "immobilize": 1,
+      "immobile": 1,
+      "motionless": 1,
+      "still": 1,
+      "fixed": 1,
+      "unable to move": 1,
+      "incapacitation": 1,
+      "fixation": 1,
+      "anchoring": 1,
+      "inhibition": 1,
+      "arrest": 1,
+      "halt": 1,
+      "stop": 1,
+      "inactivity": 1,
+      "restriction": 1,
+      "inability": 1,
+      "paralyze": 1,
+      "petrify": 1,
+      "necessity": 1,
+      "shadow-domain": 1,
+      "approximation": 1,
+      "ambiguity": 1,
+      "tension": 1,
+      "inclusive": 1,
+      "comprehensive": 1,
+      "all-encompassing": 1,
+      "embracing": 1,
+      "containing": 1,
+      "including": 1,
+      "encompassing": 1,
+      "broad": 1,
+      "open": 1,
+      "welcoming": 1,
+      "accepting": 1,
+      "unexclusive": 1,
+      "wide-ranging": 1,
+      "inconsequential": 1,
+      "insignificant": 1,
+      "unimportant": 1,
+      "trivial": 1,
+      "negligible": 1,
+      "immaterial": 1,
+      "irrelevant": 1,
+      "of no consequence": 1,
+      "minor": 1,
+      "petty": 1,
+      "inconsiderable": 1,
+      "evidence": 1,
+      "discomfort": 1,
+      "metabolism": 1,
+      "malaise": 1,
+      "ailment": 1,
+      "indirect": 1,
+      "oblique": 1,
+      "not direct": 1,
+      "circuitous": 1,
+      "mediated": 1,
+      "implied": 1,
+      "roundabout": 1,
+      "tangential": 1,
+      "autonomy": 1,
+      "self-reliance": 1,
+      "independence": 1,
+      "inefficient": 1,
+      "unproductive": 1,
+      "wasteful": 1,
+      "incompetence": 1,
+      "suboptimal": 1,
+      "obsession": 1,
+      "infatuation": 1,
+      "notification": 1,
+      "casualness": 1,
+      "ease": 1,
+      "insider": 1,
+      "confidant": 1,
+      "inclusion": 1,
+      "privileged": 1,
+      "familiarity": 1,
+      "examination": 1,
+      "concentration": 1,
+      "intent": 1,
+      "earnest": 1,
+      "eager": 1,
+      "mindful": 1,
+      "absorbed": 1,
+      "concentrated": 1,
+      "incursion": 1,
+      "invite": 1,
+      "invitation": 1,
+      "summon": 1,
+      "request": 1,
+      "call": 1,
+      "bid": 1,
+      "entreat": 1,
+      "hospitality": 1,
+      "entry": 1,
+      "detachment": 1,
+      "gem": 1,
+      "rationalization": 1,
+      "kinship": 1,
+      "lapse": 1,
+      "forgetting": 1,
+      "expiration": 1,
+      "surplus": 1,
+      "remnant": 1,
+      "study": 1,
+      "reading": 1,
+      "writing": 1,
+      "culture": 1,
+      "melancholy": 1,
+      "descent": 1,
+      "reduction": 1,
+      "gravity": 1,
+      "ambush": 1,
+      "directive": 1,
+      "movement": 1,
+      "tactic": 1,
+      "document": 1,
+      "preservation": 1,
+      "commerce": 1,
+      "exchange": 1,
+      "perfection": 1,
+      "artistry": 1,
+      "meager": 1,
+      "scanty": 1,
+      "sparse": 1,
+      "insufficient": 1,
+      "inadequate": 1,
+      "scant": 1,
+      "bare": 1,
+      "minimal": 1,
+      "deficient": 1,
+      "poor": 1,
+      "dearth": 1,
+      "poverty": 1,
+      "lack": 1,
+      "shortage": 1,
+      "slim": 1,
+      "paltry": 1,
+      "health": 1,
+      "remedy": 1,
+      "treatment": 1,
+      "channel": 1,
+      "conduit": 1,
+      "intermediary": 1,
+      "substance": 1,
+      "phenomenon": 1,
+      "demographics": 1,
+      "obfuscation": 1,
+      "betrayal": 1,
+      "mistrustful": 1,
+      "suspicious": 1,
+      "cynical": 1,
+      "doubt": 1,
+      "distrust": 1,
+      "gloom": 1,
+      "unit": 1,
+      "composition": 1,
+      "parenthood": 1,
+      "quiet-speech": 1,
+      "solace": 1,
+      "mutation": 1,
+      "anomaly": 1,
+      "transformation": 1,
+      "neutralize": 1,
+      "counteract": 1,
+      "nullify": 1,
+      "negate": 1,
+      "cancel": 1,
+      "invalidate": 1,
+      "offset": 1,
+      "counterbalance": 1,
+      "defuse": 1,
+      "deactivate": 1,
+      "disarm": 1,
+      "quell": 1,
+      "suppress": 1,
+      "counter": 1,
+      "neutralization": 1,
+      "counteraction": 1,
+      "inactivate": 1,
+      "noncombatant": 1,
+      "civilian": 1,
+      "neutrality": 1,
+      "bystander": 1,
+      "peaceful": 1,
+      "unarmed": 1,
+      "immunity": 1,
+      "safety": 1,
+      "nourish": 1,
+      "nurture": 1,
+      "feed": 1,
+      "nutrition": 1,
+      "foster": 1,
+      "strengthen": 1,
+      "value": 1,
+      "obdurate": 1,
+      "stubborn": 1,
+      "inflexible": 1,
+      "unyielding": 1,
+      "obstinate": 1,
+      "unfeeling": 1,
+      "hardened": 1,
+      "resistant": 1,
+      "intransigent": 1,
+      "profanity": 1,
+      "taboo": 1,
+      "repulsion": 1,
+      "witness": 1,
+      "occupied": 1,
+      "busy": 1,
+      "engaged": 1,
+      "committed": 1,
+      "active": 1,
+      "formal": 1,
+      "designated": 1,
+      "unity": 1,
+      "coordination": 1,
+      "activity": 1,
+      "agent": 1,
+      "functional": 1,
+      "effective": 1,
+      "alienation": 1,
+      "allegory": 1,
+      "morality": 1,
+      "involvement": 1,
+      "engagement": 1,
+      "relationship": 1,
+      "authentication": 1,
+      "access-control": 1,
+      "patriotism": 1,
+      "loyalty": 1,
+      "nationalism": 1,
+      "allegiance": 1,
+      "honor": 1,
+      "peers": 1,
+      "equals": 1,
+      "companions": 1,
+      "colleagues": 1,
+      "associates": 1,
+      "contemporaries": 1,
+      "counterparts": 1,
+      "fellow members": 1,
+      "rank": 1,
+      "peerage": 1,
+      "persist": 1,
+      "continue": 1,
+      "endure": 1,
+      "maintain": 1,
+      "persevere": 1,
+      "last": 1,
+      "remain": 1,
+      "abide": 1,
+      "hold on": 1,
+      "survive": 1,
+      "carry on": 1,
+      "stay": 1,
+      "persistent": 1,
+      "danger": 1,
+      "hope": 1,
+      "philanthropy": 1,
+      "charity": 1,
+      "benevolence": 1,
+      "giving": 1,
+      "donation": 1,
+      "humanitarian": 1,
+      "welfare": 1,
+      "compassion": 1,
+      "social-good": 1,
+      "protect": 1,
+      "penetration": 1,
+      "breach": 1,
+      "simplicity": 1,
+      "companion": 1,
+      "plentiful": 1,
+      "abundant": 1,
+      "ample": 1,
+      "copious": 1,
+      "bountiful": 1,
+      "profuse": 1,
+      "rich": 1,
+      "generous": 1,
+      "sufficient": 1,
+      "flexibility": 1,
+      "softness": 1,
+      "adaptability": 1,
+      "contemplation": 1,
+      "reputation": 1,
+      "prominence": 1,
+      "syntax": 1,
+      "relation": 1,
+      "propagation": 1,
+      "multiply": 1,
+      "reproduce": 1,
+      "proliferate": 1,
+      "extend": 1,
+      "hero": 1,
+      "character": 1,
+      "provisions": 1,
+      "stores": 1,
+      "stock": 1,
+      "sustenance": 1,
+      "equipment": 1,
+      "ration": 1,
+      "outfit": 1,
+      "necessities": 1,
+      "victuals": 1,
+      "provender": 1,
+      "commissariat": 1,
+      "abundance": 1,
+      "provision": 1,
+      "prepare": 1,
+      "substitute": 1,
+      "consciousness": 1,
+      "sector": 1,
+      "credential": 1,
+      "eligibility": 1,
+      "criterion": 1,
+      "emit": 1,
+      "radiation": 1,
+      "outward": 1,
+      "illuminate": 1,
+      "shine": 1,
+      "glow": 1,
+      "emanate": 1,
+      "project": 1,
+      "broadcast": 1,
+      "propagate": 1,
+      "reappearance": 1,
+      "return": 1,
+      "appear": 1,
+      "renewal": 1,
+      "resurface": 1,
+      "come back": 1,
+      "recall": 1,
+      "remember": 1,
+      "recollect": 1,
+      "recollection": 1,
+      "remembrance": 1,
+      "reminiscence": 1,
+      "retrieve": 1,
+      "retrieval": 1,
+      "mental": 1,
+      "past": 1,
+      "hindsight": 1,
+      "retrospective": 1,
+      "call-back": 1,
+      "evoke": 1,
+      "reminisce": 1,
+      "repose": 1,
+      "rest": 1,
+      "recluse": 1,
+      "isolation": 1,
+      "hermit": 1,
+      "narration": 1,
+      "retelling": 1,
+      "account-giving": 1,
+      "verbal": 1,
+      "memory-recall": 1,
+      "truth-telling": 1,
+      "introspection": 1,
+      "mirroring": 1,
+      "relational": 1,
+      "dependability": 1,
+      "consistency": 1,
+      "alleviation": 1,
+      "comfort": 1,
+      "hesitation": 1,
+      "restitution": 1,
+      "finance": 1,
+      "liability": 1,
+      "proxy": 1,
+      "sample": 1,
+      "leftover": 1,
+      "trace": 1,
+      "periphery": 1,
+      "edge": 1,
+      "frame": 1,
+      "competition": 1,
+      "antagonism": 1,
+      "function": 1,
+      "guardian": 1,
+      "identity": 1,
+      "space": 1,
+      "interior": 1,
+      "desecration": 1,
+      "profanation": 1,
+      "salutation": 1,
+      "greet": 1,
+      "address": 1,
+      "acknowledgment": 1,
+      "farewell": 1,
+      "formality": 1,
+      "compliment": 1,
+      "respect": 1,
+      "time-unit": 1,
+      "duration": 1,
+      "segregate": 1,
+      "isolate": 1,
+      "divide": 1,
+      "categorize": 1,
+      "preference": 1,
+      "choice": 1,
+      "self-sacrifice": 1,
+      "martyrdom": 1,
+      "sacrifice": 1,
+      "signs": 1,
+      "meaning": 1,
+      "guard": 1,
+      "resolution": 1,
+      "stability": 1,
+      "art-technique": 1,
+      "blending": 1,
+      "distribution": 1,
+      "tremor": 1,
+      "fear-response": 1,
+      "brevity": 1,
+      "briefness": 1,
+      "limitation": 1,
+      "outcry": 1,
+      "terror": 1,
+      "consequence": 1,
+      "adverse-effect": 1,
+      "semiconductor": 1,
+      "insulation": 1,
+      "texture": 1,
+      "smoothness": 1,
+      "luxury": 1,
+      "subjugation": 1,
+      "oppression": 1,
+      "friendliness": 1,
+      "sun": 1,
+      "radiant": 1,
+      "luminous": 1,
+      "stellar": 1,
+      "legal": 1,
+      "advocate": 1,
+      "law": 1,
+      "attorney": 1,
+      "justice": 1,
+      "expertise": 1,
+      "professional": 1,
+      "specialization": 1,
+      "detail": 1,
+      "contract": 1,
+      "specification": 1,
+      "arachnid": 1,
+      "web": 1,
+      "predator": 1,
+      "durability": 1,
+      "pursuit": 1,
+      "predation": 1,
+      "management": 1,
+      "firmness": 1,
+      "effort": 1,
+      "endeavor": 1,
+      "perseverance": 1,
+      "unconscious": 1,
+      "depth-psychology": 1,
+      "inner-world": 1,
+      "hidden-meaning": 1,
+      "shallowness": 1,
+      "insincerity": 1,
+      "perimeter": 1,
+      "grammar": 1,
+      "linguistics": 1,
+      "label": 1,
+      "identification": 1,
+      "categorization": 1,
+      "tagging": 1,
+      "marking": 1,
+      "classification": 1,
+      "identifier": 1,
+      "denote": 1,
+      "attach": 1,
+      "narrowing": 1,
+      "convergence": 1,
+      "diminution": 1,
+      "enlightenment": 1,
+      "method": 1,
+      "tiling": 1,
+      "physics": 1,
+      "entropy": 1,
+      "equilibrium": 1,
+      "timid": 1,
+      "shy": 1,
+      "fearful": 1,
+      "hesitant": 1,
+      "cautious": 1,
+      "bashful": 1,
+      "nervous": 1,
+      "apprehensive": 1,
+      "completeness": 1,
+      "entirety": 1,
+      "sum": 1,
+      "plaything": 1,
+      "amusement": 1,
+      "honesty": 1,
+      "fact": 1,
+      "reality": 1,
+      "veracity": 1,
+      "sincerity": 1,
+      "normalcy": 1,
+      "freedom": 1,
+      "insight": 1,
+      "empathy": 1,
+      "wisdom": 1,
+      "unfamiliarity": 1,
+      "unknown": 1,
+      "strangeness": 1,
+      "novelty": 1,
+      "illness": 1,
+      "standardization": 1,
+      "conformity": 1,
+      "harmony": 1,
+      "oneness": 1,
+      "unprotected": 1,
+      "vulnerable": 1,
+      "exposed": 1,
+      "defenseless": 1,
+      "unguarded": 1,
+      "unshielded": 1,
+      "unselfishness": 1,
+      "selflessness": 1,
+      "habituality": 1,
+      "routine": 1,
+      "bravery": 1,
+      "courage": 1,
+      "confirmation": 1,
+      "disappearance": 1,
+      "absence": 1,
+      "past-participle": 1,
+      "gone": 1,
+      "lost": 1,
+      "invisible": 1,
+      "hidden": 1,
+      "extinct": 1,
+      "departed": 1,
+      "erased": 1,
+      "dissolved": 1,
+      "faded": 1,
+      "empty": 1,
+      "null": 1,
+      "obscured": 1,
+      "concealed": 1,
+      "extinguished": 1,
+      "watchfulness": 1,
+      "face": 1,
+      "phonetics": 1,
+      "warning": 1,
+      "alert": 1,
+      "merged-duplicate": 1,
+      "murmur": 1,
+      "dormancy": 1,
+      "hibernation": 1,
+      "desiccation": 1,
+      "distance:0.16": 1,
+      "distance:0.93": 1,
+      "distance:0.09": 1,
+      "distance:0.92": 1,
+      "distance:0.78": 1,
+      "distance:0.06": 1,
+      "dark": 1,
+      "earth": 1,
+      "configuration": 1,
+      "tint": 1
+    }
+  },
+  "exceptions": {
+    "malformedCoreRecords": [],
+    "semanticCodeFormulaMismatches": [],
+    "coordinatesOutsideCanonicalRange": [
+      {
+        "name": "PersonaBase.Undercurrent-Light",
+        "page": 27,
+        "row": 37,
+        "coordinates": {
+          "x": 87.0,
+          "y": 265.0,
+          "z": 160.0
+        },
+        "outside": {
+          "y": 265.0
+        }
+      },
+      {
+        "name": "aqua",
+        "page": 40,
+        "row": 157,
+        "coordinates": {
+          "x": -263.0,
+          "y": 170.0,
+          "z": 251.0
+        },
+        "outside": {
+          "x": -263.0
+        }
+      },
+      {
+        "name": "terracotta",
+        "page": 43,
+        "row": 33,
+        "coordinates": {
+          "x": 263.0,
+          "y": 170.0,
+          "z": -251.0
+        },
+        "outside": {
+          "x": 263.0
+        }
+      },
+      {
+        "name": "abhors",
+        "page": 43,
+        "row": 99,
+        "coordinates": {
+          "x": -216.0,
+          "y": 200.0,
+          "z": -258.0
+        },
+        "outside": {
+          "z": -258.0
+        }
+      },
+      {
+        "name": "agreement",
+        "page": 43,
+        "row": 155,
+        "coordinates": {
+          "x": -262.0,
+          "y": 100.0,
+          "z": -206.0
+        },
+        "outside": {
+          "x": -262.0
+        }
+      },
+      {
+        "name": "approbation",
+        "page": 44,
+        "row": 69,
+        "coordinates": {
+          "x": -266.0,
+          "y": 250.0,
+          "z": -208.0
+        },
+        "outside": {
+          "x": -266.0
+        }
+      },
+      {
+        "name": "approval",
+        "page": 44,
+        "row": 70,
+        "coordinates": {
+          "x": -258.0,
+          "y": 250.0,
+          "z": -204.0
+        },
+        "outside": {
+          "x": -258.0
+        }
+      },
+      {
+        "name": "assent",
+        "page": 44,
+        "row": 107,
+        "coordinates": {
+          "x": -262.0,
+          "y": 100.0,
+          "z": -206.0
+        },
+        "outside": {
+          "x": -262.0
+        }
+      },
+      {
+        "name": "ceases",
+        "page": 45,
+        "row": 98,
+        "coordinates": {
+          "x": -266.0,
+          "y": 10.0,
+          "z": -108.0
+        },
+        "outside": {
+          "x": -266.0
+        }
+      },
+      {
+        "name": "clarifies",
+        "page": 45,
+        "row": 137,
+        "coordinates": {
+          "x": 266.0,
+          "y": 200.0,
+          "z": 8.0
+        },
+        "outside": {
+          "x": 266.0
+        }
+      },
+      {
+        "name": "deforms",
+        "page": 46,
+        "row": 164,
+        "coordinates": {
+          "x": -258.0,
+          "y": 200.0,
+          "z": -4.0
+        },
+        "outside": {
+          "x": -258.0
+        }
+      },
+      {
+        "name": "desecrate",
+        "page": 47,
+        "row": 8,
+        "coordinates": {
+          "x": 263.0,
+          "y": 255.0,
+          "z": 4.0
+        },
+        "outside": {
+          "x": 263.0
+        }
+      },
+      {
+        "name": "disapprobation",
+        "page": 47,
+        "row": 62,
+        "coordinates": {
+          "x": 266.0,
+          "y": 250.0,
+          "z": 208.0
+        },
+        "outside": {
+          "x": 266.0
+        }
+      },
+      {
+        "name": "disapproval",
+        "page": 47,
+        "row": 63,
+        "coordinates": {
+          "x": 258.0,
+          "y": 250.0,
+          "z": 204.0
+        },
+        "outside": {
+          "x": 258.0
+        }
+      },
+      {
+        "name": "distorts",
+        "page": 47,
+        "row": 104,
+        "coordinates": {
+          "x": -266.0,
+          "y": 200.0,
+          "z": -8.0
+        },
+        "outside": {
+          "x": -266.0
+        }
+      },
+      {
+        "name": "employment",
+        "page": 48,
+        "row": 15,
+        "coordinates": {
+          "x": -158.0,
+          "y": 100.0,
+          "z": -259.0
+        },
+        "outside": {
+          "z": -259.0
+        }
+      },
+      {
+        "name": "existed",
+        "page": 48,
+        "row": 75,
+        "coordinates": {
+          "x": -263.0,
+          "y": 128.0,
+          "z": -4.0
+        },
+        "outside": {
+          "x": -263.0
+        }
+      },
+      {
+        "name": "exists",
+        "page": 48,
+        "row": 77,
+        "coordinates": {
+          "x": 266.0,
+          "y": 10.0,
+          "z": 108.0
+        },
+        "outside": {
+          "x": 266.0
+        }
+      },
+      {
+        "name": "fun",
+        "page": 49,
+        "row": 79,
+        "coordinates": {
+          "x": 158.0,
+          "y": 100.0,
+          "z": 259.0
+        },
+        "outside": {
+          "z": 259.0
+        }
+      },
+      {
+        "name": "hallow",
+        "page": 49,
+        "row": 167,
+        "coordinates": {
+          "x": -263.0,
+          "y": 255.0,
+          "z": -4.0
+        },
+        "outside": {
+          "x": -263.0
+        }
+      },
+      {
+        "name": "me",
+        "page": 52,
+        "row": 101,
+        "coordinates": {
+          "x": -258.0,
+          "y": 250.0,
+          "z": -54.0
+        },
+        "outside": {
+          "x": -258.0
+        }
+      },
+      {
+        "name": "nil",
+        "page": 53,
+        "row": 87,
+        "coordinates": {
+          "x": -258.0,
+          "y": 128.0,
+          "z": -254.0
+        },
+        "outside": {
+          "x": -258.0
+        }
+      },
+      {
+        "name": "objects",
+        "page": 53,
+        "row": 153,
+        "coordinates": {
+          "x": 258.0,
+          "y": 50.0,
+          "z": 4.0
+        },
+        "outside": {
+          "x": 258.0
+        }
+      },
+      {
+        "name": "perished",
+        "page": 54,
+        "row": 121,
+        "coordinates": {
+          "x": 263.0,
+          "y": 128.0,
+          "z": 4.0
+        },
+        "outside": {
+          "x": 263.0
+        }
+      },
+      {
+        "name": "quadrangle",
+        "page": 55,
+        "row": 92,
+        "coordinates": {
+          "x": -266.0,
+          "y": 250.0,
+          "z": 92.0
+        },
+        "outside": {
+          "x": -266.0
+        }
+      },
+      {
+        "name": "rectangle",
+        "page": 55,
+        "row": 145,
+        "coordinates": {
+          "x": -258.0,
+          "y": 250.0,
+          "z": 96.0
+        },
+        "outside": {
+          "x": -258.0
+        }
+      },
+      {
+        "name": "save",
+        "page": 56,
+        "row": 96,
+        "coordinates": {
+          "x": 258.0,
+          "y": 100.0,
+          "z": 54.0
+        },
+        "outside": {
+          "x": 258.0
+        }
+      },
+      {
+        "name": "squander",
+        "page": 57,
+        "row": 99,
+        "coordinates": {
+          "x": -258.0,
+          "y": 100.0,
+          "z": -54.0
+        },
+        "outside": {
+          "x": -258.0
+        }
+      },
+      {
+        "name": "stop",
+        "page": 57,
+        "row": 129,
+        "coordinates": {
+          "x": -257.0,
+          "y": 68.13333333,
+          "z": -170.6666667
+        },
+        "outside": {
+          "x": -257.0
+        }
+      },
+      {
+        "name": "subjects",
+        "page": 57,
+        "row": 154,
+        "coordinates": {
+          "x": -258.0,
+          "y": 50.0,
+          "z": -4.0
+        },
+        "outside": {
+          "x": -258.0
+        }
+      },
+      {
+        "name": "trapezium",
+        "page": 58,
+        "row": 143,
+        "coordinates": {
+          "x": 258.0,
+          "y": 250.0,
+          "z": -96.0
+        },
+        "outside": {
+          "x": 258.0
+        }
+      },
+      {
+        "name": "virtuous",
+        "page": 59,
+        "row": 123,
+        "coordinates": {
+          "x": -66.0,
+          "y": 200.0,
+          "z": -258.0
+        },
+        "outside": {
+          "z": -258.0
+        }
+      },
+      {
+        "name": "were",
+        "page": 59,
+        "row": 154,
+        "coordinates": {
+          "x": -258.0,
+          "y": 10.0,
+          "z": -104.0
+        },
+        "outside": {
+          "x": -258.0
+        }
+      },
+      {
+        "name": "werenot",
+        "page": 59,
+        "row": 156,
+        "coordinates": {
+          "x": 258.0,
+          "y": 10.0,
+          "z": 104.0
+        },
+        "outside": {
+          "x": 258.0
+        }
+      },
+      {
+        "name": "wicked",
+        "page": 60,
+        "row": 30,
+        "coordinates": {
+          "x": 66.0,
+          "y": 200.0,
+          "z": 258.0
+        },
+        "outside": {
+          "z": 258.0
+        }
+      }
+    ],
+    "exactDuplicateRows": [
+      {
+        "occurrences": [
+          {
+            "name": "diagnosis",
+            "page": 11,
+            "row": 10
+          },
+          {
+            "name": "diagnosis",
+            "page": 11,
+            "row": 11
+          }
+        ]
+      },
+      {
+        "occurrences": [
+          {
+            "name": "viewpoint",
+            "page": 39,
+            "row": 45
+          },
+          {
+            "name": "viewpoint",
+            "page": 39,
+            "row": 46
+          }
+        ]
+      }
+    ]
+  },
+  "comparisonToPrior": {
+    "priorRecordCount": 5011,
+    "sharedNormalizedNames": 3289,
+    "newNormalizedNames": 4335,
+    "missingPriorNormalizedNames": 1,
+    "boundary": "Version comparison detects continuity and change; it is not independent semantic evidence."
+  },
+  "evidenceBoundary": {
+    "sourceProves": [
+      "the document hash and page count",
+      "the exact rows extracted from each page",
+      "the recorded tiers, names, colors, coordinates, relationships, and labels"
+    ],
+    "sourceDoesNotProve": [
+      "that a synonym or opposite is lexically correct",
+      "that a color association is universal or factual",
+      "that a coordinate is the correct placement for every person or context",
+      "that imported knowledge may mutate an approved, shared, or personal graph"
+    ],
+    "requiredNextEvidence": "Attach independent lexical or primary-source evidence to contested relationship claims, then review exceptions before proposing graph changes."
+  },
+  "receiptSha256": "1fe873fc5af3ebc879ce74f0860c4beea6d111a133e00b81cd02a952f3df61ad"
+}

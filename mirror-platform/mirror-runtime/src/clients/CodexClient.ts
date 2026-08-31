@@ -87,15 +87,30 @@ export class CodexClient {
 
   async requestJson(
     path: string,
-    options: { method?: string; body?: Record<string, unknown>; userToken?: string } = {}
+    options: {
+      method?: string;
+      body?: Record<string, unknown>;
+      userToken?: string;
+      retryNetworkFailures?: boolean;
+      timeoutMs?: number;
+    } = {}
   ): Promise<{ status: number; body: Record<string, any> }> {
     const headers: Record<string, string> = { 'content-type': 'application/json' };
     if (options.userToken) headers.authorization = `Bearer ${options.userToken}`;
-    const response = await this.fetcher(`${this.apiUrl}${path}`, {
+    const request = () => this.fetcher(`${this.apiUrl}${path}`, {
       method: options.method || 'GET',
       headers,
-      body: options.body === undefined ? undefined : JSON.stringify(options.body)
+      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      signal: options.timeoutMs ? AbortSignal.timeout(options.timeoutMs) : undefined
     });
+    let response: Response;
+    try {
+      response = await request();
+    } catch (error) {
+      if (!options.retryNetworkFailures) throw error;
+      await new Promise(resolve => setTimeout(resolve, 250));
+      response = await request();
+    }
     const body = await readJsonResponse(response, `Codex ${path}`);
     return { status: response.status, body };
   }

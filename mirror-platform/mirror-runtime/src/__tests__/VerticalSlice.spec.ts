@@ -42,6 +42,11 @@ describe('Community Garden vertical slice', () => {
       }
       if (request.url === '/api/chat') {
         receivedLocalContext = JSON.parse(body.messages[1].content);
+        const conversationalContent = receivedLocalContext?.userEnglish === 'yes i would. something gothic'
+          ? receivedLocalContext?.repair?.required === true
+            ? 'Start with Frankenstein by Mary Shelley, then try Dracula by Bram Stoker.'
+            : 'ARI: "Yes, I would. Something gothic."'
+          : 'Reflection is moving as an open climate.';
         response.writeHead(200, { 'content-type': 'application/json' });
         response.end(JSON.stringify({
           model: 'qwen3:4b-instruct',
@@ -50,7 +55,7 @@ describe('Community Garden vertical slice', () => {
             evidence: 'The unresolved phrase places both grounded labels together.',
             counterexample: 'Reject when reviewed uses consistently separate Amber from Glow.',
             confidence: 'low'
-          }) : 'Reflection is moving as an open climate.' },
+          }) : conversationalContent },
           done: true,
           total_duration: 1_000_000_000,
           load_duration: 1_000_000,
@@ -231,6 +236,38 @@ describe('Community Garden vertical slice', () => {
         response.end(JSON.stringify({ differenceCount: 1, differences: [{ operation: 'substitution', leftPosition: 1, rightPosition: 1, left: 'c', right: 'b' }] }));
         return;
       }
+      if (request.url === '/api/v1/foundation/brigde/build') {
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({
+          version: 'brigde-foundation.v2',
+          name: 'BRIGDE',
+          acronym: [
+            { letter: 'B', word: 'Buildable' }, { letter: 'R', word: 'Reusable' },
+            { letter: 'I', word: 'Independent' }, { letter: 'G', word: 'Grouped' },
+            { letter: 'D', word: 'Dots' }, { letter: 'E', word: 'Enterconnected' }
+          ],
+          counts: { groups: 2, occurrences: 3, bridges: 2, reusableGroups: 1, cells: 24, dots: 144 },
+          groups: [{ id: 'w1', reusable: true }, { id: 'w2', reusable: false }],
+          occurrences: [{ id: 'o1', groupId: 'w1' }, { id: 'o2', groupId: 'w1' }, { id: 'o3', groupId: 'w2' }],
+          bridges: [{ id: 'b1', fromOccurrenceId: 'o1', toOccurrenceId: 'o2' }, { id: 'b2', fromOccurrenceId: 'o2', toOccurrenceId: 'o3' }],
+          boundary: { mode: 'structure_only', bridgeCreatesMeaning: false, graphMutationAllowed: false }
+        }));
+        return;
+      }
+      if (request.url === '/api/v1/foundation/acronyms/expand') {
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({
+          version: 'acronym-graph.v1',
+          growth: { openEnded: true, terminal: false },
+          degreeOfVision: { permanentDepthLimit: null, nodesVisible: 1, edgesVisible: 0 },
+          nodes: [{ id: 'word:cat', word: 'CAT', isAcronym: true, slots: [] }],
+          edges: [],
+          frontier: { awaitingDefinitions: ['CAT'], deferredByDegreeOfVision: [], pendingWords: ['CAT'] },
+          continuation: { version: 'acronym-frontier.v1', available: true, pendingWords: ['CAT'], expandedWords: [], knownWords: ['cat'] },
+          boundary: { expansionCreatesMeaning: false, graphMutationAllowed: false }
+        }));
+        return;
+      }
       if (request.url === '/api/v1/braille/math/curriculum') {
         response.writeHead(200, { 'content-type': 'application/json' });
         response.end(JSON.stringify({ version: '1.0.0', lessons: [{ id: 'cells-and-numbers' }] }));
@@ -331,7 +368,23 @@ describe('Community Garden vertical slice', () => {
         response.end(JSON.stringify({
           version: 'private-conversation-memory.v1', events: conversationEvents.slice(-24),
           eventCount: conversationEvents.length, throughSequence: conversationEvents.at(-1)?.sequence || null,
-          truncated: false, boundary: { sharedGraphMutationAllowed: false }
+          truncated: false,
+          developmentalArchive: {
+            version: 'private-developmental-archive.v1', consulted: true, source: 'codex_history',
+            selection: 'exact_lexical_relevance',
+            events: [
+              { sourceThreadId: 'codex-thread-1', sourceEventId: 'codex-user-1', speaker: 'You', role: 'user', content: 'personal context developed in Codex', createdAt: '2026-08-01T00:00:00Z', relevance: 1 },
+              { sourceThreadId: 'codex-thread-1', sourceEventId: 'codex-assistant-1', speaker: 'Codex', role: 'assistant_reference', content: 'Codex response remains attributed.', createdAt: '2026-08-01T00:00:01Z', relevance: 1 }
+            ],
+            boundary: { codexSpeechBecomesAriSpeech: false, automaticModelTrainingAllowed: false }
+          },
+          branch: {
+            version: 'personal-ari-branch.v1', branchId: 'ari_testbranch0001', scope: 'authenticated_person_only',
+            absorption: { personObservationCount: conversationEvents.filter(event => event.role === 'user').length, ariResponseCount: conversationEvents.filter(event => event.role === 'assistant').length, contextWindowObservationCount: 1, latestMove: 'continuation' },
+            adaptation: { mode: 'conversation_context_not_model_training', expressionPacing: 'concise', recentMoves: ['continuation'] },
+            boundary: { crossPersonAccessAllowed: false, sharedGraphMutationAllowed: false, automaticModelTrainingAllowed: false, contextualAdaptationAllowed: true }
+          },
+          boundary: { sharedGraphMutationAllowed: false }
         }));
         return;
       }
@@ -775,8 +828,17 @@ describe('Community Garden vertical slice', () => {
       expect(localAiBody.relationalEvidence.notice).toContain('no relationship is established');
       expect(localAiBody.team.registryVersion).toBe('ari-tool-registry.v1');
       expect(localAiBody.team.coordinator).toBe('ARI');
-      expect(localAiBody.team.participatingMembers).toEqual(['FEN', 'CARA', 'CORA', 'VERA', 'LEA']);
-      expect(localAiBody.team.receipts).toHaveLength(6);
+      expect(localAiBody.team.participatingMembers).toEqual(['LEA', 'FEN', 'CARA', 'CORA', 'VERA']);
+      expect(localAiBody.team.receipts.map(receipt => receipt.toolId)).toEqual([
+        'lea.compose-candidate-language',
+        'fen.trace-language',
+        'cara.read-relational-graph',
+        'cora.compare-ordered-language',
+        'vera.verify-relational-boundary',
+        'vera.validate-candidate-language',
+        'fen.trace-language'
+      ]);
+      expect(localAiBody.team.receipts).toHaveLength(7);
       expect(localAiBody.team.receipts.every(receipt => receipt.status === 'completed')).toBe(true);
       expect(localAiBody.team.receipts.every(receipt => receipt.boundary.sharedGraphMutationAllowed === false)).toBe(true);
       expect(JSON.stringify(localAiBody.team.receipts)).not.toContain('Amber Glow');
@@ -789,12 +851,25 @@ describe('Community Garden vertical slice', () => {
         modelWeightsChanged: false,
         activeAdapterChanged: false
       }));
+      expect(localAiBody.trace.responsePipeline).toEqual(expect.objectContaining({
+        version: 'open-expression-closed-validation.v1',
+        expressionStage: 'qwen_open_candidate',
+        validationStage: 'ari_closed_garden_gate',
+        validationStatus: 'accepted',
+        repaired: false
+      }));
+      expect(localAiBody.boundary.mode).toBe('open_expression_then_closed_garden_validation');
       expect(receivedLocalContext?.userEnglish).toBe('Amber Glow');
-      expect(receivedLocalContext?.signal.numericSequence.length).toBeGreaterThan(0);
-      expect(receivedLocalContext?.relationships.sourceLayer).toBe('chromabridge_knowledge');
-      expect(receivedLocalContext?.learnedAlignment.contractVerified).toBe(true);
-      expect(receivedLocalContext?.ariFoundation.identity.name).toBe('ARI');
-      expect(receivedLocalContext?.ariFoundation.roles.qwen).toContain('supplies candidate words');
+      expect(receivedLocalContext?.outputContract).toEqual(expect.objectContaining({
+        composeBeforeValidation: true,
+        repeatPersonStatementByDefault: false,
+        askAlreadyAnsweredQuestion: false,
+        advanceAnsweredTurn: true
+      }));
+      expect(receivedLocalContext).not.toHaveProperty('signal');
+      expect(receivedLocalContext).not.toHaveProperty('relationships');
+      expect(receivedLocalContext).not.toHaveProperty('learnedAlignment');
+      expect(receivedLocalContext).not.toHaveProperty('ariFoundation');
       expect(receivedAlignmentRequest?.mode).toBe('authority_boundary');
       expect(receivedAlignmentRequest?.record.name).toBe('Amber Glow');
       expect(alignmentRequestCount).toBe(1);
@@ -876,6 +951,40 @@ describe('Community Garden vertical slice', () => {
         body: JSON.stringify({ left: 'CAT', right: 'BAT' })
       });
       expect(comparison.status).toBe(200);
+
+      const bridge = await fetch(`http://127.0.0.1:${mirrorAddress.port}/foundation/brigde/build`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin' },
+        body: JSON.stringify({ text: 'CAT cat BAT' })
+      });
+      const bridgeBody = await bridge.json() as {
+        name: string;
+        counts: { groups: number; bridges: number };
+        boundary: { bridgeCreatesMeaning: boolean; graphMutationAllowed: boolean };
+      };
+      expect(bridge.status).toBe(200);
+      expect(bridgeBody.name).toBe('BRIGDE');
+      expect(bridgeBody.counts).toEqual(expect.objectContaining({ groups: 2, bridges: 2 }));
+      expect(bridgeBody.boundary.bridgeCreatesMeaning).toBe(false);
+      expect(bridgeBody.boundary.graphMutationAllowed).toBe(false);
+
+      const acronym = await fetch(`http://127.0.0.1:${mirrorAddress.port}/foundation/acronyms/expand`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin' },
+        body: JSON.stringify({ roots: ['CAT'] })
+      });
+      const acronymBody = await acronym.json() as {
+        growth: { openEnded: boolean; terminal: boolean };
+        degreeOfVision: { permanentDepthLimit: null };
+        continuation: { available: boolean };
+        boundary: { expansionCreatesMeaning: boolean; graphMutationAllowed: boolean };
+      };
+      expect(acronym.status).toBe(200);
+      expect(acronymBody.growth).toEqual({ openEnded: true, terminal: false });
+      expect(acronymBody.degreeOfVision.permanentDepthLimit).toBeNull();
+      expect(acronymBody.continuation.available).toBe(true);
+      expect(acronymBody.boundary.expansionCreatesMeaning).toBe(false);
+      expect(acronymBody.boundary.graphMutationAllowed).toBe(false);
 
       const compiled = await fetch(`http://127.0.0.1:${mirrorAddress.port}/foundation/braille-runtime/compile`, {
         method: 'POST',
@@ -1013,6 +1122,13 @@ describe('Community Garden vertical slice', () => {
       expect(personalCultivationBody.cultivation.persisted).toBe(true);
       expect(personalCultivationBody.cultivation.persistenceLayer).toBe('private_conversation_transcript');
       expect(personalCultivationBody.cultivation.sharedGraphMutated).toBe(false);
+      expect(personalCultivationBody.ariBranch).toEqual(expect.objectContaining({
+        version: 'personal-ari-branch.v1', scope: 'authenticated_person_only'
+      }));
+      expect(personalCultivationBody.ariBranch.absorption.currentMove).toBe('brief_statement');
+      expect(personalCultivationBody.ariBranch.boundary).toEqual(expect.objectContaining({
+        crossPersonAccessAllowed: false, automaticModelTrainingAllowed: false, contextualAdaptationAllowed: true
+      }));
       expect(personalCultivationBody.comparisonReceipt).toEqual(expect.objectContaining({
         version: 'ari-comparison.v1', operation: 'bounded_structural_comparison'
       }));
@@ -1023,7 +1139,19 @@ describe('Community Garden vertical slice', () => {
         comparisonCreatesMeaning: false, graphMutationAllowed: false, automaticLearningAllowed: false
       }));
       expect(personalCultivationBody.boundary.crossPersonAccessAllowed).toBe(false);
-      expect(receivedLocalContext?.comparisonLedger.comparisons[0].observationSequence).toBe(1);
+      expect(receivedLocalContext?.conversationMove).toBe('brief_statement');
+      expect(receivedLocalContext?.outputContract).toEqual(expect.objectContaining({
+        output: 'ari_spoken_reply_only', composeBeforeValidation: true, includeReceipt: false
+      }));
+      expect(receivedLocalContext).not.toHaveProperty('comparisonLedger');
+      expect(receivedLocalContext?.personalAriBranch).toEqual(expect.objectContaining({
+        version: 'personal-ari-branch.v1', scope: 'authenticated_person_only'
+      }));
+      expect(receivedLocalContext?.developmentalHistory).toEqual(expect.objectContaining({
+        version: 'private-developmental-archive.v1', consulted: true, source: 'codex_history'
+      }));
+      expect(receivedLocalContext?.developmentalHistory.events.map((event: Record<string, any>) => event.speaker)).toEqual(['You', 'Codex']);
+      expect(receivedLocalContext?.developmentalHistory.boundary.codexSpeechBecomesAriSpeech).toBe(false);
 
       const personalTranscript = await fetch(`http://127.0.0.1:${mirrorAddress.port}/api/v1/me/transcript`, {
         headers: { cookie: session! }
@@ -1035,6 +1163,22 @@ describe('Community Garden vertical slice', () => {
         version: 'ari-comparison.v1', comparedObservationSequences: [1], graphMutationAllowed: false
       }));
       expect(personalTranscriptBody.boundary.crossPersonAccessAllowed).toBe(false);
+
+      const repairedCultivation = await fetch(`http://127.0.0.1:${mirrorAddress.port}/api/v1/me/cultivate`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-mirror-request': 'same-origin', cookie: session! },
+        body: JSON.stringify({ input: 'yes i would. something gothic' })
+      });
+      const repairedCultivationBody = await repairedCultivation.json() as Record<string, any>;
+      expect(repairedCultivation.status).toBe(200);
+      expect(repairedCultivationBody.fruit.text).toContain('Frankenstein');
+      expect(repairedCultivationBody.fruit.text).not.toContain('ARI:');
+      expect(repairedCultivationBody.cultivation.responsePipeline).toEqual(expect.objectContaining({
+        expressionStage: 'qwen_open_candidate',
+        validationStage: 'ari_closed_garden_gate',
+        validationStatus: 'accepted',
+        repaired: true
+      }));
 
       const personalGarden = await fetch(`http://127.0.0.1:${mirrorAddress.port}/api/v1/me/garden`, {
         headers: { cookie: session! }

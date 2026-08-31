@@ -6,6 +6,8 @@ import { assembleBrailleRuntimeModule } from '../lib/braille-runtime-module.js';
 import { runStructuralLanguageLoop } from '../lib/language-loop.js';
 import { buildVerifiedTrainingDataset, normalizeTrainingInputs } from '../lib/training-dataset.js';
 import { buildColorAtlasTrainingDataset } from '../lib/color-atlas-training-dataset.js';
+import { buildBridgeStructure } from '../lib/bridge-foundation.js';
+import { expandAcronymGraph } from '../lib/acronym-graph.js';
 import {
   LETTER_ACCOUNTABILITY_VERSION,
   analyzeLetterAccountability,
@@ -18,6 +20,7 @@ import { requireAdmin, requireAuth } from '../middleware/auth.js';
 const router = express.Router();
 const MAX_LETTER_INPUT_CODE_POINTS = 10_000;
 const MAX_COMPARISON_GRAPHEMES = 128;
+const MAX_BRIDGE_INPUT_CODE_POINTS = 2_000;
 
 router.post('/foundation/analyze', (req, res, next) => {
   try {
@@ -56,6 +59,32 @@ router.post('/foundation/letters/compare', (req, res, next) => {
       return res.status(413).json({ error: 'comparison words must be 128 grapheme clusters or fewer' });
     }
     res.json(compareLetterPatterns(left, right));
+  } catch (error) { next(error); }
+});
+
+router.post('/foundation/bridge/build', (req, res, next) => {
+  try {
+    const text = String(req.body?.text || '');
+    if ([...text].length > MAX_BRIDGE_INPUT_CODE_POINTS) {
+      return res.status(413).json({ error: 'BRIGDE input must be 2000 Unicode code points or fewer' });
+    }
+    res.json(buildBridgeStructure(text));
+  } catch (error) { next(error); }
+});
+
+router.post('/foundation/brigde/build', (req, res, next) => {
+  try {
+    const text = String(req.body?.text || '');
+    if ([...text].length > MAX_BRIDGE_INPUT_CODE_POINTS) {
+      return res.status(413).json({ error: 'BRIGDE input must be 2000 Unicode code points or fewer' });
+    }
+    res.json(buildBridgeStructure(text));
+  } catch (error) { next(error); }
+});
+
+router.post('/foundation/acronyms/expand', (req, res, next) => {
+  try {
+    res.json(expandAcronymGraph(req.body || {}));
   } catch (error) { next(error); }
 });
 

@@ -1,0 +1,16 @@
+{
+  "name": "@mirror-platform/ari-runtime",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Independent, persistent local runtime for ARI objectives.",
+  "scripts": {
+    "dev": "node src/main.mjs",
+    "start": "node src/main.mjs",
+    "build": "node --check src/main.mjs && node --check src/runtime.mjs && node --check src/store.mjs && node --check src/planner.mjs && node --check src/toolkit.mjs && node --check src/http.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -17,7 +17,7 @@ $tunnelLog = Join-Path $logDirectory 'tunnel.log'
 $cloudflared = Join-Path $env:LOCALAPPDATA 'Programs\cloudflared\cloudflared.exe'
 $ollama = Join-Path $env:LOCALAPPDATA 'Programs\Ollama\ollama.exe'
 $pnpm = Join-Path $env:APPDATA 'npm\pnpm.cmd'
-$requiredApplicationPorts = @(3000, 3100, 3200, 4173, 11435)
+$requiredApplicationPorts = @(3000, 3100, 3200, 3300, 4173, 11435)
 
 New-Item -ItemType Directory -Path $logDirectory -Force | Out-Null
 
@@ -86,7 +86,7 @@ function Start-GardenPlatform {
   $env:MIRROR_TRUST_PROXY = 'true'
   $env:MIRROR_RUNTIME_URL = 'http://127.0.0.1:3100'
   $env:GARDEN_GATEWAY_PORT = '3200'
-  $env:LOCAL_MODEL_NAME = 'mirror-qwen3-conversation:v2'
+  $env:LOCAL_MODEL_NAME = 'mirror-qwen3-conversation:codex-v3'
 
   Write-GardenLog 'Starting the protected Community Garden application stack.'
   return Start-Process `

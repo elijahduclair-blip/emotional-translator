@@ -55,6 +55,25 @@ describe('CodexClient compact persistence', () => {
     );
   });
 
+  it('retries one transient network failure for an explicitly idempotent request', async () => {
+    let attempts = 0;
+    const client = new CodexClient('http://codex.test', 'service-token', async () => {
+      attempts += 1;
+      if (attempts === 1) throw new TypeError('fetch failed');
+      return new Response(JSON.stringify({ document: { id: 'journal-1' }, idempotent: false }), {
+        status: 201, headers: { 'content-type': 'application/json' }
+      });
+    });
+
+    const result = await client.requestJson('/api/v1/conversation-memory/documents', {
+      method: 'POST', body: { fileName: 'journal.pdf' }, retryNetworkFailures: true
+    });
+
+    expect(attempts).toBe(2);
+    expect(result.status).toBe(201);
+    expect(result.body.document.id).toBe('journal-1');
+  });
+
   it('reads the active conversational adapter only with the runtime service token', async () => {
     let authorization = '';
     const client = new CodexClient('http://codex.test', 'service-token', async (_url, init) => {

@@ -78,6 +78,57 @@ test('letter accountability routes expose complete bounded structural records', 
   assert.equal(oversized.status, 413);
 });
 
+test('BRIGDE route groups reusable dot structures and connects ordered occurrences', async () => {
+  const response = await fetch(`${API_ROOT}/api/v1/foundation/brigde/build`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: 'CAT cat BAT' })
+  });
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.name, 'BRIGDE');
+  assert.equal(body.acronym.map(item => item.letter).join(''), 'BRIGDE');
+  assert.equal(body.counts.groups, 2);
+  assert.equal(body.counts.occurrences, 3);
+  assert.equal(body.counts.bridges, 2);
+  assert.equal(body.groups[0].reusable, true);
+  assert.equal(body.boundary.graphMutationAllowed, false);
+
+  const oversized = await fetch(`${API_ROOT}/api/v1/foundation/brigde/build`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ text: 'a'.repeat(2001) })
+  });
+  assert.equal(oversized.status, 413);
+});
+
+test('open acronym route preserves an unbounded frontier behind a finite degree of vision', async () => {
+  const first = await fetch(`${API_ROOT}/api/v1/foundation/acronyms/expand`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ roots: ['CAT'] })
+  });
+  const firstBody = await first.json();
+  assert.equal(first.status, 200);
+  assert.equal(firstBody.growth.openEnded, true);
+  assert.equal(firstBody.degreeOfVision.permanentDepthLimit, null);
+  assert.deepEqual(firstBody.frontier.awaitingDefinitions, ['CAT']);
+
+  const resumed = await fetch(`${API_ROOT}/api/v1/foundation/acronyms/expand`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      continuation: firstBody.continuation,
+      definitions: { CAT: ['Connected', 'Accountable', 'Traceable'] }
+    })
+  });
+  const resumedBody = await resumed.json();
+  assert.equal(resumed.status, 200);
+  assert.equal(resumedBody.edges.length, 3);
+  assert.equal(resumedBody.boundary.graphMutationAllowed, false);
+});
+
 test('Braille Runtime compiler remains proposal-only and rejects arbitrary actions', async () => {
   const compiled = await fetch(`${API_ROOT}/api/v1/foundation/braille-runtime/compile`, {
     method: 'POST',

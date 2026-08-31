@@ -4,6 +4,7 @@ node_modules/
 **/coverage/
 .env
 *.log
+ari-runtime/data/
 training/.venv/
 training/cache/
 training/data/

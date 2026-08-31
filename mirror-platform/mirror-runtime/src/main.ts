@@ -10,8 +10,10 @@ async function main() {
     enableAlignmentModel: process.env.MIRROR_ENABLE_ALIGNMENT_MODEL !== 'false',
     codexServiceToken: process.env.RUNTIME_SERVICE_TOKEN || (process.env.NODE_ENV === 'production' ? '' : 'mirror-platform-local'),
     localModelUrl: process.env.LOCAL_MODEL_URL || 'http://127.0.0.1:11434',
-    localModelName: process.env.LOCAL_MODEL_NAME || 'mirror-qwen3-conversation:v2',
+    localModelName: process.env.LOCAL_MODEL_NAME || 'mirror-qwen3-conversation:codex-v3',
     alignmentModelUrl: process.env.ALIGNMENT_MODEL_URL || 'http://127.0.0.1:11435',
+    ariRuntimeUrl: process.env.ARI_RUNTIME_URL || 'http://127.0.0.1:3300',
+    ariRuntimeControlKey: process.env.ARI_RUNTIME_CONTROL_KEY || process.env.RUNTIME_SERVICE_TOKEN || '',
     cloudflareZoneTag: process.env.CF_ZONE_TAG || '',
     cloudflareAnalyticsToken: process.env.CF_ANALYTICS_TOKEN || ''
   });

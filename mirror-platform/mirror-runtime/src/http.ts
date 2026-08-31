@@ -6,6 +6,7 @@ import { MirrorRuntimeService } from './services/mirror-runtime.service';
 
 const MAX_BODY_BYTES = 16 * 1024;
 const MAX_FOUNDATION_BODY_BYTES = 64 * 1024;
+const MAX_DOCUMENT_BODY_BYTES = 12 * 1024 * 1024;
 const MAX_GARDEN_SEED_CODE_POINTS = 10_000;
 const GARDEN_FRUIT_RATE_LIMIT = 20;
 const GARDEN_FRUIT_RATE_WINDOW_MS = 60 * 1000;
@@ -47,6 +48,108 @@ export function createMirrorHttpServer(service: MirrorRuntimeService) {
 
       if (request.method === 'GET' && path === '/api/v1/ari/tools') {
         return sendJson(response, 200, service.getRuntime().getAriToolRegistry());
+      }
+
+      if (request.method === 'GET' && path === '/api/v1/me/ari/runtime') {
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().ariRuntimeRequest('/v1/runtime', { ownerToken: token }));
+      }
+
+      const independentRuntimeControl = path.match(/^\/api\/v1\/me\/ari\/runtime\/(pause|resume|wake)$/);
+      if (request.method === 'POST' && independentRuntimeControl) {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().ariRuntimeRequest(`/v1/runtime/${independentRuntimeControl[1]}`, {
+          method: 'POST', ownerToken: token
+        }));
+      }
+
+      if (path === '/api/v1/me/ari/runtime/objectives' && request.method === 'GET') {
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().ariRuntimeRequest('/v1/objectives', { ownerToken: token }));
+      }
+
+      if (path === '/api/v1/me/ari/runtime/objectives' && request.method === 'POST') {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().ariRuntimeRequest('/v1/objectives', {
+          method: 'POST', body: await readJson(request, MAX_FOUNDATION_BODY_BYTES), ownerToken: token
+        }));
+      }
+
+      const independentObjective = path.match(/^\/api\/v1\/me\/ari\/runtime\/objectives\/([^/]+)$/);
+      if (independentObjective && request.method === 'GET') {
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().ariRuntimeRequest(
+          `/v1/objectives/${encodeURIComponent(decodeURIComponent(independentObjective[1]))}`, { ownerToken: token }
+        ));
+      }
+
+      if (independentObjective && request.method === 'PATCH') {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().ariRuntimeRequest(
+          `/v1/objectives/${encodeURIComponent(decodeURIComponent(independentObjective[1]))}`,
+          { method: 'PATCH', body: await readJson(request), ownerToken: token }
+        ));
+      }
+
+      if (request.method === 'GET' && path === '/api/v1/me/ari/autonomy/objectives') {
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/ari/autonomy/objectives', { userToken: token }));
+      }
+
+      if (request.method === 'POST' && path === '/api/v1/me/ari/autonomy/objectives') {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        const body = await readJson(request, MAX_FOUNDATION_BODY_BYTES);
+        if (body.run === false) {
+          return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/ari/autonomy/objectives', {
+            method: 'POST', body, userToken: token
+          }));
+        }
+        const result = await service.getRuntime().runAriAutonomousObjective(body, token);
+        return sendJson(response, 201, result);
+      }
+
+      const autonomyRunMatch = path.match(/^\/api\/v1\/me\/ari\/autonomy\/objectives\/([^/]+)\/run$/);
+      if (request.method === 'POST' && autonomyRunMatch) {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        const body = await readJson(request);
+        return sendJson(response, 200, await service.getRuntime().runAriAutonomousObjective({
+          ...body, objectiveId: decodeURIComponent(autonomyRunMatch[1])
+        }, token));
+      }
+
+      const autonomyOutcomeMatch = path.match(/^\/api\/v1\/me\/ari\/autonomy\/objectives\/([^/]+)\/outcomes$/);
+      if (request.method === 'POST' && autonomyOutcomeMatch) {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest(
+          `/api/v1/ari/autonomy/objectives/${encodeURIComponent(decodeURIComponent(autonomyOutcomeMatch[1]))}/outcomes`,
+          { method: 'POST', body: await readJson(request), userToken: token }
+        ));
+      }
+
+      const autonomyRetryMatch = path.match(/^\/api\/v1\/me\/ari\/autonomy\/objectives\/([^/]+)\/retry$/);
+      if (request.method === 'POST' && autonomyRetryMatch) {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest(
+          `/api/v1/ari/autonomy/objectives/${encodeURIComponent(decodeURIComponent(autonomyRetryMatch[1]))}/retry`,
+          { method: 'POST', body: await readJson(request), userToken: token }
+        ));
+      }
+
+      const autonomyControlMatch = path.match(/^\/api\/v1\/me\/ari\/autonomy\/objectives\/([^/]+)$/);
+      if (request.method === 'PATCH' && autonomyControlMatch) {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest(
+          `/api/v1/ari/autonomy/objectives/${encodeURIComponent(decodeURIComponent(autonomyControlMatch[1]))}`,
+          { method: 'PATCH', body: await readJson(request), userToken: token }
+        ));
       }
 
       if (request.method === 'POST' && path === '/analytics/visit') {
@@ -143,6 +246,50 @@ export function createMirrorHttpServer(service: MirrorRuntimeService) {
         const result = await service.getRuntime().codexRequest(`/api/v1/conversation-memory/transcript${suffix}`, { userToken: token });
         if (result.status >= 400) return proxyResult(response, result);
         return sendJson(response, 200, personalTranscript(result.body));
+      }
+
+      if (request.method === 'POST' && path === '/api/v1/me/journal/files') {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/conversation-memory/documents', {
+          method: 'POST', body: await readJson(request, MAX_DOCUMENT_BODY_BYTES), userToken: token,
+          retryNetworkFailures: true, timeoutMs: 180_000
+        }));
+      }
+
+      if (request.method === 'GET' && path === '/api/v1/me/journal/files') {
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/conversation-memory/documents', { userToken: token }));
+      }
+
+      const journalOcrFile = path.match(/^\/api\/v1\/me\/journal\/files\/([^/]+)\/ocr$/);
+      if (request.method === 'POST' && journalOcrFile) {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest(
+          `/api/v1/conversation-memory/documents/${encodeURIComponent(decodeURIComponent(journalOcrFile[1]))}/ocr`,
+          { method: 'POST', userToken: token, retryNetworkFailures: true, timeoutMs: 180_000 }
+        ));
+      }
+
+      const journalFile = path.match(/^\/api\/v1\/me\/journal\/files\/([^/]+)$/);
+      if (request.method === 'DELETE' && journalFile) {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        return proxyResult(response, await service.getRuntime().codexRequest(
+          `/api/v1/conversation-memory/documents/${encodeURIComponent(decodeURIComponent(journalFile[1]))}`,
+          { method: 'DELETE', userToken: token }
+        ));
+      }
+
+      if (request.method === 'POST' && path === '/api/v1/me/conversation-imports/codex') {
+        requireSameOriginMutation(request);
+        const token = requireSession(request);
+        const result = await service.getRuntime().codexRequest('/api/v1/conversation-memory/imports/codex', {
+          method: 'POST', body: await readJson(request, MAX_FOUNDATION_BODY_BYTES), userToken: token
+        });
+        if (result.status >= 400) return proxyResult(response, result);
+        return sendJson(response, result.status, personalCodexImport(result.body));
       }
 
       if (request.method === 'POST' && path === '/api/v1/me/session') {
@@ -401,6 +548,27 @@ export function createMirrorHttpServer(service: MirrorRuntimeService) {
         requireSameOriginMutation(request);
         return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/foundation/letters/compare', {
           method: 'POST', body: await readJson(request)
+        }));
+      }
+
+      if (request.method === 'POST' && path === '/foundation/bridge/build') {
+        requireSameOriginMutation(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/foundation/bridge/build', {
+          method: 'POST', body: await readJson(request, MAX_FOUNDATION_BODY_BYTES)
+        }));
+      }
+
+      if (request.method === 'POST' && path === '/foundation/brigde/build') {
+        requireSameOriginMutation(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/foundation/brigde/build', {
+          method: 'POST', body: await readJson(request, MAX_FOUNDATION_BODY_BYTES)
+        }));
+      }
+
+      if (request.method === 'POST' && path === '/foundation/acronyms/expand') {
+        requireSameOriginMutation(request);
+        return proxyResult(response, await service.getRuntime().codexRequest('/api/v1/foundation/acronyms/expand', {
+          method: 'POST', body: await readJson(request, MAX_FOUNDATION_BODY_BYTES)
         }));
       }
 
@@ -740,7 +908,7 @@ function publicGardenFruit(input: string, result: Record<string, any>, personalC
       text: String(result.response?.text || '')
     },
     cultivation: {
-      stages: ['received', 'translated', 'related', 'composed'],
+      stages: ['received', 'composed_openly', 'translated', 'related', 'validated_closed'],
       translator: {
         name: String(result.translator?.name || 'ARI'),
         domain: String(result.translator?.domain || 'Community Garden'),
@@ -748,6 +916,13 @@ function publicGardenFruit(input: string, result: Record<string, any>, personalC
         foundationVersion: String(result.translator?.foundationVersion || 'unresolved')
       },
       graphSource: String(result.trace?.graphSource || 'unresolved'),
+      responsePipeline: {
+        version: String(result.trace?.responsePipeline?.version || 'open-expression-closed-validation.v1'),
+        expressionStage: 'qwen_open_candidate',
+        validationStage: 'ari_closed_garden_gate',
+        validationStatus: String(result.trace?.responsePipeline?.validationStatus || 'unresolved'),
+        repaired: result.trace?.responsePipeline?.repaired === true
+      },
       relationshipNotice: String(result.relationalEvidence?.notice || 'No relational evidence summary was returned.'),
       personalContextConsulted,
       persisted: transcriptSaved,
@@ -791,13 +966,47 @@ function personalApiFruit(input: string, result: Record<string, any>) {
       transcriptSequence: Number(result.conversationMemory?.assistantEventSequence || 0) || null,
       sharedGraphMutated: false
     },
+    ariBranch: personalAriBranch(result.conversationMemory?.branch),
     comparisonReceipt: personalComparisonReceipt(result.comparisonReceipt),
     boundary: {
       ...fruit.boundary,
       mode: 'personal_api_private_context',
       crossPersonAccessAllowed: false,
       automaticLearningAllowed: false,
-      reason: 'The personal cultivation API saves the ordered exchange only in the authenticated person private transcript. It does not change shared knowledge or learn automatically.'
+      automaticModelTrainingAllowed: false,
+      contextualAdaptationAllowed: true,
+      reason: 'The personal cultivation API absorbs the ordered exchange into this authenticated person private ARI branch. It does not train model weights or change shared knowledge automatically.'
+    }
+  };
+}
+
+function personalAriBranch(value: Record<string, any> | null | undefined) {
+  if (!value || value.version !== 'personal-ari-branch.v1') return null;
+  const allowedMoves = new Set(['greeting', 'correction', 'question', 'teaching', 'reflection', 'brief_statement', 'continuation']);
+  const recentMoves = (Array.isArray(value.adaptation?.recentMoves) ? value.adaptation.recentMoves : [])
+    .map((move: unknown) => String(move || ''))
+    .filter((move: string) => allowedMoves.has(move))
+    .slice(-8);
+  return {
+    version: 'personal-ari-branch.v1',
+    branchId: String(value.branchId || '').slice(0, 32),
+    scope: 'authenticated_person_only',
+    absorption: {
+      personObservationCount: boundedNonnegative(value.absorption?.personObservationCount, Number.MAX_SAFE_INTEGER),
+      ariResponseCount: boundedNonnegative(value.absorption?.ariResponseCount, Number.MAX_SAFE_INTEGER),
+      currentMove: allowedMoves.has(String(value.absorption?.latestMove || '')) ? String(value.absorption.latestMove) : null
+    },
+    adaptation: {
+      mode: 'conversation_context_not_model_training',
+      expressionPacing: ['unestablished', 'concise', 'balanced', 'expansive'].includes(value.adaptation?.expressionPacing)
+        ? value.adaptation.expressionPacing : 'unestablished',
+      recentMoves
+    },
+    boundary: {
+      crossPersonAccessAllowed: false,
+      sharedGraphMutationAllowed: false,
+      automaticModelTrainingAllowed: false,
+      contextualAdaptationAllowed: true
     }
   };
 }
@@ -820,11 +1029,38 @@ function personalTranscript(body: Record<string, any>) {
       nextBefore: Number(body.nextBefore) || null,
       order: 'oldest_to_newest_within_page'
     },
+    ariBranch: personalAriBranch(body.branch),
     boundary: {
       mode: 'account_scoped_append_only_transcript',
       crossPersonAccessAllowed: false,
       sharedGraphMutationAllowed: false,
-      automaticLearningAllowed: false
+      automaticLearningAllowed: false,
+      automaticModelTrainingAllowed: false,
+      contextualAdaptationAllowed: true
+    }
+  };
+}
+
+function personalCodexImport(body: Record<string, any>) {
+  return {
+    version: 'garden-api.v1',
+    import: {
+      source: 'codex_history',
+      received: boundedNonnegative(body.batch?.received, 25),
+      imported: boundedNonnegative(body.batch?.imported, 25),
+      existing: boundedNonnegative(body.batch?.existing, 25),
+      archiveEventCount: boundedNonnegative(body.archive?.eventCount, Number.MAX_SAFE_INTEGER),
+      personEventCount: boundedNonnegative(body.archive?.personEventCount, Number.MAX_SAFE_INTEGER),
+      codexEventCount: boundedNonnegative(body.archive?.codexEventCount, Number.MAX_SAFE_INTEGER)
+    },
+    boundary: {
+      mode: 'private_developmental_context',
+      crossPersonAccessAllowed: false,
+      codexSpeechBecomesAriSpeech: false,
+      sharedGraphMutationAllowed: false,
+      automaticLearningAllowed: false,
+      automaticModelTrainingAllowed: false,
+      contextualAdaptationAllowed: true
     }
   };
 }

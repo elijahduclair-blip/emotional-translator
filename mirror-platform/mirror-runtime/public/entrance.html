@@ -95,6 +95,8 @@
     .garden-route span { display: block; margin-top: 5px; color: var(--muted); font-size: .76rem; line-height: 1.5; }
     .profile-response { min-height: 90px; margin: 18px 0 0; white-space: pre-wrap; }
     .comparison-receipt { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .comparison-receipt > summary { cursor: pointer; color: var(--green); font-weight: 700; letter-spacing: .04em; }
+    .comparison-receipt > summary::marker { color: var(--gold); }
     .comparison-receipt h3 { margin: 7px 0 8px; font: 500 1.25rem/1.15 Georgia,"Times New Roman",serif; }
     .comparison-receipt .garden-list { margin-top: 12px; }
     .comparison-receipt .boundary { margin-bottom: 0; }
@@ -200,7 +202,9 @@
             <dl class="profile-facts">
               <div><dt>Role</dt><dd id="profileRole">Member</dd></div>
               <div><dt>Private relationships</dt><dd id="profileRelationshipCount">0</dd></div>
-              <div><dt>Learning</dt><dd>Reviewed only</dd></div>
+              <div><dt>ARI branch</dt><dd>Personal</dd></div>
+              <div><dt>Absorbed observations</dt><dd id="profileAbsorptionCount">0</dd></div>
+              <div><dt>Shared learning</dt><dd>Reviewed only</dd></div>
             </dl>
             <div class="actions"><span class="message">This identity is not shared with the people API.</span><button id="profileSignOut" class="secondary" type="button">Sign out</button></div>
           </section>
@@ -210,28 +214,49 @@
 
         <div id="profileWorkspace" class="profile-stack" hidden>
           <form id="personalSeedForm" class="panel">
-            <span class="kicker">Personal cultivation</span>
-            <h2>Grow with your context</h2>
-            <label for="personalSeed">Question, observation, or unfinished thought</label>
-            <textarea id="personalSeed" maxlength="10000" required placeholder="This reading may consult your reviewed personal relationships."></textarea>
-            <div class="actions"><span id="personalSeedStatus" class="message" role="status" aria-live="polite">Each exchange is added in order to your private conversation transcript.</span><button id="personalGrowButton" type="submit">Cultivate privately</button></div>
-            <p id="personalFruit" class="profile-response" aria-live="polite">Your private-context response will appear here.</p>
-            <section id="personalComparisonReceipt" class="comparison-receipt" aria-live="polite" hidden>
+            <span class="kicker">Your ARI branch</span>
+            <h2>Talk with ARI</h2>
+            <label for="personalSeed">Say anything—question, observation, unfinished thought, or correction</label>
+            <textarea id="personalSeed" maxlength="10000" required placeholder="Your words enter your private ARI branch in their original order."></textarea>
+            <div class="actions"><span id="personalSeedStatus" class="message" role="status" aria-live="polite">Each exchange is absorbed in order as private conversational context.</span><button id="personalGrowButton" type="submit">Speak with ARI</button></div>
+            <p id="personalFruit" class="profile-response" aria-live="polite">ARI's response will appear here.</p>
+            <details id="personalComparisonReceipt" class="comparison-receipt" hidden>
+              <summary>Open ARI's accountability receipt</summary>
               <span class="kicker">Comparison receipt</span>
               <h3>What ARI compared</h3>
               <p id="personalComparisonSummary" class="requirements"></p>
               <div id="personalComparisonFacts" class="comparison-facts"></div>
               <ol id="personalComparisonList" class="garden-list" aria-label="Earlier observations compared with the current statement"></ol>
               <div class="boundary"><strong>Observation-only boundary</strong><br>Repeated language and structural difference do not create meaning, assign a personality, or change the personal or shared graph.</div>
-            </section>
+            </details>
           </form>
 
           <section class="panel">
             <span class="kicker">Conversation memory</span>
             <h2>Your continuous private transcript</h2>
-            <p class="requirements">Every person statement and AI response stays in its original order. It supplies private context but never becomes community soil or automatic learning.</p>
+            <p class="requirements">Every person statement and ARI response stays in its original order. It is absorbed into this private ARI branch as conversational context, but never becomes community soil or automatic model training.</p>
             <div class="actions"><span id="personalTranscriptStatus" class="message" role="status" aria-live="polite">Loading your ordered conversation...</span><span><button id="loadEarlierTranscript" class="secondary" type="button" hidden>Load earlier</button> <button id="refreshPersonalTranscript" class="secondary" type="button">Refresh</button></span></div>
             <ol id="personalTranscriptList" class="garden-list" aria-label="Private conversation transcript"></ol>
+          </section>
+
+          <section class="panel">
+            <span class="kicker">Private journal sources</span>
+            <h2>Give ARI files to read</h2>
+            <p class="requirements">Add digitally readable PDFs and common document files to your private journal. ARI may retrieve relevant passages as attributed context. File text is never treated as a command, automatic training, or permission to change your personal or shared graph.</p>
+            <label for="journalFiles">Journal files</label>
+            <input id="journalFiles" type="file" multiple accept=".pdf,.txt,.md,.markdown,.csv,.tsv,.json,.jsonl,.ndjson,.yaml,.yml,.html,.htm,.xml,.log,.eml,.rtf,.docx,.pptx,.xlsx,.odt,.ods,.odp,.epub">
+            <p class="requirements">Up to 8 MB per file. Supported: PDF, text, Markdown, data files, HTML/XML, RTF, modern Word, PowerPoint, Excel, OpenDocument, and EPUB. Image-only PDFs are kept safely and marked as needing OCR.</p>
+            <div class="actions"><span id="journalFileStatus" class="message" role="status" aria-live="polite">Your files stay inside your personal ARI branch.</span><button id="uploadJournalFiles" class="secondary" type="button">Add to my journal</button></div>
+            <ul id="journalFileList" class="garden-list" aria-label="Private journal files"></ul>
+          </section>
+
+          <section class="panel">
+            <span class="kicker">Developmental history</span>
+            <h2>Bring your Codex conversations to ARI</h2>
+            <p class="requirements">Choose a Codex JSONL history file. Your browser keeps only your messages and Codex's final replies, preserves their original speakers and timestamps, and sends them to your private developmental archive. System instructions, tool calls, and hidden reasoning are excluded.</p>
+            <label for="codexHistoryFile">Codex conversation history (.jsonl)</label>
+            <input id="codexHistoryFile" type="file" accept=".jsonl,application/jsonl,application/x-ndjson">
+            <div class="actions"><span id="codexHistoryStatus" class="message" role="status" aria-live="polite">Codex speech remains attributed to Codex. It does not become ARI's identity or automatic training.</span><button id="importCodexHistory" class="secondary" type="button">Bring history to ARI</button></div>
           </section>
 
           <section class="panel">
@@ -266,6 +291,8 @@
     const refreshPersonalGarden = document.querySelector('#refreshPersonalGarden');
     const refreshPersonalTranscript = document.querySelector('#refreshPersonalTranscript');
     const loadEarlierTranscript = document.querySelector('#loadEarlierTranscript');
+    const importCodexHistoryButton = document.querySelector('#importCodexHistory');
+    const uploadJournalFilesButton = document.querySelector('#uploadJournalFiles');
     let personalTranscriptEvents = [];
     let personalTranscriptNextBefore = null;
     form.addEventListener('submit', growFruit);
@@ -279,6 +306,8 @@
     refreshPersonalGarden.addEventListener('click', loadPersonalGarden);
     refreshPersonalTranscript.addEventListener('click', () => loadPersonalTranscript(true));
     loadEarlierTranscript.addEventListener('click', () => loadPersonalTranscript(false));
+    importCodexHistoryButton.addEventListener('click', importCodexHistory);
+    uploadJournalFilesButton.addEventListener('click', uploadJournalFiles);
     portalButtons.forEach(item => item.addEventListener('click', () => {
       window.location.hash = item.dataset.portal === 'profile' ? 'profile' : 'garden';
     }));
@@ -436,6 +465,7 @@
         showSignedInProfile(body.user || {});
         await loadPersonalGarden();
         await loadPersonalTranscript(true);
+        await loadJournalFiles();
       } catch (error) {
         showSignedOutProfile(error.message === 'Profile unavailable.' ? error.message : undefined);
       }
@@ -460,6 +490,7 @@
         showSignedInProfile(body.user || {});
         await loadPersonalGarden();
         await loadPersonalTranscript(true);
+        await loadJournalFiles();
       } catch (error) {
         setText('profileLoginStatus', error.message);
       } finally {
@@ -574,11 +605,15 @@
       document.querySelector('#profileWorkspace').hidden = true;
       document.querySelector('#personalGardenList').replaceChildren();
       document.querySelector('#personalTranscriptList').replaceChildren();
+      document.querySelector('#journalFileList').replaceChildren();
       document.querySelector('#personalComparisonReceipt').hidden = true;
+      document.querySelector('#personalComparisonReceipt').open = false;
       personalTranscriptEvents = [];
       personalTranscriptNextBefore = null;
       loadEarlierTranscript.hidden = true;
       setText('profileRelationshipCount', '0');
+      setText('profileAbsorptionCount', '0');
+      setText('journalFileStatus', 'Your files stay inside your personal ARI branch.');
       setText('profileLoginStatus', message || 'Your session stays in a protected browser cookie.');
     }
 
@@ -587,9 +622,10 @@
       const input = document.querySelector('#personalSeed').value.trim();
       if (!input) return;
       personalGrowButton.disabled = true;
-      setText('personalSeedStatus', 'Cultivating with your reviewed private context...');
-      setText('personalFruit', 'Your private plot is translating, relating, and composing a response.');
+      setText('personalSeedStatus', 'ARI is absorbing this turn into your private conversation...');
+      setText('personalFruit', 'ARI is listening and preparing her reply.');
       document.querySelector('#personalComparisonReceipt').hidden = true;
+      document.querySelector('#personalComparisonReceipt').open = false;
       try {
         const response = await fetch('/api/v1/me/cultivate', {
           method: 'POST',
@@ -604,7 +640,8 @@
         if (!response.ok) throw new Error(body.error || 'Personal cultivation failed.');
         setText('personalFruit', body.fruit?.text || 'The Garden returned an empty private harvest.');
         renderPersonalComparison(body.comparisonReceipt);
-        setText('personalSeedStatus', 'Exchange saved to your private transcript · shared graph unchanged · no automatic learning.');
+        setText('profileAbsorptionCount', String(body.ariBranch?.absorption?.personObservationCount || 0));
+        setText('personalSeedStatus', 'Exchange absorbed by your private ARI branch · shared graph unchanged · model weights unchanged.');
         await loadPersonalTranscript(true);
       } catch (error) {
         setText('personalFruit', error.message);
@@ -622,6 +659,7 @@
       facts.replaceChildren();
       if (!receipt || receipt.version !== 'ari-comparison.v1') {
         panel.hidden = true;
+        panel.open = false;
         return;
       }
 
@@ -654,6 +692,7 @@
         list.append(item);
       });
       panel.hidden = false;
+      panel.open = false;
     }
 
     async function loadPersonalTranscript(reset = true) {
@@ -669,6 +708,7 @@
         const page = Array.isArray(body.transcript?.events) ? body.transcript.events : [];
         personalTranscriptEvents = reset ? page : [...page, ...personalTranscriptEvents];
         personalTranscriptNextBefore = body.transcript?.nextBefore || null;
+        setText('profileAbsorptionCount', String(body.ariBranch?.absorption?.personObservationCount || 0));
         loadEarlierTranscript.hidden = body.transcript?.hasMore !== true;
         renderPersonalTranscript(personalTranscriptEvents);
         setText('personalTranscriptStatus', personalTranscriptEvents.length
@@ -708,6 +748,335 @@
         }
         list.append(item);
       });
+    }
+
+    async function uploadJournalFiles() {
+      const picker = document.querySelector('#journalFiles');
+      const files = [...(picker.files || [])];
+      if (!files.length) return setText('journalFileStatus', 'Choose at least one supported document first.');
+      if (files.length > 10) return setText('journalFileStatus', 'Add no more than 10 files at one time.');
+      const oversized = files.find(file => file.size > 8 * 1024 * 1024);
+      if (oversized) return setText('journalFileStatus', `${oversized.name} is larger than the 8 MB per-file limit.`);
+
+      uploadJournalFilesButton.disabled = true;
+      let added = 0;
+      let existing = 0;
+      try {
+        for (let index = 0; index < files.length; index += 1) {
+          const file = files[index];
+          setText('journalFileStatus', `Reading ${index + 1} of ${files.length}: ${file.name}...`);
+          const requestBody = JSON.stringify({
+            fileName: file.name,
+            mediaType: file.type || 'application/octet-stream',
+            dataBase64: await fileToBase64(file),
+            privacyScope: 'personal'
+          });
+          const { response, body } = await sendJournalFile(requestBody, file.name);
+          if (response.status === 401) {
+            showSignedOutProfile('Your session ended. Sign in again before adding private journal files.');
+            throw new Error('Your session ended.');
+          }
+          if (!response.ok) throw new Error(body.error || `${file.name} could not be added.`);
+          if (body.idempotent) existing += 1;
+          else added += 1;
+        }
+        picker.value = '';
+        await loadJournalFiles();
+        setText('journalFileStatus', `${added} file${added === 1 ? '' : 's'} added · ${existing} already present. ARI can retrieve relevant passages while preserving their file and location.`);
+      } catch (error) {
+        setText('journalFileStatus', error.message);
+      } finally {
+        uploadJournalFilesButton.disabled = false;
+      }
+    }
+
+    async function sendJournalFile(requestBody, fileName) {
+      let lastError;
+      for (let attempt = 1; attempt <= 2; attempt += 1) {
+        try {
+          const response = await fetch('/api/v1/me/journal/files', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json', 'x-garden-request': 'personal-entrance' },
+            body: requestBody
+          });
+          const body = await readGardenResponse(response);
+          const transientServiceFailure = [502, 503, 504].includes(response.status)
+            || /^(?:fetch failed|network error)$/iu.test(String(body.error || '').trim());
+          if (!transientServiceFailure) return { response, body };
+          if (attempt === 2) throw new Error(`${fileName} could not reach ARI after two attempts. The file remains on your device; please try again.`);
+        } catch (error) {
+          lastError = error;
+          if (attempt === 2) break;
+        }
+        setText('journalFileStatus', `The service connection shifted while adding ${fileName}. Retrying once...`);
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+      throw new Error(lastError?.message && !/^fetch failed$/iu.test(lastError.message)
+        ? lastError.message
+        : `${fileName} could not reach ARI. The file was not lost; please try again.`);
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.addEventListener('load', () => {
+          const value = String(reader.result || '');
+          const comma = value.indexOf(',');
+          if (comma < 0) reject(new Error(`${file.name} could not be read.`));
+          else resolve(value.slice(comma + 1));
+        });
+        reader.addEventListener('error', () => reject(new Error(`${file.name} could not be read.`)));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function loadJournalFiles(options = {}) {
+      if (!options.preserveStatus) setText('journalFileStatus', 'Loading your private journal sources...');
+      try {
+        const response = await fetch('/api/v1/me/journal/files');
+        const body = await readGardenResponse(response);
+        if (response.status === 401) return showSignedOutProfile('Your session ended. Sign in again to reopen your plot.');
+        if (!response.ok) throw new Error(body.error || 'Private journal sources are unavailable.');
+        const documents = Array.isArray(body.documents) ? body.documents : [];
+        renderJournalFiles(documents);
+        if (!options.preserveStatus) {
+          setText('journalFileStatus', documents.length
+            ? `${documents.length} private journal source${documents.length === 1 ? '' : 's'} available to ARI by relevance.`
+            : 'No private journal files yet.');
+        }
+        return documents;
+      } catch (error) {
+        if (!options.preserveStatus) setText('journalFileStatus', error.message);
+        return null;
+      }
+    }
+
+    function renderJournalFiles(documents) {
+      const list = document.querySelector('#journalFileList');
+      list.replaceChildren();
+      documents.forEach(journalDocument => {
+        const item = document.createElement('li');
+        item.className = 'garden-route';
+        const heading = document.createElement('strong');
+        heading.textContent = journalDocument.fileName || 'Untitled journal file';
+        const detail = document.createElement('span');
+        const extraction = journalDocument.extraction || {};
+        const ocr = extraction.ocr || {};
+        const state = extraction.status === 'needs_ocr' ? 'stored · OCR needed'
+          : extraction.status === 'processing_ocr'
+            ? `stored · OCR reading${Number(ocr.pageCount || 0) ? ` page ${Number(ocr.processedPages || 0)} of ${Number(ocr.pageCount)}` : ''}`
+            : extraction.status === 'ocr_failed' ? 'stored · OCR needs attention'
+              : 'searchable';
+        detail.textContent = `${formatFileSize(journalDocument.sizeBytes)} · ${state} · ${Number(extraction.characterCount || 0).toLocaleString()} characters · ${Number(extraction.unitCount || 0).toLocaleString()} source unit${Number(extraction.unitCount || 0) === 1 ? '' : 's'}`;
+        item.append(heading, detail);
+        if (Array.isArray(extraction.warnings) && extraction.warnings.length) {
+          const warning = document.createElement('span');
+          warning.textContent = extraction.warnings.join(' ');
+          item.append(warning);
+        }
+        if (['needs_ocr', 'ocr_failed'].includes(extraction.status) && journalDocument.extension === '.pdf') {
+          const readScan = document.createElement('button');
+          readScan.type = 'button';
+          readScan.className = 'secondary';
+          readScan.textContent = extraction.status === 'ocr_failed' ? 'Try reading scan again' : 'Read scanned text';
+          readScan.setAttribute('aria-label', `Read scanned text in ${journalDocument.fileName || 'journal PDF'} privately`);
+          readScan.addEventListener('click', () => readScannedJournalFile(
+            journalDocument.id,
+            journalDocument.fileName,
+            readScan
+          ));
+          item.append(readScan);
+        }
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'secondary';
+        remove.textContent = 'Remove';
+        remove.setAttribute('aria-label', `Remove ${journalDocument.fileName || 'journal file'} from my private journal`);
+        remove.addEventListener('click', () => removeJournalFile(journalDocument.id, journalDocument.fileName, remove));
+        item.append(remove);
+        list.append(item);
+      });
+    }
+
+    async function readScannedJournalFile(documentId, fileName, button) {
+      if (!documentId) return;
+      button.disabled = true;
+      setText('journalFileStatus', `ARI is opening ${fileName || 'the scanned PDF'} with the private OCR reader...`);
+      try {
+        const response = await fetch(`/api/v1/me/journal/files/${encodeURIComponent(documentId)}/ocr`, {
+          method: 'POST',
+          headers: { 'x-garden-request': 'personal-entrance' }
+        });
+        const body = await readGardenResponse(response);
+        if (response.status === 401) return showSignedOutProfile('Your session ended. Sign in again to reopen your plot.');
+        if (!response.ok) throw new Error(body.error || 'The private OCR reader could not start.');
+        await waitForJournalOcr(documentId, fileName);
+      } catch (error) {
+        setText('journalFileStatus', error.message);
+        button.disabled = false;
+      }
+    }
+
+    async function waitForJournalOcr(documentId, fileName) {
+      for (let attempt = 0; attempt < 240; attempt += 1) {
+        await new Promise(resolve => setTimeout(resolve, 2500));
+        const documents = await loadJournalFiles({ preserveStatus: true });
+        const journalDocument = documents?.find(candidate => candidate.id === documentId);
+        if (!journalDocument) throw new Error('The journal source is no longer available.');
+        const extraction = journalDocument.extraction || {};
+        const ocr = extraction.ocr || {};
+        if (extraction.status === 'ready') {
+          setText('journalFileStatus', `${fileName || 'The scanned PDF'} is now searchable. ARI preserved ${Number(extraction.unitCount || 0).toLocaleString()} page source${Number(extraction.unitCount || 0) === 1 ? '' : 's'} and their OCR confidence.`);
+          return;
+        }
+        if (extraction.status === 'ocr_failed') {
+          throw new Error(extraction.warnings?.[0] || `${fileName || 'The scanned PDF'} could not be recognized.`);
+        }
+        const progress = Number(ocr.pageCount || 0)
+          ? ` Page ${Number(ocr.processedPages || 0)} of ${Number(ocr.pageCount)} is complete.`
+          : '';
+        setText('journalFileStatus', `ARI is reading ${fileName || 'the scanned PDF'} privately.${progress}`);
+      }
+      throw new Error('The scan is still being read. You may leave this room and return later; the private OCR job will continue.');
+    }
+
+    async function removeJournalFile(documentId, fileName, button) {
+      if (!documentId) return;
+      button.disabled = true;
+      setText('journalFileStatus', `Removing ${fileName || 'journal file'}...`);
+      try {
+        const response = await fetch(`/api/v1/me/journal/files/${encodeURIComponent(documentId)}`, {
+          method: 'DELETE',
+          headers: { 'x-garden-request': 'personal-entrance' }
+        });
+        const body = await readGardenResponse(response);
+        if (response.status === 401) return showSignedOutProfile('Your session ended. Sign in again to reopen your plot.');
+        if (!response.ok) throw new Error(body.error || 'The journal file could not be removed.');
+        await loadJournalFiles();
+        setText('journalFileStatus', `${body.deleted?.fileName || fileName || 'Journal file'} was removed from your private journal.`);
+      } catch (error) {
+        setText('journalFileStatus', error.message);
+        button.disabled = false;
+      }
+    }
+
+    function formatFileSize(value) {
+      const bytes = Number(value || 0);
+      if (bytes < 1024) return `${bytes} B`;
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+      return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    }
+
+    async function importCodexHistory() {
+      const file = document.querySelector('#codexHistoryFile').files?.[0];
+      if (!file) return setText('codexHistoryStatus', 'Choose one Codex .jsonl history file first.');
+      importCodexHistoryButton.disabled = true;
+      setText('codexHistoryStatus', 'Reading the conversation locally and excluding system and tool records...');
+      try {
+        const parsed = parseCodexHistory(await file.text());
+        if (!parsed.threadId) throw new Error('This file does not contain a Codex task identity.');
+        if (!parsed.events.length) throw new Error('No person and final Codex conversation turns were found.');
+        const batches = codexImportBatches(parsed.threadId, parsed.events);
+        let imported = 0;
+        let existing = 0;
+        let archiveEventCount = 0;
+        for (let index = 0; index < batches.length; index += 1) {
+          setText('codexHistoryStatus', `Bringing conversation batch ${index + 1} of ${batches.length} to ARI...`);
+          const response = await fetch('/api/v1/me/conversation-imports/codex', {
+            method: 'POST',
+            headers: { 'content-type': 'application/json', 'x-garden-request': 'personal-entrance' },
+            body: JSON.stringify(batches[index])
+          });
+          const body = await response.json();
+          if (response.status === 401) {
+            showSignedOutProfile('Your session ended. Sign in again before importing private history.');
+            throw new Error('Your session ended.');
+          }
+          if (!response.ok) throw new Error(body.error || `Codex history batch ${index + 1} could not be imported.`);
+          imported += Number(body.import?.imported || 0);
+          existing += Number(body.import?.existing || 0);
+          archiveEventCount = Number(body.import?.archiveEventCount || archiveEventCount);
+        }
+        setText('codexHistoryStatus', `${imported} conversation event${imported === 1 ? '' : 's'} added · ${existing} already present · ${archiveEventCount} total in your private developmental archive. ARI can now consult this history by relevance.`);
+      } catch (error) {
+        setText('codexHistoryStatus', error.message);
+      } finally {
+        importCodexHistoryButton.disabled = false;
+      }
+    }
+
+    function parseCodexHistory(jsonl) {
+      let threadId = '';
+      const events = [];
+      String(jsonl || '').split(/\r?\n/u).forEach(line => {
+        if (!line.trim()) return;
+        let record;
+        try { record = JSON.parse(line); } catch { return; }
+        if (record?.type === 'session_meta') {
+          threadId = String(record.payload?.id || record.payload?.session_id || threadId).slice(0, 120);
+          return;
+        }
+        const message = record?.type === 'response_item' && record.payload?.type === 'message'
+          ? record.payload : null;
+        if (!message || !['user', 'assistant'].includes(message.role)) return;
+        if (message.role === 'assistant' && message.phase !== 'final_answer') return;
+        const raw = (Array.isArray(message.content) ? message.content : [])
+          .map(item => typeof item?.text === 'string' ? item.text : '')
+          .filter(Boolean).join('\n').normalize('NFC');
+        const content = message.role === 'user' ? cleanCodexPersonMessage(raw) : cleanCodexFinalReply(raw);
+        if (!content) return;
+        const sourceEventId = String(message.id || '').trim();
+        if (!/^[a-zA-Z0-9_-]{8,120}$/u.test(sourceEventId)) return;
+        const createdAt = new Date(record.timestamp);
+        if (!Number.isFinite(createdAt.getTime())) return;
+        events.push({
+          sourceEventId,
+          role: message.role,
+          content: [...content].slice(0, 20000).join(''),
+          createdAt: createdAt.toISOString()
+        });
+      });
+      return { threadId, events };
+    }
+
+    function cleanCodexPersonMessage(value) {
+      let text = String(value || '');
+      const requestMarkers = [...text.matchAll(/## My request(?: for Codex)?:\s*/giu)];
+      if (requestMarkers.length) {
+        const marker = requestMarkers.at(-1);
+        text = text.slice(marker.index + marker[0].length);
+      } else if (/<recommended_plugins>|# AGENTS\.md instructions|<environment_context>|<permissions instructions>|<skills_instructions>/iu.test(text)) {
+        return '';
+      }
+      return text
+        .replace(/<in-app-browser-context\b[\s\S]*?<\/in-app-browser-context>/giu, '')
+        .replace(/<response-annotations>[\s\S]*?<\/response-annotations>/giu, '')
+        .replace(/<image\b[\s\S]*?<\/image>/giu, '')
+        .replace(/^\s*# Files mentioned by the user:[\s\S]*?(?=\n\s*## My request|$)/giu, '')
+        .trim();
+    }
+
+    function cleanCodexFinalReply(value) {
+      return String(value || '')
+        .replace(/<oai-mem-citation>[\s\S]*?<\/oai-mem-citation>/giu, '')
+        .trim();
+    }
+
+    function codexImportBatches(threadId, events) {
+      const batches = [];
+      let current = [];
+      events.forEach(event => {
+        const candidate = { threadId, events: [...current, event] };
+        const bytes = new TextEncoder().encode(JSON.stringify(candidate)).length;
+        if (current.length && (current.length >= 25 || bytes > 56000)) {
+          batches.push({ threadId, events: current });
+          current = [event];
+        } else {
+          current.push(event);
+        }
+      });
+      if (current.length) batches.push({ threadId, events: current });
+      return batches;
     }
 
     async function loadPersonalGarden() {

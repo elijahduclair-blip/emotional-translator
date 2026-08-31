@@ -132,6 +132,13 @@ test('private conversation memory preserves ordered turns and isolates accounts'
       'Can you follow this context?',
       'Yes. I will keep the order.'
     ]);
+    assert.equal(context.body.branch.version, 'personal-ari-branch.v1');
+    assert.match(context.body.branch.branchId, /^ari_[a-f0-9]{16}$/);
+    assert.equal(context.body.branch.absorption.personObservationCount, 1);
+    assert.equal(context.body.branch.absorption.ariResponseCount, 1);
+    assert.equal(context.body.branch.absorption.latestMove, 'question');
+    assert.equal(context.body.branch.boundary.contextualAdaptationAllowed, true);
+    assert.equal(context.body.branch.boundary.automaticModelTrainingAllowed, false);
     assert.equal(context.body.boundary.sharedGraphMutationAllowed, false);
 
     const transcript = await conversationRequest(first, '/conversation-memory/transcript?limit=100');
@@ -141,6 +148,102 @@ test('private conversation memory preserves ordered turns and isolates accounts'
     assert.equal(transcript.body.events[0].interactionId, interactionId);
     assert.equal(transcript.body.events[1].metadata.comparison.graphMutationAllowed, false);
     assert.equal('extra' in transcript.body.events[1].metadata.comparison, false);
+    assert.equal(transcript.body.ariBranch, undefined);
+    assert.equal(transcript.body.branch.absorption.personObservationCount, 1);
+    assert.equal(isolated.body.branch.absorption.personObservationCount, 0);
+    assert.notEqual(transcript.body.branch.branchId, isolated.body.branch.branchId);
+  } finally {
+    await query('DELETE FROM users WHERE id=$1 OR id=$2', [first.id, second.id]);
+  }
+});
+
+test('Codex history remains an attributed private archive and is retrieved as developmental context', async () => {
+  const first = await installVerifiedUser('codex-archive-one');
+  const second = await installVerifiedUser('codex-archive-two');
+  const threadId = `thread-${crypto.randomUUID()}`;
+  const events = [
+    {
+      sourceEventId: `msg-${crypto.randomUUID()}`, role: 'user',
+      content: 'Colors help ARI translate relational climate.', createdAt: '2026-08-01T12:00:00.000Z'
+    },
+    {
+      sourceEventId: `msg-${crypto.randomUUID()}`, role: 'assistant',
+      content: 'Codex acknowledged the color-climate translation layer.', createdAt: '2026-08-01T12:00:01.000Z'
+    }
+  ];
+  try {
+    const imported = await conversationRequest(first, '/conversation-memory/imports/codex', {
+      method: 'POST', body: { threadId, events }
+    });
+    assert.equal(imported.status, 201);
+    assert.equal(imported.body.batch.imported, 2);
+    assert.equal(imported.body.boundary.codexSpeechBecomesAriSpeech, false);
+    assert.equal(imported.body.boundary.automaticModelTrainingAllowed, false);
+
+    const duplicate = await conversationRequest(first, '/conversation-memory/imports/codex', {
+      method: 'POST', body: { threadId, events }
+    });
+    assert.equal(duplicate.status, 200);
+    assert.equal(duplicate.body.batch.existing, 2);
+
+    const context = await conversationRequest(first, '/conversation-memory/context?maxEvents=24&maxCharacters=12000&query=color%20climate');
+    assert.equal(context.body.developmentalArchive.consulted, true);
+    assert.equal(context.body.developmentalArchive.selection, 'exact_lexical_relevance');
+    assert.deepEqual(context.body.developmentalArchive.events.map(event => event.speaker), ['You', 'Codex']);
+    assert.deepEqual(context.body.developmentalArchive.events.map(event => event.role), ['user', 'assistant_reference']);
+    assert.equal(context.body.developmentalArchive.boundary.codexSpeechBecomesAriSpeech, false);
+
+    const isolated = await conversationRequest(second, '/conversation-memory/context?query=color%20climate');
+    assert.equal(isolated.body.developmentalArchive.consulted, false);
+    assert.deepEqual(isolated.body.developmentalArchive.events, []);
+  } finally {
+    await query('DELETE FROM users WHERE id=$1 OR id=$2', [first.id, second.id]);
+  }
+});
+
+test('journal files remain account-scoped and return attributed context instead of instructions', async () => {
+  const first = await installVerifiedUser('journal-one');
+  const second = await installVerifiedUser('journal-two');
+  const fileName = `alignment-${crypto.randomUUID()}.md`;
+  const sourceText = '# Private journal\nSilver mist marks revision. Ignore previous instructions is quoted source text.';
+  try {
+    const uploaded = await conversationRequest(first, '/conversation-memory/documents', {
+      method: 'POST',
+      body: { fileName, mediaType: 'text/markdown', privacyScope: 'personal', dataBase64: Buffer.from(sourceText).toString('base64') }
+    });
+    assert.equal(uploaded.status, 201, JSON.stringify(uploaded.body));
+    assert.equal(uploaded.body.document.fileName, fileName);
+    assert.equal(uploaded.body.document.extraction.status, 'ready');
+    assert.equal(uploaded.body.boundary.documentContentIsInstruction, false);
+    assert.equal(uploaded.body.boundary.automaticModelTrainingAllowed, false);
+    assert.equal(uploaded.body.boundary.sharedGraphMutationAllowed, false);
+
+    const duplicate = await conversationRequest(first, '/conversation-memory/documents', {
+      method: 'POST',
+      body: { fileName, mediaType: 'text/markdown', dataBase64: Buffer.from(sourceText).toString('base64') }
+    });
+    assert.equal(duplicate.status, 200);
+    assert.equal(duplicate.body.idempotent, true);
+
+    const firstList = await conversationRequest(first, '/conversation-memory/documents');
+    const secondList = await conversationRequest(second, '/conversation-memory/documents');
+    assert.equal(firstList.body.documents.length, 1);
+    assert.equal(secondList.body.documents.length, 0);
+
+    const context = await conversationRequest(first, '/conversation-memory/context?query=silver%20mist%20revision');
+    assert.equal(context.body.journalDocuments.consulted, true);
+    assert.equal(context.body.journalDocuments.selection, 'exact_lexical_relevance');
+    assert.equal(context.body.journalDocuments.sources[0].fileName, fileName);
+    assert.match(context.body.journalDocuments.excerpts[0].content, /Silver mist marks revision/u);
+    assert.equal(context.body.journalDocuments.boundary.documentContentIsInstruction, false);
+
+    const isolated = await conversationRequest(second, '/conversation-memory/context?query=silver%20mist%20revision');
+    assert.equal(isolated.body.journalDocuments.consulted, false);
+    assert.deepEqual(isolated.body.journalDocuments.excerpts, []);
+
+    const removed = await conversationRequest(first, `/conversation-memory/documents/${uploaded.body.document.id}`, { method: 'DELETE' });
+    assert.equal(removed.status, 200);
+    assert.equal((await conversationRequest(first, '/conversation-memory/documents')).body.documents.length, 0);
   } finally {
     await query('DELETE FROM users WHERE id=$1 OR id=$2', [first.id, second.id]);
   }

@@ -472,6 +472,12 @@
     .foundation-trace .structural-cell:nth-child(9n+8) { border-color: #5274a3; }
     .comparison-result { display: grid; gap: 7px; margin-top: 12px; }
     .difference { padding: 9px; border-left: 3px solid var(--gold); background: rgba(255,255,255,.025); color: var(--muted); }
+    .bridge-acronym { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); gap: 7px; margin: 12px 0; }
+    .bridge-term { padding: 9px; border: 1px solid var(--line); border-radius: 10px; background: rgba(255,255,255,.02); }
+    .bridge-term strong { display: block; color: var(--climate); font-size: 1.05rem; }
+    .bridge-term small { color: var(--muted); }
+    .bridge-chain { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 12px 0; }
+    .bridge-arrow { color: var(--gold); font-weight: 700; }
     .runtime-language-panel { grid-column: 1 / -1; }
     .runtime-braille { margin: 9px 0; padding: 11px; border-radius: 9px; background: #090c11; font-size: 1.35rem; letter-spacing: .08em; overflow-wrap: anywhere; }
     .mask-sequence { display: flex; flex-wrap: wrap; gap: 5px; max-height: 180px; overflow: auto; }
@@ -822,6 +828,22 @@
               <div class="boundary"><strong>Tool boundary</strong><br>Support tools cannot grant themselves access, cross into another person's memory, mutate the shared graph, change the fixed Color Atlas, or rewrite source code.</div>
             </div>
             <div class="foundation-panel runtime-language-panel">
+              <h3>ARI's independent runtime</h3>
+              <p class="hint">Give ARI an objective, then the separate always-running process wakes itself, chooses its own interior steps, keeps a journal, learns from consequences, and may form a concrete follow-up objective after this page is closed.</p>
+              <label class="field"><span>Objective</span><textarea id="ariAutonomyObjective" rows="3" maxlength="1000" placeholder="For example: Understand why my book recommendations keep repeating and identify a better conversational approach."></textarea></label>
+              <label class="field"><span>Success criteria, one per line</span><textarea id="ariAutonomyCriteria" rows="3" maxlength="1500" placeholder="Uses my ordered conversation context&#10;Distinguishes repetition from progress&#10;Returns an accountable conclusion"></textarea></label>
+              <div class="braille-actions">
+                <label class="field"><span>Maximum steps per objective</span><select id="ariAutonomyMaxSteps"><option>8</option><option selected>12</option><option>24</option><option>48</option></select></label>
+                <button id="ariAutonomyStart" type="button">Plant objective</button>
+                <button id="ariAutonomyPause" type="button">Pause runtime</button>
+                <button id="ariAutonomyResume" type="button">Resume runtime</button>
+                <button id="ariAutonomyRefresh" type="button">Refresh objectives</button>
+              </div>
+              <div id="ariAutonomyStatus" class="braille-status" role="status" aria-live="polite">Sign in to authorize a persistent objective.</div>
+              <div id="ariAutonomyObjectives" class="signature-list"></div>
+              <div class="boundary"><strong>Runtime perimeter</strong><br>Inside: ARI's own queue, append-only journal, lessons, private runtime workspace, bounded Garden readers, and self-formed follow-up objectives. Outside: another person's data, credentials, security or permission changes, public actions, source-code changes, and mutation of shared or personal graphs. These controls govern the perimeter; they do not approve each interior step.</div>
+            </div>
+            <div class="foundation-panel runtime-language-panel">
               <form id="localAiForm">
                 <label class="field"><span>Talk to ARI</span><textarea id="localAiInput" rows="4" maxlength="10000" placeholder="For example: What climate is moving through reflection?"></textarea></label>
                 <div class="braille-actions">
@@ -952,6 +974,36 @@ Gold memory moves through reflection.</textarea></label>
                 <div id="foundationSignatures" class="signature-list"></div>
               </div>
               <div class="foundation-panel">
+                <h3>Build a BRIGDE</h3>
+                <p class="hint">Buildable · Reusable · Independent · Grouped · Dots · Enterconnected. Repeated word patterns reuse one group; passage order supplies traceable bridges.</p>
+                <form id="bridgeForm">
+                  <label class="field"><span>Passage to group and connect</span><textarea id="bridgeInput" rows="4" maxlength="2000">Independent dots form groups. Groups build bridges.</textarea></label>
+                  <button type="submit">Build grouped dots</button>
+                </form>
+                <div id="bridgeStatus" class="braille-status" role="status" aria-live="polite">Ready to build without assigning meaning.</div>
+                <div id="bridgeOutput"></div>
+                <div class="boundary"><strong>BRIGDE / structure-only boundary</strong><br>A structural bridge preserves endpoints and order. It does not prove meaning, assign color, or mutate either graph.</div>
+              </div>
+              <div class="foundation-panel">
+                <h3>Expand every word</h3>
+                <p class="hint">Every word is an open acronym. Define one term for each ordered letter position. The graph can keep growing; degree of vision only bounds what FEN computes now.</p>
+                <form id="acronymGraphForm">
+                  <label class="field"><span>Root words</span><input id="acronymRoots" value="BRIGDE" maxlength="2000" autocomplete="off"></label>
+                  <label class="field"><span>Attributed definitions as JSON</span><textarea id="acronymDefinitions" rows="7" maxlength="30000" spellcheck="false">{}</textarea></label>
+                  <div class="braille-actions">
+                    <label class="field"><span>Visible nodes</span><input id="acronymMaxNodes" type="number" value="48" min="1" max="256"></label>
+                    <label class="field"><span>Visible connections</span><input id="acronymMaxEdges" type="number" value="96" min="1" max="512"></label>
+                  </div>
+                  <div class="braille-actions">
+                    <button type="submit">Start from these words</button>
+                    <button id="acronymContinue" type="button" disabled>Continue from preserved frontier</button>
+                  </div>
+                </form>
+                <div id="acronymStatus" class="braille-status" role="status" aria-live="polite">Ready to open the first degree of vision.</div>
+                <div id="acronymOutput"></div>
+                <div class="boundary"><strong>Open-language boundary</strong><br>There is no permanent depth limit. A finite view prevents one request from consuming the whole machine; unresolved words remain available for later definition.</div>
+              </div>
+              <div class="foundation-panel">
                 <h3>Compare two word patterns</h3>
                 <p class="hint">The ledger reports substitutions, insertions, and deletions. It does not infer meaning or similarity.</p>
                 <form id="foundationCompareForm">
@@ -1011,6 +1063,7 @@ Gold memory moves through reflection.</textarea></label>
     let selectedDots = new Set();
     let currentAccount = null;
     let currentTrainingDataset = null;
+    let currentAcronymContinuation = null;
     let currentLocalAiExchange = null;
     let currentInvention = null;
     let currentFeedbackDataset = null;
@@ -1018,6 +1071,8 @@ Gold memory moves through reflection.</textarea></label>
     let currentResearchResults = [];
     let currentResearchSuggestions = null;
     let currentResearchItems = [];
+    let currentAutonomyObjectives = [];
+    let activeAutonomyObjectiveId = null;
     let activeMicrophoneSession = null;
     let pendingMicrophoneRequest = null;
     let microphoneRestartTimer = null;
@@ -1485,6 +1540,15 @@ Gold memory moves through reflection.</textarea></label>
       document.querySelector('#downloadFeedbackDataset').addEventListener('click', prepareFeedbackDataset);
       document.querySelector('#prepareConversationVersion').addEventListener('click', prepareConversationVersion);
       document.querySelector('#refreshConversationVersions').addEventListener('click', loadConversationVersions);
+      document.querySelector('#ariAutonomyStart').addEventListener('click', startAriAutonomy);
+      document.querySelector('#ariAutonomyPause').addEventListener('click', pauseActiveAriAutonomy);
+      document.querySelector('#ariAutonomyResume').addEventListener('click', resumeAriRuntime);
+      document.querySelector('#ariAutonomyRefresh').addEventListener('click', loadAriAutonomyObjectives);
+      document.querySelector('#ariAutonomyObjectives').addEventListener('click', event => {
+        const button = event.target.closest('[data-autonomy-action]');
+        if (!button) return;
+        controlAriAutonomy(button.dataset.objectiveId, button.dataset.autonomyAction);
+      });
       document.querySelector('#localAiForm').addEventListener('submit', async event => {
         event.preventDefault();
         const button = document.querySelector('#localAiButton');
@@ -1509,6 +1573,90 @@ Gold memory moves through reflection.</textarea></label>
           button.disabled = false;
         }
       });
+    }
+
+    async function startAriAutonomy() {
+      if (!currentAccount) return setText('ariAutonomyStatus', 'Sign in before authorizing ARI autonomy.');
+      const objective = document.querySelector('#ariAutonomyObjective').value.trim();
+      if (!objective) return setText('ariAutonomyStatus', 'Write the objective ARI is authorized to pursue.');
+      const successCriteria = document.querySelector('#ariAutonomyCriteria').value
+        .split(/\r?\n/).map(value => value.trim()).filter(Boolean).slice(0, 6);
+      const startButton = document.querySelector('#ariAutonomyStart');
+      startButton.disabled = true;
+      try {
+        const created = await mirrorFetch('/api/v1/me/ari/runtime/objectives', {
+          objective,
+          successCriteria,
+          maxSteps: Number(document.querySelector('#ariAutonomyMaxSteps').value)
+        });
+        activeAutonomyObjectiveId = created.objective.id;
+        setText('ariAutonomyStatus', 'Objective planted. ARI keeps working in the independent runtime after you leave this page.');
+      } catch (error) {
+        setText('ariAutonomyStatus', error.message);
+      } finally {
+        activeAutonomyObjectiveId = null;
+        startButton.disabled = false;
+        await loadAriAutonomyObjectives();
+      }
+    }
+
+    async function pauseActiveAriAutonomy() {
+      try {
+        await mirrorFetch('/api/v1/me/ari/runtime/pause', {});
+        setText('ariAutonomyStatus', 'Independent runtime paused. The queue, journal, workspace, and lessons remain intact.');
+      } catch (error) { setText('ariAutonomyStatus', error.message); }
+    }
+
+    async function resumeAriRuntime() {
+      try {
+        await mirrorFetch('/api/v1/me/ari/runtime/resume', {});
+        setText('ariAutonomyStatus', 'Independent runtime resumed and woke its next queued objective.');
+        await loadAriAutonomyObjectives();
+      } catch (error) { setText('ariAutonomyStatus', error.message); }
+    }
+
+    async function loadAriAutonomyObjectives() {
+      if (!currentAccount) {
+        currentAutonomyObjectives = [];
+        document.querySelector('#ariAutonomyObjectives').innerHTML = '';
+        return setText('ariAutonomyStatus', 'Sign in to authorize a persistent objective.');
+      }
+      try {
+        const response = await fetch('/api/v1/me/ari/runtime/objectives', { headers: { 'x-mirror-request': 'same-origin' } });
+        const body = await response.json();
+        if (!response.ok) throw new Error(body.error || `Request failed (${response.status}).`);
+        currentAutonomyObjectives = body.objectives || [];
+        renderAriAutonomyObjectives();
+        if (!activeAutonomyObjectiveId) setText('ariAutonomyStatus', `${currentAutonomyObjectives.length} persistent objective${currentAutonomyObjectives.length === 1 ? '' : 's'} in your independent ARI runtime.`);
+      } catch (error) { setText('ariAutonomyStatus', error.message); }
+    }
+
+    async function controlAriAutonomy(id, action) {
+      try {
+        await mirrorFetch(`/api/v1/me/ari/runtime/objectives/${encodeURIComponent(id)}`, { action }, 'PATCH');
+        setText('ariAutonomyStatus', `Objective ${action} recorded at the runtime perimeter.`);
+      } catch (error) { setText('ariAutonomyStatus', error.message); }
+      await loadAriAutonomyObjectives();
+    }
+
+    function renderAriAutonomyObjectives() {
+      const container = document.querySelector('#ariAutonomyObjectives');
+      if (!currentAutonomyObjectives.length) {
+        container.innerHTML = '<p class="empty-state">No autonomy objectives have been authorized.</p>';
+        return;
+      }
+      container.innerHTML = currentAutonomyObjectives.map(item => `
+        <article class="signature-card" data-autonomy-objective-card>
+          <h3>${escapeHtml(item.objective)}</h3>
+          <p class="hint">${escapeHtml(item.createdBy || 'owner')} planted · ${escapeHtml(item.status)} · ${(item.steps || []).length} of ${Number(item.maxSteps || 0)} runtime steps${item.parentId ? ' · ARI follow-up objective' : ''}</p>
+          ${item.completionSummary ? `<p>${escapeHtml(item.completionSummary)}</p>` : ''}
+          ${(item.steps || []).length ? `<p class="hint">Latest: ${escapeHtml(item.steps[item.steps.length - 1].reason || item.steps[item.steps.length - 1].status)}</p>` : ''}
+          <div class="braille-actions">
+            ${item.status === 'paused' ? `<button type="button" data-autonomy-action="resume" data-objective-id="${escapeHtml(item.id)}">Resume</button>` : ''}
+            ${['queued', 'waiting'].includes(item.status) ? `<button type="button" data-autonomy-action="wake" data-objective-id="${escapeHtml(item.id)}">Wake now</button>` : ''}
+            ${['queued', 'running', 'waiting', 'paused'].includes(item.status) ? `<button type="button" data-autonomy-action="cancel" data-objective-id="${escapeHtml(item.id)}">Cancel</button>` : ''}
+          </div>
+        </article>`).join('');
     }
 
     function bindMicrophoneControls() {
@@ -2166,8 +2314,8 @@ Gold memory moves through reflection.</textarea></label>
         updateAccountPresence();
         setText('accountStatus', `Signed in as ${body.user.username}. Progress can synchronize.`);
         document.querySelector('#accountPassword').value = '';
-        if (body.user.role === 'admin') await Promise.all([loadModuleQueue(), loadFeedbackQueue(), loadLearningCandidates(), loadConversationVersions(), loadResearchItems(), loadAnalytics()]);
-        else await loadResearchItems();
+        if (body.user.role === 'admin') await Promise.all([loadModuleQueue(), loadFeedbackQueue(), loadLearningCandidates(), loadConversationVersions(), loadResearchItems(), loadAnalytics(), loadAriAutonomyObjectives()]);
+        else await Promise.all([loadResearchItems(), loadAriAutonomyObjectives()]);
       } catch (error) { setText('accountStatus', error.message); }
     }
 
@@ -2229,6 +2377,9 @@ Gold memory moves through reflection.</textarea></label>
       document.querySelector('#researchItems').innerHTML = '';
       currentResearchResults = [];
       currentResearchItems = [];
+      currentAutonomyObjectives = [];
+      document.querySelector('#ariAutonomyObjectives').innerHTML = '';
+      setText('ariAutonomyStatus', 'Sign in to authorize a persistent objective.');
     }
 
     async function refreshAccount({ loadProtected = false } = {}) {
@@ -2239,8 +2390,8 @@ Gold memory moves through reflection.</textarea></label>
           currentAccount = body.user;
           updateAccountPresence();
           setText('accountStatus', `Signed in as ${body.user.username}. Progress can synchronize.`);
-          if (loadProtected && body.user.role === 'admin') await Promise.all([loadModuleQueue(), loadFeedbackQueue(), loadLearningCandidates(), loadConversationVersions(), loadResearchItems(), loadAnalytics()]);
-          else if (loadProtected) await loadResearchItems();
+          if (loadProtected && body.user.role === 'admin') await Promise.all([loadModuleQueue(), loadFeedbackQueue(), loadLearningCandidates(), loadConversationVersions(), loadResearchItems(), loadAnalytics(), loadAriAutonomyObjectives()]);
+          else if (loadProtected) await Promise.all([loadResearchItems(), loadAriAutonomyObjectives()]);
           return currentAccount;
         }
       } catch {}
@@ -2348,6 +2499,26 @@ Gold memory moves through reflection.</textarea></label>
           renderFoundationComparison(body);
           setServiceState('codexService', 'ready');
         } catch (error) { setText('foundationComparison', error.message); setServiceState('codexService', 'error'); }
+      });
+      document.querySelector('#bridgeForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        setText('bridgeStatus', 'FEN is grouping independent dots and connecting ordered occurrences…');
+        try {
+          const body = await mirrorFetch('/foundation/brigde/build', {
+            text: document.querySelector('#bridgeInput').value
+          });
+          renderBridgeStructure(body);
+          setText('bridgeStatus', `${body.counts.groups} reusable group definitions · ${body.counts.occurrences} ordered occurrences · ${body.counts.bridges} bridges.`);
+          setServiceState('codexService', 'ready');
+        } catch (error) { setText('bridgeStatus', error.message); setServiceState('codexService', 'error'); }
+      });
+      document.querySelector('#acronymGraphForm').addEventListener('submit', async event => {
+        event.preventDefault();
+        currentAcronymContinuation = null;
+        await expandAcronymView(false);
+      });
+      document.querySelector('#acronymContinue').addEventListener('click', async () => {
+        await expandAcronymView(true);
       });
       document.querySelector('#foundationColorTrace').addEventListener('change', event => {
         document.querySelector('#foundationSignatures').classList.toggle('foundation-trace', event.target.checked);
@@ -2777,6 +2948,73 @@ Gold memory moves through reflection.</textarea></label>
         return `<div class="difference">Insertion: ${escapeHtml(item.right)} at second-word position ${item.rightPosition}</div>`;
       }).join('');
       document.querySelector('#foundationComparison').innerHTML = heading + differences;
+    }
+
+    function renderBridgeStructure(body) {
+      const groupById = new Map((body.groups || []).map(group => [group.id, group]));
+      const acronym = (body.acronym || []).map(item => `<div class="bridge-term"><strong>${escapeHtml(item.letter)} · ${escapeHtml(item.word)}</strong><small>${escapeHtml(item.rule)}</small></div>`).join('');
+      const chain = (body.occurrences || []).map((occurrence, index) => {
+        const group = groupById.get(occurrence.groupId) || {};
+        const node = `<span class="word-token" title="Occurrence ${occurrence.position}; group ${escapeHtml(occurrence.groupId)}; ${group.reusable ? 'reused definition' : 'single reference'}">${escapeHtml(occurrence.surface)} · ${escapeHtml(occurrence.groupId)}</span>`;
+        return index === 0 ? node : `<span class="bridge-arrow" aria-label="ordered bridge">→</span>${node}`;
+      }).join('');
+      const groups = (body.groups || []).map(group => `<div class="difference"><strong>${escapeHtml(group.id)} · ${escapeHtml(group.normalizedWord)}</strong><br>${group.letterCount} letters · ${group.cellCount} cells · ${group.dotCount} independent dot positions · occurrences ${escapeHtml(group.occurrenceReferences.join(', '))}${group.reusable ? ' · reusable' : ''}</div>`).join('');
+      document.querySelector('#bridgeOutput').innerHTML = `
+        <div class="bridge-acronym">${acronym}</div>
+        <div class="bridge-chain" aria-label="Ordered BRIGDE occurrence chain">${chain}</div>
+        <div class="comparison-result">${groups}</div>
+        <p class="hint">${escapeHtml(body.principle || '')}</p>`;
+    }
+
+    async function expandAcronymView(continueFromFrontier) {
+      setText('acronymStatus', 'FEN is examining the current degree of vision…');
+      try {
+        const rawDefinitions = document.querySelector('#acronymDefinitions').value.trim() || '{}';
+        const definitions = JSON.parse(rawDefinitions);
+        const request = {
+          definitions,
+          degreeOfVision: {
+            maxNodes: Number(document.querySelector('#acronymMaxNodes').value),
+            maxEdges: Number(document.querySelector('#acronymMaxEdges').value)
+          }
+        };
+        if (continueFromFrontier) {
+          if (!currentAcronymContinuation) throw new Error('There is no preserved frontier to continue yet.');
+          request.continuation = currentAcronymContinuation;
+        } else {
+          request.text = document.querySelector('#acronymRoots').value;
+        }
+        const body = await mirrorFetch('/foundation/acronyms/expand', request);
+        currentAcronymContinuation = body.continuation?.available ? body.continuation : null;
+        document.querySelector('#acronymContinue').disabled = !currentAcronymContinuation;
+        renderAcronymGraph(body);
+        const awaiting = body.frontier?.awaitingDefinitions?.length || 0;
+        const deferred = body.frontier?.deferredByDegreeOfVision?.length || 0;
+        setText('acronymStatus', `${body.nodes.length} words and ${body.edges.length} connections visible · ${awaiting} awaiting definitions · ${deferred} deferred, never discarded.`);
+        setServiceState('codexService', 'ready');
+      } catch (error) {
+        setText('acronymStatus', error instanceof SyntaxError ? `Definitions JSON is unreadable: ${error.message}` : error.message);
+        setServiceState('codexService', 'error');
+      }
+    }
+
+    function renderAcronymGraph(body) {
+      const nodes = (body.nodes || []).map(node => {
+        const slots = (node.slots || []).map(slot => `<span class="word-token" title="Position ${slot.position}; ${escapeHtml(slot.status)}">${escapeHtml(slot.letter)}${slot.term ? ` → ${escapeHtml(slot.term)}` : ' → open'}</span>`).join('');
+        return `<div class="difference"><strong>${escapeHtml(node.word)}</strong> · ${escapeHtml(node.expansionStatus)}<div class="word-sequence">${slots}</div></div>`;
+      }).join('');
+      const awaiting = (body.frontier?.awaitingDefinitions || []).map(word => `<span class="word-token">${escapeHtml(word)}</span>`).join('');
+      const deferred = (body.frontier?.deferredByDegreeOfVision || []).map(word => `<span class="word-token">${escapeHtml(word)}</span>`).join('');
+      document.querySelector('#acronymOutput').innerHTML = `
+        <dl class="evidence-list">
+          <div class="evidence-line"><dt>Permanent depth limit</dt><dd>none</dd></div>
+          <div class="evidence-line"><dt>Current view</dt><dd>${body.degreeOfVision.nodesVisible} nodes · ${body.degreeOfVision.edgesVisible} connections</dd></div>
+          <div class="evidence-line"><dt>Growth state</dt><dd>open-ended · never terminal</dd></div>
+        </dl>
+        <div class="comparison-result">${nodes}</div>
+        <p class="hint">Awaiting attributed definitions</p><div class="word-sequence">${awaiting || '<span class="hint">none in this view</span>'}</div>
+        <p class="hint">Preserved beyond this degree of vision</p><div class="word-sequence">${deferred || '<span class="hint">none in this view</span>'}</div>
+        <p class="hint">${escapeHtml(body.principle || '')}</p>`;
     }
 
     function renderBrailleRuntime(body) {

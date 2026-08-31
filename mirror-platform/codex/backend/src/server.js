@@ -22,6 +22,7 @@ import localAiFeedbackRouter from './routes/local-ai-feedback.js';
 import analyticsRouter from './routes/analytics.js';
 import conversationMemoryRouter from './routes/conversation-memory.js';
 import ariRouter from './routes/ari.js';
+import ariAutonomyRouter from './routes/ari-autonomy.js';
 import { limitPublicAnalysis, validateProductionConfig } from './middleware/public-api.js';
 
 dotenv.config();
@@ -37,6 +38,9 @@ const CORS_ORIGINS = String(process.env.CORS_ORIGINS || process.env.CORS_ORIGIN 
   .filter(Boolean);
 
 // Middleware
+// Journal files are sent as bounded base64 JSON through the same-origin facade.
+// All other API routes retain the 64 KB guardrail.
+app.use('/api/v1/conversation-memory/documents', express.json({ limit: '12mb' }));
 app.use(express.json({ limit: '64kb' }));
 app.use(cors({
   origin(origin, callback) {
@@ -62,6 +66,9 @@ app.use((req, res, next) => {
 
 app.use('/api/v1/foundation/analyze', limitPublicAnalysis);
 app.use('/api/v1/foundation/letters', limitPublicAnalysis);
+app.use('/api/v1/foundation/bridge', limitPublicAnalysis);
+app.use('/api/v1/foundation/brigde', limitPublicAnalysis);
+app.use('/api/v1/foundation/acronyms', limitPublicAnalysis);
 app.use('/api/v1/foundation/language-loop', limitPublicAnalysis);
 app.use('/api/v1/foundation/training', limitPublicAnalysis);
 app.use('/api/v1/foundation/braille-runtime', limitPublicAnalysis);
@@ -78,6 +85,9 @@ app.get('/api', (req, res) => {
       health: '/api/health',
       foundation: '/api/v1/foundation/analyze',
       foundationLetters: '/api/v1/foundation/letters/analyze',
+      foundationBrigde: '/api/v1/foundation/brigde/build',
+      foundationBridgeCompatibility: '/api/v1/foundation/bridge/build',
+      foundationAcronyms: '/api/v1/foundation/acronyms/expand',
       languageLoop: '/api/v1/foundation/language-loop',
       trainingDataset: '/api/v1/foundation/training/dataset',
       colorAtlasTrainingDataset: '/api/v1/foundation/training/color-atlas',
@@ -114,6 +124,7 @@ app.use('/api/v1', localAiFeedbackRouter);
 app.use('/api/v1', analyticsRouter);
 app.use('/api/v1', conversationMemoryRouter);
 app.use('/api/v1', ariRouter);
+app.use('/api/v1', ariAutonomyRouter);
 
 // 404
 app.use((req, res) => {
@@ -131,6 +142,8 @@ app.listen(PORT, () => {
   console.log('  AI translator (/api/v1/translate)');
   console.log('  Foundation analysis (/api/v1/foundation/analyze)');
   console.log('  Ordered letter accountability (/api/v1/foundation/letters)');
+  console.log('  BRIGDE structural construction (/api/v1/foundation/brigde/build)');
+  console.log('  Open acronym graph (/api/v1/foundation/acronyms/expand)');
   console.log('  Reversible language loop (/api/v1/foundation/language-loop)');
   console.log('  Verified local-AI training dataset (/api/v1/foundation/training/dataset)');
   console.log('  ChromaBridge color-atlas training dataset (/api/v1/foundation/training/color-atlas)');

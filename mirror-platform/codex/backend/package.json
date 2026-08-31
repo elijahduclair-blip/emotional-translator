@@ -1,29 +1,36 @@
 {
-    "version":  "1.0.0",
-    "dependencies":  {
-                         "dotenv":  "^16.3.1",
-                         "pg":  "^8.11.3",
-                         "express":  "^4.18.2",
-                         "nodemailer": "^7.0.6",
-                         "cors":  "^2.8.5"
-                     },
-    "name":  "emotional-color-translator-api",
-    "type":  "module",
-    "description":  "Backend API for Emotional Color Translator",
-    "scripts":  {
-                    "migrate":  "node src/db/migrate.js",
-                    "seed":  "node src/db/seed.js",
-                    "knowledge:import":  "node scripts/import-color-knowledge.js",
-                    "dev":  "node --watch src/server.js",
-                    "start":  "node src/server.js",
-                    "deploy:start":  "npm run migrate && npm run seed && npm start",
-                    "backup":  "node src/db/backup.js backup",
-                    "backup:list":  "node src/db/backup.js list",
-                    "backup:restore":  "node src/db/backup.js restore"
-                    ,"test":  "node --test --test-concurrency=1"
-                },
-    "devDependencies":  {
-                            "nodemon":  "^3.0.2"
-                        },
-    "main":  "src/server.js"
+    "version": "1.0.0",
+    "dependencies": {
+        "@napi-rs/canvas": "1.0.7",
+        "@tesseract.js-data/eng": "1.0.0",
+        "cors": "^2.8.5",
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "jszip": "3.10.1",
+        "nodemailer": "^7.0.6",
+        "pdf-parse": "2.4.5",
+        "pdfjs-dist": "6.2.108",
+        "pg": "^8.11.3",
+        "tesseract.js": "7.0.0"
+    },
+    "name": "emotional-color-translator-api",
+    "type": "module",
+    "description": "Backend API for Emotional Color Translator",
+    "scripts": {
+        "migrate": "node src/db/migrate.js",
+        "seed": "node src/db/seed.js",
+        "knowledge:import": "node scripts/import-color-knowledge.js",
+        "dev": "node --watch src/server.js",
+        "start": "node src/server.js",
+        "deploy:start": "npm run migrate && npm run seed && npm start",
+        "backup": "node src/db/backup.js backup",
+        "backup:list": "node src/db/backup.js list",
+        "backup:restore": "node src/db/backup.js restore",
+        "test": "node --test --test-concurrency=1"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.2",
+        "pdf-lib": "1.17.1"
+    },
+    "main": "src/server.js"
 }

@@ -17,6 +17,8 @@ export class MirrorRuntimeService {
       localModelUrl: config?.localModelUrl,
       localModelName: config?.localModelName,
       alignmentModelUrl: config?.alignmentModelUrl,
+      ariRuntimeUrl: config?.ariRuntimeUrl,
+      ariRuntimeControlKey: config?.ariRuntimeControlKey,
       cloudflareZoneTag: config?.cloudflareZoneTag,
       cloudflareAnalyticsToken: config?.cloudflareAnalyticsToken,
     });
@@ -38,7 +40,8 @@ export class MirrorRuntimeService {
     return {
       status: this.runtime.getStatus(),
       localModel: await this.runtime.getLocalModelStatus(),
-      alignmentModel: await this.runtime.getAlignmentModelStatus()
+      alignmentModel: await this.runtime.getAlignmentModelStatus(),
+      independentAriRuntime: await this.runtime.getIndependentAriRuntimeStatus()
     };
   }
 

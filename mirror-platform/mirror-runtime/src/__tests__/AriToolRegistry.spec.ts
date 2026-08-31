@@ -11,6 +11,16 @@ describe('ARI Tool Registry', () => {
     expect(snapshot.team.filter(member => member.coordinator).map(member => member.id)).toEqual(['ARI']);
     expect(snapshot.counts.members).toBe(ARI_TEAM.length);
     expect(snapshot.tools.every(tool => tool.owner !== 'ARI')).toBe(true);
+    expect(snapshot.tools.find(tool => tool.id === 'fen.build-bridge')).toEqual(expect.objectContaining({
+      owner: 'FEN',
+      status: 'unavailable',
+      permissions: expect.objectContaining({ writes: [] })
+    }));
+    expect(snapshot.tools.find(tool => tool.id === 'fen.expand-acronyms')).toEqual(expect.objectContaining({
+      owner: 'FEN',
+      status: 'unavailable',
+      permissions: expect.objectContaining({ writes: [] })
+    }));
     expect(snapshot.boundary.sharedGraphMutationAllowed).toBe(false);
   });
 

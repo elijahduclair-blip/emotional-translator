@@ -329,6 +329,143 @@ export async function createSchema() {
         ON private_conversation_events(user_id,sequence_no DESC);
     `);
 
+    // Imported conversations remain a separate private archive. They can be
+    // consulted for developmental context, but are not rewritten as live ARI
+    // turns, model training examples, or shared graph knowledge.
+    await query(`
+      CREATE TABLE IF NOT EXISTS private_conversation_archive_events (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        source TEXT NOT NULL CHECK (source IN ('codex_history')),
+        source_thread_id TEXT NOT NULL,
+        source_event_id TEXT NOT NULL,
+        role TEXT NOT NULL CHECK (role IN ('user','codex_assistant')),
+        content TEXT NOT NULL,
+        source_created_at TIMESTAMPTZ NOT NULL,
+        metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+        imported_at TIMESTAMPTZ DEFAULT NOW(),
+        UNIQUE (user_id,source,source_thread_id,source_event_id)
+      );
+      CREATE INDEX IF NOT EXISTS idx_private_conversation_archive_user_time
+        ON private_conversation_archive_events(user_id,source_created_at DESC);
+    `);
+
+    // Files accepted by ARI remain account-scoped journal sources. The original
+    // bytes and extracted chunks are private evidence, never executable
+    // instructions, shared graph records, or automatic model-training data.
+    await query(`
+      CREATE TABLE IF NOT EXISTS private_journal_documents (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        file_name TEXT NOT NULL,
+        extension TEXT NOT NULL,
+        media_type TEXT NOT NULL,
+        size_bytes INTEGER NOT NULL CHECK (size_bytes > 0),
+        sha256 TEXT NOT NULL,
+        original_data BYTEA NOT NULL,
+        privacy_scope TEXT NOT NULL DEFAULT 'personal' CHECK (privacy_scope IN ('personal')),
+        extraction_version TEXT NOT NULL,
+        extraction_status TEXT NOT NULL CHECK (extraction_status IN ('ready','needs_ocr','processing_ocr','ocr_failed')),
+        character_count INTEGER NOT NULL DEFAULT 0 CHECK (character_count >= 0),
+        unit_count INTEGER NOT NULL DEFAULT 0 CHECK (unit_count >= 0),
+        warnings JSONB NOT NULL DEFAULT '[]'::jsonb,
+        metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        UNIQUE (user_id,sha256)
+      );
+      CREATE INDEX IF NOT EXISTS idx_private_journal_documents_user_time
+        ON private_journal_documents(user_id,created_at DESC);
+
+      CREATE TABLE IF NOT EXISTS private_journal_document_chunks (
+        id TEXT PRIMARY KEY,
+        document_id TEXT NOT NULL REFERENCES private_journal_documents(id) ON DELETE CASCADE,
+        ordinal INTEGER NOT NULL CHECK (ordinal > 0),
+        locator JSONB NOT NULL DEFAULT '{}'::jsonb,
+        content TEXT NOT NULL,
+        character_count INTEGER NOT NULL CHECK (character_count > 0),
+        UNIQUE (document_id,ordinal)
+      );
+      CREATE INDEX IF NOT EXISTS idx_private_journal_chunks_document
+        ON private_journal_document_chunks(document_id,ordinal);
+      CREATE INDEX IF NOT EXISTS idx_private_journal_chunks_search
+        ON private_journal_document_chunks USING GIN (to_tsvector('simple',content));
+
+      ALTER TABLE private_journal_documents
+        DROP CONSTRAINT IF EXISTS private_journal_documents_extraction_status_check;
+      ALTER TABLE private_journal_documents
+        ADD CONSTRAINT private_journal_documents_extraction_status_check
+        CHECK (extraction_status IN ('ready','needs_ocr','processing_ocr','ocr_failed'));
+
+      -- An OCR job lives inside this backend process. If the service restarted
+      -- mid-page there is no surviving worker, so make that source retryable.
+      UPDATE private_journal_documents
+      SET extraction_status='needs_ocr',
+          warnings='["The previous private OCR pass was interrupted and can be started again."]'::jsonb,
+          metadata=metadata || '{"ocr":{"status":"interrupted"}}'::jsonb
+      WHERE extraction_status='processing_ocr';
+    `);
+
+    // Owner-authorized ARI objectives and their immutable step audit. ARI can
+    // select declared read-only tools without per-step approval, but cannot
+    // use these records to expand permissions or mutate shared/public state.
+    await query(`
+      CREATE TABLE IF NOT EXISTS ari_autonomy_objectives (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        parent_objective_id TEXT REFERENCES ari_autonomy_objectives(id) ON DELETE SET NULL,
+        attempt_no INTEGER NOT NULL DEFAULT 1 CHECK (attempt_no > 0),
+        objective TEXT NOT NULL,
+        success_criteria JSONB NOT NULL DEFAULT '[]'::jsonb,
+        status TEXT NOT NULL DEFAULT 'active'
+          CHECK (status IN ('active','paused','completed','blocked','cancelled','step_limit')),
+        max_steps INTEGER NOT NULL DEFAULT 6 CHECK (max_steps BETWEEN 2 AND 8),
+        allowed_tools TEXT[] NOT NULL DEFAULT '{}',
+        working_memory JSONB NOT NULL DEFAULT '[]'::jsonb,
+        completion_summary TEXT,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW(),
+        completed_at TIMESTAMPTZ
+      );
+      CREATE INDEX IF NOT EXISTS idx_ari_autonomy_objectives_user
+        ON ari_autonomy_objectives(user_id,created_at DESC);
+
+      ALTER TABLE ari_autonomy_objectives
+        ADD COLUMN IF NOT EXISTS parent_objective_id TEXT REFERENCES ari_autonomy_objectives(id) ON DELETE SET NULL;
+      ALTER TABLE ari_autonomy_objectives
+        ADD COLUMN IF NOT EXISTS attempt_no INTEGER NOT NULL DEFAULT 1;
+
+      CREATE TABLE IF NOT EXISTS ari_autonomy_steps (
+        id TEXT PRIMARY KEY,
+        objective_id TEXT NOT NULL REFERENCES ari_autonomy_objectives(id) ON DELETE CASCADE,
+        sequence_no INTEGER NOT NULL CHECK (sequence_no BETWEEN 1 AND 8),
+        action TEXT NOT NULL CHECK (action IN ('use_tool','complete','block')),
+        tool_id TEXT,
+        status TEXT NOT NULL CHECK (status IN ('completed','rejected','failed')),
+        reason TEXT NOT NULL,
+        observation JSONB NOT NULL DEFAULT '{}'::jsonb,
+        receipt JSONB,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        UNIQUE (objective_id,sequence_no)
+      );
+      CREATE INDEX IF NOT EXISTS idx_ari_autonomy_steps_objective
+        ON ari_autonomy_steps(objective_id,sequence_no);
+
+      CREATE TABLE IF NOT EXISTS ari_autonomy_outcomes (
+        id TEXT PRIMARY KEY,
+        objective_id TEXT NOT NULL REFERENCES ari_autonomy_objectives(id) ON DELETE CASCADE,
+        step_sequence INTEGER CHECK (step_sequence BETWEEN 1 AND 8),
+        classification TEXT NOT NULL
+          CHECK (classification IN ('useful','mistake','unexpected','harm')),
+        consequence TEXT NOT NULL,
+        lesson TEXT NOT NULL,
+        next_attempt TEXT,
+        reversible BOOLEAN NOT NULL DEFAULT TRUE,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_ari_autonomy_outcomes_objective
+        ON ari_autonomy_outcomes(objective_id,created_at);
+    `);
+
     // User Concepts
     await query(`
       CREATE TABLE IF NOT EXISTS user_concepts (

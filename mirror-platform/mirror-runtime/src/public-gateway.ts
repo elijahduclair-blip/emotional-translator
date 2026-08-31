@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { createWebBotAuthDirectoryResponse, createWebBotAuthIdentity } from './web-bot-auth';
 
 const MAX_SEED_BODY_BYTES = 64 * 1024;
+const MAX_DOCUMENT_BODY_BYTES = 12 * 1024 * 1024;
 const DEFAULT_RATE_LIMIT = 20;
 const RATE_WINDOW_MS = 60 * 1000;
 const PUBLIC_CONTENT_SIGNAL = 'search=yes, ai-input=yes, ai-train=no';
@@ -250,6 +251,9 @@ export function createGardenPublicGateway(options: GardenPublicGatewayOptions = 
     const url = new URL(request.url || '/', 'http://garden-entrance.local');
     const path = url.pathname;
     try {
+      const canonicalRedirect = canonicalRedirectTarget(request, url, options.trustProxy === true);
+      if (canonicalRedirect) return sendPermanentRedirect(response, canonicalRedirect);
+
       if ((request.method === 'GET' || request.method === 'HEAD') && (path === '/' || path === '/index.html')) {
         if (acceptsMarkdown(request)) {
           return sendStatic(response, request.method, 'text/markdown; charset=utf-8', entranceMarkdown, {
@@ -679,6 +683,88 @@ export function createGardenPublicGateway(options: GardenPublicGatewayOptions = 
         });
         if (result.status >= 400) return sendJson(response, result.status, publicError(result.body));
         return sendJson(response, 200, publicPersonalTranscript(result.body));
+      }
+
+      if (request.method === 'POST' && path === '/api/v1/me/journal/files') {
+        requireGardenRequest(request, 'personal-entrance');
+        const body = await readJson(request, MAX_DOCUMENT_BODY_BYTES);
+        const result = await runtimeJson(runtimeOrigin, '/api/v1/me/journal/files', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json', 'x-mirror-request': 'same-origin',
+            cookie: requirePersonalSession(request)
+          },
+          body: JSON.stringify({
+            fileName: String(body.fileName || '').slice(0, 180),
+            mediaType: String(body.mediaType || '').slice(0, 120),
+            privacyScope: 'personal',
+            dataBase64: String(body.dataBase64 || '')
+          })
+        }, { retryNetworkFailures: true, timeoutMs: 180_000 });
+        if (result.status >= 400) return sendJson(response, result.status, publicError(result.body));
+        return sendJson(response, result.status, result.body);
+      }
+
+      if (request.method === 'GET' && path === '/api/v1/me/journal/files') {
+        const result = await runtimeJson(runtimeOrigin, '/api/v1/me/journal/files', {
+          headers: { cookie: requirePersonalSession(request) }
+        });
+        if (result.status >= 400) return sendJson(response, result.status, publicError(result.body));
+        return sendJson(response, 200, result.body);
+      }
+
+      const journalOcrFile = path.match(/^\/api\/v1\/me\/journal\/files\/([^/]+)\/ocr$/);
+      if (request.method === 'POST' && journalOcrFile) {
+        requireGardenRequest(request, 'personal-entrance');
+        const result = await runtimeJson(
+          runtimeOrigin,
+          `/api/v1/me/journal/files/${encodeURIComponent(decodeURIComponent(journalOcrFile[1]))}/ocr`,
+          {
+            method: 'POST',
+            headers: { 'x-mirror-request': 'same-origin', cookie: requirePersonalSession(request) }
+          },
+          { retryNetworkFailures: true, timeoutMs: 180_000 }
+        );
+        if (result.status >= 400) return sendJson(response, result.status, publicError(result.body));
+        return sendJson(response, result.status, result.body);
+      }
+
+      const journalFile = path.match(/^\/api\/v1\/me\/journal\/files\/([^/]+)$/);
+      if (request.method === 'DELETE' && journalFile) {
+        requireGardenRequest(request, 'personal-entrance');
+        const result = await runtimeJson(runtimeOrigin, `/api/v1/me/journal/files/${encodeURIComponent(decodeURIComponent(journalFile[1]))}`, {
+          method: 'DELETE',
+          headers: { 'x-mirror-request': 'same-origin', cookie: requirePersonalSession(request) }
+        });
+        if (result.status >= 400) return sendJson(response, result.status, publicError(result.body));
+        return sendJson(response, 200, result.body);
+      }
+
+      if (request.method === 'POST' && path === '/api/v1/me/conversation-imports/codex') {
+        requireGardenRequest(request, 'personal-entrance');
+        const body = await readJson(request);
+        const events = Array.isArray(body.events) ? body.events : [];
+        if (!events.length || events.length > 25) {
+          return sendJson(response, 400, { error: 'Each Codex import batch must contain between 1 and 25 conversation events.' });
+        }
+        const result = await runtimeJson(runtimeOrigin, '/api/v1/me/conversation-imports/codex', {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json', 'x-mirror-request': 'same-origin',
+            cookie: requirePersonalSession(request)
+          },
+          body: JSON.stringify({
+            threadId: String(body.threadId || '').slice(0, 120),
+            events: events.map((event: Record<string, any>) => ({
+              sourceEventId: String(event?.sourceEventId || '').slice(0, 120),
+              role: event?.role === 'assistant' ? 'assistant' : 'user',
+              content: String(event?.content || '').slice(0, 20_000),
+              createdAt: String(event?.createdAt || '').slice(0, 40)
+            }))
+          })
+        });
+        if (result.status >= 400) return sendJson(response, result.status, publicError(result.body));
+        return sendJson(response, result.status, publicCodexImport(result.body));
       }
 
       return sendJson(response, 404, { error: 'This path is not part of the public Garden Entrance.' });
@@ -1187,8 +1273,24 @@ function sendOAuthJsonError(response: ServerResponse, error: unknown, fallbackCo
   return sendJson(response, status, { error: oauthCode(error, fallbackCode), error_description: oauthDescription(error, 'Authorization failed.') });
 }
 
-async function runtimeJson(origin: string, path: string, init?: RequestInit) {
-  const response = await fetch(`${origin}${path}`, { ...init, signal: AbortSignal.timeout(70_000) });
+async function runtimeJson(
+  origin: string,
+  path: string,
+  init?: RequestInit,
+  options: { retryNetworkFailures?: boolean; timeoutMs?: number } = {}
+) {
+  const request = () => fetch(`${origin}${path}`, {
+    ...init,
+    signal: AbortSignal.timeout(options.timeoutMs || 70_000)
+  });
+  let response: Response;
+  try {
+    response = await request();
+  } catch (error) {
+    if (!options.retryNetworkFailures) throw error;
+    await new Promise(resolve => setTimeout(resolve, 250));
+    response = await request();
+  }
   const body = await response.json().catch(() => ({})) as Record<string, any>;
   return { status: response.status, body, headers: response.headers };
 }
@@ -1213,6 +1315,7 @@ function publicApiIdentity() {
         garden: '/api/v1/me/garden',
         placeRelationships: '/api/v1/me/garden/relationships',
         transcript: '/api/v1/me/transcript',
+        journalFiles: '/api/v1/me/journal/files',
         requestHeader: 'x-garden-request: personal-entrance'
       },
       people: {
@@ -1283,7 +1386,17 @@ function publicOpenApiDocument() {
       '/api/v1/me/cultivate': { post: { tags: ['Account'], summary: 'Cultivate using the authenticated person private context', security: personalWrite('garden:cultivate'), requestBody: inputBody, responses: { '200': jsonResponse('Private fruit') } } },
       '/api/v1/me/garden': { get: { tags: ['Account'], summary: 'Read the authenticated person reviewed graph overlay', security: personalSession('garden:graph:read'), responses: { '200': jsonResponse('Personal graph') } } },
       '/api/v1/me/garden/relationships': { post: { tags: ['Account'], summary: 'Place user-confirmed relationships in the personal graph', security: personalWrite('garden:graph:write'), responses: { '201': jsonResponse('Personal graph mutation receipt') } } },
-      '/api/v1/me/transcript': { get: { tags: ['Account'], summary: 'Read the authenticated person ordered private transcript', security: personalSession('garden:transcript:read'), responses: { '200': jsonResponse('Private transcript page') } } }
+      '/api/v1/me/transcript': { get: { tags: ['Account'], summary: 'Read the authenticated person ordered private transcript', security: personalSession('garden:transcript:read'), responses: { '200': jsonResponse('Private transcript page') } } },
+      '/api/v1/me/journal/files': {
+        get: { tags: ['Account'], summary: 'List the signed-in person private journal files', security: [{ gardenSession: [] }], responses: { '200': jsonResponse('Private journal file list') } },
+        post: { tags: ['Account'], summary: 'Extract and add one supported file to the signed-in person private journal', security: [{ gardenIntent: [], gardenSession: [] }], responses: { '201': jsonResponse('Private journal extraction receipt'), '413': jsonResponse('File or request too large'), '415': jsonResponse('Unsupported document type'), '422': jsonResponse('Unreadable document') } }
+      },
+      '/api/v1/me/journal/files/{documentId}': {
+        delete: { tags: ['Account'], summary: 'Remove one file from the signed-in person private journal', security: [{ gardenIntent: [], gardenSession: [] }], parameters: [{ name: 'documentId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }], responses: { '200': jsonResponse('Private journal deletion receipt'), '404': jsonResponse('Journal file not found') } }
+      },
+      '/api/v1/me/journal/files/{documentId}/ocr': {
+        post: { tags: ['Account'], summary: 'Queue private page-aware OCR for one stored scanned PDF', security: [{ gardenIntent: [], gardenSession: [] }], parameters: [{ name: 'documentId', in: 'path', required: true, schema: { type: 'string', format: 'uuid' } }], responses: { '202': jsonResponse('Private OCR queued or already processing'), '409': jsonResponse('OCR unavailable for this source'), '422': jsonResponse('Scan could not be recognized') } }
+      }
     },
     components: {
       securitySchemes: {
@@ -1356,6 +1469,13 @@ function publicFruit(body: Record<string, any>) {
         foundationVersion: String(body.cultivation?.translator?.foundationVersion || 'unresolved')
       },
       graphSource: String(body.cultivation?.graphSource || 'unresolved'),
+      responsePipeline: {
+        version: String(body.cultivation?.responsePipeline?.version || 'open-expression-closed-validation.v1'),
+        expressionStage: 'qwen_open_candidate',
+        validationStage: 'ari_closed_garden_gate',
+        validationStatus: String(body.cultivation?.responsePipeline?.validationStatus || 'unresolved'),
+        repaired: body.cultivation?.responsePipeline?.repaired === true
+      },
       relationshipNotice: String(body.cultivation?.relationshipNotice || ''),
       personalContextConsulted: false,
       persisted: false,
@@ -1398,6 +1518,7 @@ function publicPersonalFruit(body: Record<string, any>) {
       transcriptSequence: Number(body.cultivation?.transcriptSequence || 0) || null,
       sharedGraphMutated: false
     },
+    ariBranch: publicPersonalAriBranch(body.ariBranch),
     comparisonReceipt: publicComparisonReceipt(body.comparisonReceipt),
     boundary: {
       mode: 'personal_api_private_context',
@@ -1406,7 +1527,40 @@ function publicPersonalFruit(body: Record<string, any>) {
       sourceMutationAllowed: false,
       crossPersonAccessAllowed: false,
       automaticLearningAllowed: false,
-      reason: 'Only the authenticated person transcript and reviewed overlay may be consulted. The ordered exchange stays private and does not change shared knowledge.'
+      automaticModelTrainingAllowed: false,
+      contextualAdaptationAllowed: true,
+      reason: 'Only the authenticated person transcript, ARI branch, and reviewed overlay may be consulted. The ordered exchange stays private and does not train model weights or change shared knowledge.'
+    }
+  };
+}
+
+function publicPersonalAriBranch(value: Record<string, any> | null | undefined) {
+  if (!value || value.version !== 'personal-ari-branch.v1') return null;
+  const allowedMoves = new Set(['greeting', 'correction', 'question', 'teaching', 'reflection', 'brief_statement', 'continuation']);
+  const recentMoves = (Array.isArray(value.adaptation?.recentMoves) ? value.adaptation.recentMoves : [])
+    .map((move: unknown) => String(move || ''))
+    .filter((move: string) => allowedMoves.has(move))
+    .slice(-8);
+  return {
+    version: 'personal-ari-branch.v1',
+    branchId: String(value.branchId || '').slice(0, 32),
+    scope: 'authenticated_person_only',
+    absorption: {
+      personObservationCount: boundedNonnegative(value.absorption?.personObservationCount, Number.MAX_SAFE_INTEGER),
+      ariResponseCount: boundedNonnegative(value.absorption?.ariResponseCount, Number.MAX_SAFE_INTEGER),
+      currentMove: allowedMoves.has(String(value.absorption?.currentMove || '')) ? String(value.absorption.currentMove) : null
+    },
+    adaptation: {
+      mode: 'conversation_context_not_model_training',
+      expressionPacing: ['unestablished', 'concise', 'balanced', 'expansive'].includes(value.adaptation?.expressionPacing)
+        ? value.adaptation.expressionPacing : 'unestablished',
+      recentMoves
+    },
+    boundary: {
+      crossPersonAccessAllowed: false,
+      sharedGraphMutationAllowed: false,
+      automaticModelTrainingAllowed: false,
+      contextualAdaptationAllowed: true
     }
   };
 }
@@ -1483,11 +1637,38 @@ function publicPersonalTranscript(body: Record<string, any>) {
       nextBefore: Number(body.transcript?.nextBefore) || null,
       order: 'oldest_to_newest_within_page'
     },
+    ariBranch: publicPersonalAriBranch(body.ariBranch),
     boundary: {
       mode: 'account_scoped_append_only_transcript',
       crossPersonAccessAllowed: false,
       sharedGraphMutationAllowed: false,
-      automaticLearningAllowed: false
+      automaticLearningAllowed: false,
+      automaticModelTrainingAllowed: false,
+      contextualAdaptationAllowed: true
+    }
+  };
+}
+
+function publicCodexImport(body: Record<string, any>) {
+  return {
+    version: 'garden-api.v1',
+    import: {
+      source: 'codex_history',
+      received: boundedNonnegative(body.import?.received, 25),
+      imported: boundedNonnegative(body.import?.imported, 25),
+      existing: boundedNonnegative(body.import?.existing, 25),
+      archiveEventCount: boundedNonnegative(body.import?.archiveEventCount, Number.MAX_SAFE_INTEGER),
+      personEventCount: boundedNonnegative(body.import?.personEventCount, Number.MAX_SAFE_INTEGER),
+      codexEventCount: boundedNonnegative(body.import?.codexEventCount, Number.MAX_SAFE_INTEGER)
+    },
+    boundary: {
+      mode: 'private_developmental_context',
+      crossPersonAccessAllowed: false,
+      codexSpeechBecomesAriSpeech: false,
+      sharedGraphMutationAllowed: false,
+      automaticLearningAllowed: false,
+      automaticModelTrainingAllowed: false,
+      contextualAdaptationAllowed: true
     }
   };
 }
@@ -1514,7 +1695,7 @@ function publicError(body: Record<string, any>) {
   return { error: String(body.error || 'The Garden could not cultivate this seed.').slice(0, 240) };
 }
 
-async function readJson(request: IncomingMessage) {
+async function readJson(request: IncomingMessage, maxBytes = MAX_SEED_BODY_BYTES) {
   const contentType = String(request.headers['content-type'] || '').toLowerCase();
   if (!/^application\/(?:json|[a-z0-9.+-]+\+json)(?:\s*;|$)/.test(contentType)) {
     throw httpError(415, 'Content-Type must be application/json.');
@@ -1524,7 +1705,7 @@ async function readJson(request: IncomingMessage) {
   for await (const chunk of request) {
     const buffer = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
     size += buffer.length;
-    if (size > MAX_SEED_BODY_BYTES) throw httpError(413, 'Garden request exceeds 64 KB.');
+    if (size > maxBytes) throw httpError(413, `Garden request exceeds ${Math.floor(maxBytes / 1024)} KB.`);
     chunks.push(buffer);
   }
   try {
@@ -1583,6 +1764,36 @@ function isSecureRequest(request: IncomingMessage) {
   if (String(request.headers['x-forwarded-proto'] || '').toLowerCase() === 'https') return true;
   const hostname = String(request.headers.host || '').split(':')[0].toLowerCase();
   return hostname !== 'localhost' && hostname !== '127.0.0.1';
+}
+
+function canonicalRedirectTarget(request: IncomingMessage, url: URL, trustProxy: boolean) {
+  if (request.method !== 'GET' && request.method !== 'HEAD') return null;
+  const forwardedHost = trustProxy ? String(request.headers['x-forwarded-host'] || '').split(',')[0].trim() : '';
+  const hostname = String(forwardedHost || request.headers.host || '').split(':')[0].toLowerCase();
+  const publicHost = new URL(PUBLIC_ORIGIN).hostname;
+  const publicHosts = new Set([publicHost, `www.${publicHost}`, `garden.${publicHost}`]);
+  if (!publicHosts.has(hostname)) return null;
+
+  const normalizedPath = url.pathname === '/index.html'
+    ? '/'
+    : url.pathname.endsWith('/') && publicDocuments.has(url.pathname.slice(0, -1))
+      ? url.pathname.slice(0, -1)
+      : url.pathname;
+  const forwardedProtocol = String(request.headers['x-forwarded-proto'] || '').split(',')[0].trim().toLowerCase();
+  const alternateHost = hostname !== publicHost;
+  const insecureProtocol = forwardedProtocol === 'http';
+  const alternatePath = normalizedPath !== url.pathname;
+  if (!alternateHost && !insecureProtocol && !alternatePath) return null;
+  return `${PUBLIC_ORIGIN}${normalizedPath}${url.search}`;
+}
+
+function sendPermanentRedirect(response: ServerResponse, location: string) {
+  response.writeHead(308, {
+    ...securityHeaders(),
+    location,
+    'cache-control': 'public, max-age=86400'
+  });
+  response.end();
 }
 
 function createFixedWindowRateLimiter({ maxRequests, windowMs, trustProxy }: { maxRequests: number; windowMs: number; trustProxy: boolean }) {

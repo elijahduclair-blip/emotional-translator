@@ -66,6 +66,7 @@ describe('Garden Entrance public gateway', () => {
     const gateway = createGardenPublicGateway({
       runtimeOrigin: `http://127.0.0.1:${runtimeAddress.port}`,
       rateLimitMax: 2,
+      trustProxy: true,
       webBotAuthSecret: 'test-only-community-garden-web-bot-auth-secret'
     });
     await listen(gateway);
@@ -100,6 +101,8 @@ describe('Garden Entrance public gateway', () => {
       expect(html).toContain('id="seed" maxlength="10000"');
       expect(html).toContain('id="personalSeed" maxlength="10000"');
       expect(html).toContain('id="personalComparisonReceipt"');
+      expect(html).toContain("Open ARI's accountability receipt");
+      expect(html).toContain('id="profileAbsorptionCount"');
       expect(html).toContain('Observation-only boundary');
       expect(html).toContain('Create my account');
       expect(html).toContain("fetch('/api/v1/me/account'");
@@ -117,6 +120,40 @@ describe('Garden Entrance public gateway', () => {
       expect(html).toContain('readOnlyHint: true');
       expect(html).not.toContain('Governance');
       expect(html).not.toContain('Administrator');
+
+      const indexRedirect = await fetch(`${origin}/index.html?source=google`, {
+        redirect: 'manual',
+        headers: { 'x-forwarded-host': 'acommunitygarden.garden', 'x-forwarded-proto': 'https' }
+      });
+      expect(indexRedirect.status).toBe(308);
+      expect(indexRedirect.headers.get('location')).toBe('https://acommunitygarden.garden/?source=google');
+
+      const trailingSlashRedirect = await fetch(`${origin}/about/`, {
+        redirect: 'manual',
+        headers: { 'x-forwarded-host': 'acommunitygarden.garden', 'x-forwarded-proto': 'https' }
+      });
+      expect(trailingSlashRedirect.status).toBe(308);
+      expect(trailingSlashRedirect.headers.get('location')).toBe('https://acommunitygarden.garden/about');
+
+      const insecureRedirect = await fetch(`${origin}/ari?source=http`, {
+        redirect: 'manual',
+        headers: { 'x-forwarded-host': 'acommunitygarden.garden', 'x-forwarded-proto': 'http' }
+      });
+      expect(insecureRedirect.status).toBe(308);
+      expect(insecureRedirect.headers.get('location')).toBe('https://acommunitygarden.garden/ari?source=http');
+
+      const oldHostRedirect = await fetch(`${origin}/privacy`, {
+        redirect: 'manual',
+        headers: { 'x-forwarded-host': 'garden.acommunitygarden.garden', 'x-forwarded-proto': 'https' }
+      });
+      expect(oldHostRedirect.status).toBe(308);
+      expect(oldHostRedirect.headers.get('location')).toBe('https://acommunitygarden.garden/privacy');
+
+      const accountQuery = await fetch(`${origin}/?v=account-room`, {
+        redirect: 'manual',
+        headers: { 'x-forwarded-host': 'acommunitygarden.garden', 'x-forwarded-proto': 'https' }
+      });
+      expect(accountQuery.status).toBe(200);
 
       const publicPages = [
         ['/about', 'About Community Garden', 'https://acommunitygarden.garden/about'],
@@ -446,6 +483,11 @@ describe('Garden Entrance public gateway', () => {
     let personalHeaders: Record<string, string | string[] | undefined> | undefined;
     let gardenHeaders: Record<string, string | string[] | undefined> | undefined;
     let transcriptHeaders: Record<string, string | string[] | undefined> | undefined;
+    let codexImportHeaders: Record<string, string | string[] | undefined> | undefined;
+    let codexImportBody: Record<string, any> | undefined;
+    let journalUploadHeaders: Record<string, string | string[] | undefined> | undefined;
+    let journalUploadBody: Record<string, any> | undefined;
+    let journalOcrHeaders: Record<string, string | string[] | undefined> | undefined;
     let sessionHeaders: Record<string, string | string[] | undefined> | undefined;
     let signupHeaders: Record<string, string | string[] | undefined> | undefined;
     let signupBody: Record<string, unknown> | undefined;
@@ -518,6 +560,12 @@ describe('Garden Entrance public gateway', () => {
           version: 'garden-api.v1', seed: { received: true, codePointCount: 13 },
           fruit: { language: 'english', text: 'Personal fruit.' },
           cultivation: { stages: ['received', 'composed'], graphSource: 'user_graph', relationshipNotice: 'Private route.', persisted: true, contextEventCount: 2, transcriptSequence: 4 },
+          ariBranch: {
+            version: 'personal-ari-branch.v1', branchId: 'ari_person00000001', scope: 'authenticated_person_only',
+            absorption: { personObservationCount: 7, ariResponseCount: 6, currentMove: 'question', private: 'must-not-cross' },
+            adaptation: { expressionPacing: 'balanced', recentMoves: ['greeting', 'question', 'invalid-private-move'] },
+            boundary: { crossPersonAccessAllowed: true, sharedGraphMutationAllowed: true, automaticModelTrainingAllowed: true }
+          },
           comparisonReceipt: {
             version: 'ari-comparison.v1', operation: 'bounded_structural_comparison',
             selection: { availablePersonObservations: 3, comparedObservationCount: 1, contextTruncated: false },
@@ -547,6 +595,62 @@ describe('Garden Entrance public gateway', () => {
           },
           internalUserId: 'must-not-cross'
         }));
+        return;
+      }
+      if (request.url === '/api/v1/me/conversation-imports/codex' && request.method === 'POST') {
+        codexImportHeaders = request.headers;
+        codexImportBody = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+        response.writeHead(201, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({
+          import: { received: 2, imported: 2, existing: 0, archiveEventCount: 2, personEventCount: 1, codexEventCount: 1 },
+          boundary: { private: 'must-not-cross' }, internalUserId: 'must-not-cross'
+        }));
+        return;
+      }
+      if (request.url === '/api/v1/me/journal/files' && request.method === 'POST') {
+        journalUploadHeaders = request.headers;
+        journalUploadBody = JSON.parse(Buffer.concat(chunks).toString('utf8'));
+        response.writeHead(201, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({
+          document: {
+            id: '11111111-1111-4111-8111-111111111111', fileName: 'journal.md', extension: '.md',
+            mediaType: 'text/markdown', sizeBytes: 22, privacyScope: 'personal',
+            extraction: { status: 'ready', characterCount: 22, unitCount: 1, warnings: [] }
+          },
+          idempotent: false,
+          boundary: { documentContentIsInstruction: false, automaticModelTrainingAllowed: false, sharedGraphMutationAllowed: false }
+        }));
+        return;
+      }
+      if (request.url === '/api/v1/me/journal/files' && request.method === 'GET') {
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({
+          version: 'private-journal-files.v1',
+          documents: [{
+            id: '11111111-1111-4111-8111-111111111111', fileName: 'journal.md', extension: '.md',
+            mediaType: 'text/markdown', sizeBytes: 22, privacyScope: 'personal',
+            extraction: { status: 'ready', characterCount: 22, unitCount: 1, warnings: [] }
+          }],
+          boundary: { crossPersonAccessAllowed: false, contextualRetrievalAllowed: true }
+        }));
+        return;
+      }
+      if (request.url === '/api/v1/me/journal/files/11111111-1111-4111-8111-111111111111/ocr' && request.method === 'POST') {
+        journalOcrHeaders = request.headers;
+        response.writeHead(202, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({
+          document: {
+            id: '11111111-1111-4111-8111-111111111111', fileName: 'scan.pdf', extension: '.pdf',
+            extraction: { status: 'processing_ocr', characterCount: 0, unitCount: 0, warnings: [], ocr: { status: 'queued' } }
+          },
+          queued: true,
+          boundary: { crossPersonAccessAllowed: false, automaticModelTrainingAllowed: false }
+        }));
+        return;
+      }
+      if (request.url === '/api/v1/me/journal/files/11111111-1111-4111-8111-111111111111' && request.method === 'DELETE') {
+        response.writeHead(200, { 'content-type': 'application/json' });
+        response.end(JSON.stringify({ deleted: { id: '11111111-1111-4111-8111-111111111111', fileName: 'journal.md' } }));
         return;
       }
       if (request.url === '/api/v1/me/garden' && request.method === 'GET') {
@@ -608,6 +712,7 @@ describe('Garden Entrance public gateway', () => {
       expect(catalogBody.entrances.person.cultivate).toBe('/api/v1/me/cultivate');
       expect(catalogBody.entrances.person.placeRelationships).toBe('/api/v1/me/garden/relationships');
       expect(catalogBody.entrances.person.transcript).toBe('/api/v1/me/transcript');
+      expect(catalogBody.entrances.person.journalFiles).toBe('/api/v1/me/journal/files');
       expect(catalogBody.entrances.person.createAccount).toBe('/api/v1/me/account');
       expect(catalogBody.entrances.people.cultivate).toBe('/api/v1/community/cultivate');
       expect(catalogBody.boundary.crossPersonAccessAllowed).toBe(false);
@@ -821,6 +926,12 @@ describe('Garden Entrance public gateway', () => {
       expect(personalBody.cultivation.personalContextConsulted).toBe(true);
       expect(personalBody.cultivation.persisted).toBe(true);
       expect(personalBody.cultivation.persistenceLayer).toBe('private_conversation_transcript');
+      expect(personalBody.ariBranch).toEqual({
+        version: 'personal-ari-branch.v1', branchId: 'ari_person00000001', scope: 'authenticated_person_only',
+        absorption: { personObservationCount: 7, ariResponseCount: 6, currentMove: 'question' },
+        adaptation: { mode: 'conversation_context_not_model_training', expressionPacing: 'balanced', recentMoves: ['greeting', 'question'] },
+        boundary: { crossPersonAccessAllowed: false, sharedGraphMutationAllowed: false, automaticModelTrainingAllowed: false, contextualAdaptationAllowed: true }
+      });
       expect(personalBody.comparisonReceipt.comparisons[0]).toEqual({
         observationSequence: 1, relevanceScore: 0.75, sharedTokens: ['personal', 'seed'],
         sharedPhrases: ['personal seed'], differenceCount: 1
@@ -879,6 +990,67 @@ describe('Garden Entrance public gateway', () => {
       expect(transcriptBody).not.toHaveProperty('internalUserId');
       expect(transcriptHeaders?.cookie).toBe(session);
       expect(transcriptBody.boundary.crossPersonAccessAllowed).toBe(false);
+
+      const journalUpload = await fetch(`${origin}/api/v1/me/journal/files`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-garden-request': 'personal-entrance', cookie: session! },
+        body: JSON.stringify({ fileName: 'journal.md', mediaType: 'text/markdown', privacyScope: 'public', dataBase64: Buffer.from('ARI journal reference.').toString('base64') })
+      });
+      const journalUploadResult = await journalUpload.json() as Record<string, any>;
+      expect(journalUpload.status).toBe(201);
+      expect(journalUploadResult.document.fileName).toBe('journal.md');
+      expect(journalUploadResult.boundary).toEqual(expect.objectContaining({
+        documentContentIsInstruction: false, automaticModelTrainingAllowed: false, sharedGraphMutationAllowed: false
+      }));
+      expect(journalUploadHeaders?.cookie).toBe(session);
+      expect(journalUploadBody).toEqual(expect.objectContaining({ fileName: 'journal.md', privacyScope: 'personal' }));
+      expect(journalUploadBody?.dataBase64).toBe(Buffer.from('ARI journal reference.').toString('base64'));
+
+      const journalList = await fetch(`${origin}/api/v1/me/journal/files`, { headers: { cookie: session! } });
+      const journalListResult = await journalList.json() as Record<string, any>;
+      expect(journalList.status).toBe(200);
+      expect(journalListResult.documents).toHaveLength(1);
+      expect(journalListResult.boundary.crossPersonAccessAllowed).toBe(false);
+
+      const journalOcr = await fetch(`${origin}/api/v1/me/journal/files/11111111-1111-4111-8111-111111111111/ocr`, {
+        method: 'POST', headers: { 'x-garden-request': 'personal-entrance', cookie: session! }
+      });
+      const journalOcrResult = await journalOcr.json() as Record<string, any>;
+      expect(journalOcr.status).toBe(202);
+      expect(journalOcrResult.queued).toBe(true);
+      expect(journalOcrResult.document.extraction.status).toBe('processing_ocr');
+      expect(journalOcrHeaders?.cookie).toBe(session);
+      expect(journalOcrHeaders?.['x-mirror-request']).toBe('same-origin');
+
+      const journalDelete = await fetch(`${origin}/api/v1/me/journal/files/11111111-1111-4111-8111-111111111111`, {
+        method: 'DELETE', headers: { 'x-garden-request': 'personal-entrance', cookie: session! }
+      });
+      expect(journalDelete.status).toBe(200);
+
+      const codexImport = await fetch(`${origin}/api/v1/me/conversation-imports/codex`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json', 'x-garden-request': 'personal-entrance', cookie: session! },
+        body: JSON.stringify({
+          threadId: '019fb724-fe9d-7f80-90f8-7a4f6ba6d817',
+          events: [
+            { sourceEventId: 'msg_person_0001', role: 'user', content: 'My correction.', createdAt: '2026-08-01T00:00:00Z' },
+            { sourceEventId: 'msg_codex_0001', role: 'assistant', content: 'Codex response.', createdAt: '2026-08-01T00:00:01Z' }
+          ]
+        })
+      });
+      const codexImportResult = await codexImport.json() as Record<string, any>;
+      expect(codexImport.status).toBe(201);
+      expect(codexImportResult.import).toEqual({
+        source: 'codex_history', received: 2, imported: 2, existing: 0,
+        archiveEventCount: 2, personEventCount: 1, codexEventCount: 1
+      });
+      expect(codexImportResult.boundary).toEqual(expect.objectContaining({
+        mode: 'private_developmental_context', codexSpeechBecomesAriSpeech: false,
+        sharedGraphMutationAllowed: false, automaticModelTrainingAllowed: false
+      }));
+      expect(codexImportResult).not.toHaveProperty('internalUserId');
+      expect(codexImportHeaders?.cookie).toBe(session);
+      expect(codexImportBody?.events).toHaveLength(2);
 
       const logout = await fetch(`${origin}/api/v1/me/session`, {
         method: 'DELETE', headers: { 'x-garden-request': 'personal-entrance', cookie: session! }

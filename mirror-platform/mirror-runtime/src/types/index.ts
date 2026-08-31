@@ -45,6 +45,8 @@ export interface MirrorRuntimeConfig {
   localModelUrl?: string;
   localModelName?: string;
   alignmentModelUrl?: string;
+  ariRuntimeUrl?: string;
+  ariRuntimeControlKey?: string;
   cloudflareZoneTag?: string;
   cloudflareAnalyticsToken?: string;
 }
