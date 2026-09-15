@@ -38,6 +38,7 @@ jobs:
           cache: npm
           cache-dependency-path: backend/package-lock.json
       - run: npm ci
+      - run: npm run migrate
       - run: npm test
       - name: Wait for the deployed personal placement capability
         shell: bash
