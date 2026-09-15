@@ -66,7 +66,8 @@ app.get('/api/health', (req, res) => {
     capabilities: {
       edgeCreationGate: 'persistent-receipt-v2',
       personalGraphPlacement: 'personal-receipt-placement-v1',
-      personalMappingObservations: 'personal-mapping-observation-v1'
+      personalMappingObservations: 'personal-mapping-observation-v1',
+      personalPatternComparison: 'personal-evidence-comparison-v1'
     }
   });
 });

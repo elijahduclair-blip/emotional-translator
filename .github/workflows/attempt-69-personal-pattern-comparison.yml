@@ -1,0 +1,62 @@
+name: Attempt 69 Personal Pattern Comparison
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compare-personal-observations:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: emotional_translator_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d emotional_translator_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/emotional_translator_test
+      AUTH_SECRET: github-actions-attempt-69-test-secret-more-than-32-characters
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm run migrate
+      - run: npm test
+      - name: Apply the backward-compatible schema
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          NODE_ENV: production
+        run: npm run migrate
+      - name: Compare Elijah personal mapping observations
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          NODE_ENV: production
+          ALLOW_PRODUCTION_PERSONAL_PATTERN_COMPARISON: 1
+          ATTEMPT_69_OWNER_USERNAME: elijah_duclair
+          ATTEMPT_69_REPORT: attempt-69-personal-pattern-comparison.json
+        run: AUTH_SECRET="$(openssl rand -hex 32)" node scripts/run-attempt-69-personal-pattern-comparison.js
+      - name: Publish the comparison report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attempt-69-personal-pattern-comparison
+          path: backend/attempt-69-personal-pattern-comparison.json
+          if-no-files-found: warn

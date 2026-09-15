@@ -1,0 +1,12 @@
+Attempt 69 applies the consumed Attempt 68 review by implementing the compare-second layer.
+Controlling review SHA-256: c932ac953a03bb60d5eae27fc47e81f07d507d4ed00d5a79c055244fba59a973.
+Review: repetition can be measured instead of assumed.
+Review: repeated observations from Elijah can establish a stable personal pattern.
+Review: repeated personal observations do not establish that a mapping applies to everybody.
+Review: collect first, compare second, generalize only if the evidence eventually supports it.
+Comparison unit: one exact normalized subject-color pair.
+Stable personal pattern gate: at least two observations, two sealed receipts, and two distinct evidence fingerprints.
+Evidence fingerprint: SHA-256 of exact statement, source name, and evidence object.
+Color recurrence across different subjects remains recurrence data, not proof of shared meaning.
+Production input: the four receipt-backed Attempt 68 observations in Elijah's profile.
+Boundary: Attempt 69 is read-only comparison; it cannot mutate a personal relationship, shared graph, or Color Atlas.

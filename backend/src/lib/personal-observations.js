@@ -131,6 +131,72 @@ export function summarizePersonalMappingObservations(rows) {
   return { observationCount: rows.length, distinctPairCount: pairs.length, repeatedPairCount: pairs.filter(item => item.repeated).length, pairs, colors };
 }
 
+export function comparePersonalMappingPatterns(rows, { minimumObservations = 2, minimumDistinctEvidence = 2 } = {}) {
+  const observationThreshold = boundedThreshold(minimumObservations, 'minimumObservations');
+  const evidenceThreshold = boundedThreshold(minimumDistinctEvidence, 'minimumDistinctEvidence');
+  const groups = new Map();
+  for (const row of rows) {
+    const pairKey = `${row.subject_key}\u0000${row.color_key}`;
+    const current = groups.get(pairKey) || {
+      subject: row.subject_label,
+      color: row.color_label,
+      relationshipType: row.relationship_type,
+      observations: [],
+      receiptIds: new Set(),
+      evidenceFingerprints: new Set(),
+    };
+    current.observations.push(row);
+    if (row.receipt_id) current.receiptIds.add(row.receipt_id);
+    current.evidenceFingerprints.add(sha256Json({
+      exactStatement: row.exact_statement,
+      sourceName: row.source_name,
+      evidence: row.evidence || {},
+    }));
+    groups.set(pairKey, current);
+  }
+
+  const pairs = [...groups.values()].map(group => {
+    const observationCount = group.observations.length;
+    const distinctReceiptCount = group.receiptIds.size;
+    const distinctEvidenceCount = group.evidenceFingerprints.size;
+    const stablePersonalPattern = observationCount >= observationThreshold
+      && distinctReceiptCount >= observationThreshold
+      && distinctEvidenceCount >= evidenceThreshold;
+    const observedTimes = group.observations.map(row => new Date(row.observed_at).valueOf()).filter(Number.isFinite).sort((a, b) => a - b);
+    return {
+      subject: group.subject,
+      color: group.color,
+      relationshipType: group.relationshipType,
+      observationCount,
+      distinctReceiptCount,
+      distinctEvidenceCount,
+      firstObservedAt: observedTimes.length ? new Date(observedTimes[0]).toISOString() : null,
+      lastObservedAt: observedTimes.length ? new Date(observedTimes.at(-1)).toISOString() : null,
+      stablePersonalPattern,
+      status: stablePersonalPattern ? 'STABLE_PERSONAL_PATTERN' : observationCount > 1 ? 'REPETITION_NOT_INDEPENDENT' : 'FIRST_OCCURRENCE',
+    };
+  }).sort((a, b) => Number(b.stablePersonalPattern) - Number(a.stablePersonalPattern)
+    || b.observationCount - a.observationCount || a.subject.localeCompare(b.subject));
+  const recurrence = summarizePersonalMappingObservations(rows);
+  return {
+    policy: {
+      minimumObservations: observationThreshold,
+      minimumDistinctReceipts: observationThreshold,
+      minimumDistinctEvidence: evidenceThreshold,
+      unit: 'exact normalized subject-color pair',
+      evidenceFingerprint: 'SHA-256 of exact statement, source name, and evidence object',
+    },
+    observationCount: rows.length,
+    pairCount: pairs.length,
+    stablePersonalPatternCount: pairs.filter(item => item.stablePersonalPattern).length,
+    firstOccurrenceCount: pairs.filter(item => item.status === 'FIRST_OCCURRENCE').length,
+    nonIndependentRepetitionCount: pairs.filter(item => item.status === 'REPETITION_NOT_INDEPENDENT').length,
+    patterns: pairs.filter(item => item.stablePersonalPattern),
+    pairs,
+    colorRecurrence: recurrence.colors,
+  };
+}
+
 function requiredText(value, message, maxLength) {
   const text = String(value || '').normalize('NFC').trim();
   if (!text) throw httpError(400, message);
@@ -148,6 +214,12 @@ function validDate(value) {
   const date = new Date(value);
   if (Number.isNaN(date.valueOf())) throw httpError(400, 'observedAt must be a valid date-time.');
   return date.toISOString();
+}
+
+function boundedThreshold(value, field) {
+  const number = Number(value);
+  if (!Number.isInteger(number) || number < 2 || number > 100) throw httpError(400, `${field} must be an integer from 2 through 100.`);
+  return number;
 }
 
 function stable(value) {

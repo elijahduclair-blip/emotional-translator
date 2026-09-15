@@ -82,6 +82,32 @@ test('Attempt 68 stores owner-confirmed mapping observations with sealed receipt
   assert.equal(lookup.body.summary.repeatedPairCount, 1);
   assert.equal(lookup.body.summary.pairs[0].observationCount, 2);
   assert.equal(lookup.body.boundary.automaticLearningAllowed, false);
+
+  const repeatedSameEvidence = await request(`/api/v1/users/${ownerId}/graph/patterns`, ownerToken);
+  assert.equal(repeatedSameEvidence.status, 200);
+  assert.equal(repeatedSameEvidence.body.comparison.stablePersonalPatternCount, 0);
+  assert.equal(repeatedSameEvidence.body.comparison.nonIndependentRepetitionCount, 1);
+  assert.equal(repeatedSameEvidence.body.comparison.pairs[0].distinctEvidenceCount, 1);
+
+  const independentOccurrence = await request(`/api/v1/users/${ownerId}/graph/observations`, ownerToken, {
+    method: 'POST',
+    body: {
+      ...observationBody('A69-INDEPENDENT-OCCURRENCE', 'momentum', 'Red', 'Momentum feels Red here', { occurrence: 3 }),
+      sourceName: 'Attempt 69 independent observation fixture',
+      evidence: { type: 'owner_direct_statement', occurrenceId: 'independent-3' },
+    },
+  });
+  assert.equal(independentOccurrence.status, 201);
+  const stablePattern = await request(`/api/v1/users/${ownerId}/graph/patterns`, ownerToken);
+  assert.equal(stablePattern.status, 200);
+  assert.equal(stablePattern.body.comparison.stablePersonalPatternCount, 1);
+  assert.equal(stablePattern.body.comparison.patterns[0].subject, 'momentum');
+  assert.equal(stablePattern.body.comparison.patterns[0].color, 'Red');
+  assert.equal(stablePattern.body.comparison.patterns[0].observationCount, 3);
+  assert.equal(stablePattern.body.comparison.patterns[0].distinctReceiptCount, 3);
+  assert.equal(stablePattern.body.comparison.patterns[0].distinctEvidenceCount, 2);
+  assert.equal(stablePattern.body.boundary.personalRelationshipMutationAllowed, false);
+  assert.equal(stablePattern.body.boundary.automaticGeneralizationAllowed, false);
 });
 
 test('Attempt 68 rolls back the observation when receipt storage fails', async () => {

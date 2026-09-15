@@ -3,7 +3,7 @@ import { pool, query } from '../db/pool.js';
 import crypto from 'crypto';
 import { requireAuth, requirePasswordCurrent, requireSelfOrAdmin } from '../middleware/auth.js';
 import { formatPersonalGraphRelationship, normalizePersonalGraphKey, persistPersonalGraphPlacement } from '../lib/personal-graph.js';
-import { formatPersonalMappingObservation, persistPersonalMappingObservation, summarizePersonalMappingObservations } from '../lib/personal-observations.js';
+import { comparePersonalMappingPatterns, formatPersonalMappingObservation, persistPersonalMappingObservation, summarizePersonalMappingObservations } from '../lib/personal-observations.js';
 
 const router = express.Router();
 
@@ -208,6 +208,28 @@ router.post('/users/:id/graph/observations', requireAuth, requirePasswordCurrent
   }
 });
 
+router.get('/users/:id/graph/patterns', requireAuth, requirePasswordCurrent, requireSelfOrAdmin, async (req, res, next) => {
+  try {
+    const result = await query(
+      `SELECT observation.*,receipt.receipt_id,receipt.receipt_sha256
+       FROM user_graph_observations AS observation
+       INNER JOIN user_graph_observation_receipts AS receipt ON receipt.observation_id=observation.id
+       WHERE observation.user_id=$1
+       ORDER BY observation.observed_at,observation.created_at,observation.id
+       LIMIT 2000`,
+      [req.params.id]
+    );
+    const comparison = comparePersonalMappingPatterns(result.rows);
+    res.json({
+      sourceLayer: 'user_graph_observation_comparison',
+      comparison,
+      boundary: personalPatternBoundary(comparison),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 function graphTerms(value) {
   const words = String(value || '').normalize('NFC').match(/[\p{L}\p{N}]+(?:['\u2019_-][\p{L}\p{N}]+)*/gu) || [];
   const terms = new Set();
@@ -241,6 +263,19 @@ function personalObservationBoundary(reason, { observed = false, confirmed = fal
     colorAtlasMutationAllowed: false,
     automaticLearningAllowed: false,
     reason,
+  };
+}
+
+function personalPatternBoundary(comparison) {
+  return {
+    mode: 'evidence_distinct_personal_pattern_comparison',
+    comparisonOnly: true,
+    stablePersonalPatternsFound: comparison.stablePersonalPatternCount,
+    personalRelationshipMutationAllowed: false,
+    sharedGraphMutationAllowed: false,
+    colorAtlasMutationAllowed: false,
+    automaticGeneralizationAllowed: false,
+    reason: 'Only repeated exact subject-color pairs with distinct receipts and distinct evidence can qualify as stable personal patterns. Color-family recurrence across different subjects is not shared meaning.',
   };
 }
 
