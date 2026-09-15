@@ -1,0 +1,8 @@
+ChromaBridge Attempt 66 evidence bundle
+User statement: I think making flow grey is the first step.
+User scope statement: Give these to Ari for my profile. Then tell them to mutate my personal graph after placing the words with their color associations.
+Live source endpoint: condition-word-flow is an active common_word node whose role is movement through a system without fixed shape.
+Live target endpoint: family-gray is the active Gray core-family node.
+Existing route: condition-word-flow already connects to family-blue as a condition climate; multiple contextual color routes may coexist.
+Scope gap: The statements support an Elijah-specific flow-to-Gray association, but they do not authorize adding that association to the shared graph.
+Decision boundary: Retain an UNRESOLVED creation receipt and do not create a shared edge or graph-history row.

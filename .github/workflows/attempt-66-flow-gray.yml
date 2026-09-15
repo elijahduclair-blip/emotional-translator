@@ -1,0 +1,43 @@
+name: Attempt 66 Flow Gray Receipt
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preserve-receipt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - name: Confirm the deployed persistent receipt capability
+        shell: bash
+        run: |
+          response="$(curl --fail --silent --show-error https://eli-emotional-translator-api.onrender.com/api/health)"
+          printf '%s\n' "$response"
+          printf '%s' "$response" | grep -q '"edgeCreationGate":"persistent-receipt-v2"'
+      - name: Preserve the real flow-to-Gray candidate
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          NODE_ENV: production
+          ALLOW_PRODUCTION_COLOR_RECEIPT: 1
+          ATTEMPT_66_REPORT: attempt-66-flow-gray.json
+        run: AUTH_SECRET="$(openssl rand -hex 32)" node scripts/run-attempt-66-flow-gray.js
+      - name: Publish the evidence receipt report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attempt-66-flow-gray
+          path: backend/attempt-66-flow-gray.json
+          if-no-files-found: warn
