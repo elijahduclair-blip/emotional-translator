@@ -3,7 +3,7 @@ import { pool, query } from '../db/pool.js';
 import crypto from 'crypto';
 import { requireAuth, requirePasswordCurrent, requireSelfOrAdmin } from '../middleware/auth.js';
 import { formatPersonalGraphRelationship, normalizePersonalGraphKey, persistPersonalGraphPlacement } from '../lib/personal-graph.js';
-import { buildPersonalPatternInquiries, comparePersonalMappingPatterns, formatPersonalMappingObservation, persistPersonalMappingObservation, summarizePersonalMappingObservations } from '../lib/personal-observations.js';
+import { buildPersonalPatternInquiries, buildSourceAnchoredRelationalSearch, comparePersonalMappingPatterns, formatPersonalMappingObservation, persistPersonalMappingObservation, summarizePersonalMappingObservations } from '../lib/personal-observations.js';
 
 const router = express.Router();
 
@@ -252,6 +252,19 @@ router.get('/users/:id/graph/pattern-inquiries', requireAuth, requirePasswordCur
   }
 });
 
+router.post('/users/:id/graph/source-bridge-search', requireAuth, requirePasswordCurrent, requireSelfOrAdmin, async (req, res, next) => {
+  try {
+    const search = buildSourceAnchoredRelationalSearch(req.body?.assertions);
+    res.json({
+      sourceLayer: 'user_graph_source_bridge_search',
+      search,
+      boundary: sourceBridgeSearchBoundary(search),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 function graphTerms(value) {
   const words = String(value || '').normalize('NFC').match(/[\p{L}\p{N}]+(?:['\u2019_-][\p{L}\p{N}]+)*/gu) || [];
   const terms = new Set();
@@ -312,6 +325,22 @@ function personalPatternInquiryBoundary(inquirySet) {
     colorAtlasMutationAllowed: false,
     automaticMeaningAssignmentAllowed: false,
     reason: 'ARI may surface stable same-color associations and ask the owner for a relationship and counterexample. ARI does not supply the higher-order meaning or treat the inquiry as evidence.',
+  };
+}
+
+function sourceBridgeSearchBoundary(search) {
+  return {
+    mode: 'source_anchored_relational_search',
+    previewOnly: true,
+    searchPacketsBuilt: search.networkCount,
+    suppliedRelationTypesPreserved: true,
+    personalObservationMutationAllowed: false,
+    personalRelationshipMutationAllowed: false,
+    sharedGraphMutationAllowed: false,
+    colorAtlasMutationAllowed: false,
+    synonymInferenceAllowed: false,
+    automaticMeaningAssignmentAllowed: false,
+    reason: 'ARI may combine an anchor with its supplied typed neighbors to form candidate search queries. A search combination is not a synonym claim, meaning assignment, or graph relationship.',
   };
 }
 

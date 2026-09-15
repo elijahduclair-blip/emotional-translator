@@ -1,0 +1,10 @@
+Attempt 73 - source-anchored relational search
+Controlling Attempt 72 review SHA-256: 9cc6356ef4c4cb81b68f3f118e95c82b8c87bbae923e8f1196a3961770f830e7
+Owner statement: "grass is green. grass grows."
+Owner statement: "grass, green, grows are three words you can use to search other concepts associated."
+Owner statement: "just like red and blood. red and blood match in color."
+Owner statement: "when i think of red i associate it with pain"
+Typed relations must remain typed; connected terms are not automatically synonyms.
+The preview endpoint must not store observations or mutate personal or shared graphs.
+Expected candidate search packet: grass + Green + grows.
+Expected candidate search packet: Red + blood + pain.

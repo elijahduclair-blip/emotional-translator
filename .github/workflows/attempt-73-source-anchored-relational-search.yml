@@ -1,0 +1,62 @@
+name: Attempt 73 Source-Anchored Relational Search
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-source-anchored-relational-search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: emotional_translator_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d emotional_translator_test"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/emotional_translator_test
+      AUTH_SECRET: github-actions-attempt-73-test-secret-more-than-32-characters
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - run: npm run migrate
+      - run: npm test
+      - name: Apply the backward-compatible personal graph schema
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          NODE_ENV: production
+        run: npm run migrate
+      - name: Build ARI's bounded source-anchor search packets
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          NODE_ENV: production
+          ALLOW_PRODUCTION_SOURCE_BRIDGE_SEARCH: 1
+          ATTEMPT_73_OWNER_USERNAME: elijah_duclair
+          ATTEMPT_73_REPORT: attempt-73-source-anchored-relational-search.json
+        run: AUTH_SECRET="$(openssl rand -hex 32)" node scripts/run-attempt-73-source-anchored-relational-search.js
+      - name: Publish the source-anchor report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attempt-73-source-anchored-relational-search
+          path: backend/attempt-73-source-anchored-relational-search.json
+          if-no-files-found: warn

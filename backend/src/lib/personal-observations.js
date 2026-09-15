@@ -248,6 +248,127 @@ export function buildPersonalPatternInquiries(rows, { minimumStablePatternsPerCo
   };
 }
 
+export function buildSourceAnchoredRelationalSearch(assertions) {
+  if (!Array.isArray(assertions) || assertions.length === 0) throw httpError(400, 'assertions must be a non-empty array.');
+  if (assertions.length > 100) throw httpError(413, 'assertions must contain 100 items or fewer.');
+
+  const distinctAssertions = new Map();
+  const termLabels = new Map();
+  assertions.forEach((value, index) => {
+    const assertion = plainObject(value, `assertions[${index}]`);
+    const source = requiredText(assertion.source, `assertions[${index}].source is required.`, 200);
+    const relation = requiredText(assertion.relation, `assertions[${index}].relation is required.`, 100);
+    const target = requiredText(assertion.target, `assertions[${index}].target is required.`, 200);
+    const exactStatement = requiredText(assertion.exactStatement, `assertions[${index}].exactStatement is required.`, 4_000);
+    const sourceKey = normalizePersonalGraphKey(source);
+    const relationKey = normalizePersonalGraphKey(relation);
+    const targetKey = normalizePersonalGraphKey(target);
+    if (sourceKey === targetKey) throw httpError(400, `assertions[${index}] must connect two different terms.`);
+    termLabels.set(sourceKey, termLabels.get(sourceKey) || source);
+    termLabels.set(targetKey, termLabels.get(targetKey) || target);
+    const key = `${sourceKey}\u0000${relationKey}\u0000${targetKey}`;
+    const current = distinctAssertions.get(key) || {
+      source, sourceKey, relation, relationKey, target, targetKey, exactStatements: new Set(), occurrenceCount: 0,
+    };
+    current.exactStatements.add(exactStatement);
+    current.occurrenceCount += 1;
+    distinctAssertions.set(key, current);
+  });
+
+  const edges = [...distinctAssertions.values()].map(edge => ({
+    assertionId: `CBSRA-${sha256Json({ sourceKey: edge.sourceKey, relationKey: edge.relationKey, targetKey: edge.targetKey }).slice(0, 16).toUpperCase()}`,
+    source: edge.source,
+    sourceKey: edge.sourceKey,
+    relation: edge.relation,
+    relationKey: edge.relationKey,
+    target: edge.target,
+    targetKey: edge.targetKey,
+    exactStatements: [...edge.exactStatements],
+    occurrenceCount: edge.occurrenceCount,
+  })).sort((a, b) => a.sourceKey.localeCompare(b.sourceKey) || a.relationKey.localeCompare(b.relationKey) || a.targetKey.localeCompare(b.targetKey));
+
+  const adjacency = new Map();
+  for (const edge of edges) {
+    addNeighbor(adjacency, edge.sourceKey, edge.targetKey);
+    addNeighbor(adjacency, edge.targetKey, edge.sourceKey);
+  }
+  const components = connectedComponents(adjacency);
+  const networks = [];
+  const seedAssertions = [];
+  for (const component of components) {
+    const componentKeys = new Set(component);
+    const componentEdges = edges.filter(edge => componentKeys.has(edge.sourceKey) && componentKeys.has(edge.targetKey));
+    const anchorKeys = component.filter(key => (adjacency.get(key)?.size || 0) >= 2);
+    if (component.length < 3 || componentEdges.length < 2 || anchorKeys.length === 0) {
+      seedAssertions.push(...componentEdges);
+      continue;
+    }
+
+    const directPairs = new Set();
+    for (const edge of componentEdges) {
+      directPairs.add(undirectedPairKey(edge.sourceKey, edge.targetKey));
+    }
+    const lateralSearches = [];
+    let truncated = false;
+    for (const anchorKey of anchorKeys.sort()) {
+      const neighborKeys = [...adjacency.get(anchorKey)].sort();
+      for (let left = 0; left < neighborKeys.length; left += 1) {
+        for (let right = left + 1; right < neighborKeys.length; right += 1) {
+          if (directPairs.has(undirectedPairKey(neighborKeys[left], neighborKeys[right]))) continue;
+          if (lateralSearches.length >= 200) {
+            truncated = true;
+            break;
+          }
+          const terms = [termLabels.get(anchorKey), termLabels.get(neighborKeys[left]), termLabels.get(neighborKeys[right])];
+          lateralSearches.push({
+            anchor: terms[0],
+            left: terms[1],
+            right: terms[2],
+            terms,
+            query: terms.join(' '),
+            relationship: null,
+            status: 'CANDIDATE_SEARCH_ONLY',
+          });
+        }
+        if (truncated) break;
+      }
+      if (truncated) break;
+    }
+    const normalizedNetwork = componentEdges.map(edge => ({ sourceKey: edge.sourceKey, relationKey: edge.relationKey, targetKey: edge.targetKey }));
+    networks.push({
+      networkId: `CBSRN-${sha256Json(normalizedNetwork).slice(0, 16).toUpperCase()}`,
+      status: 'SOURCE_ANCHORED_SEARCH_PACKET',
+      terms: component.map(key => termLabels.get(key)),
+      anchorTerms: anchorKeys.map(key => termLabels.get(key)),
+      assertions: componentEdges,
+      lateralSearches,
+      lateralSearchCount: lateralSearches.length,
+      lateralSearchesTruncated: truncated,
+      proposedMeaning: null,
+    });
+  }
+
+  networks.sort((a, b) => a.networkId.localeCompare(b.networkId));
+  return {
+    policy: {
+      inputUnit: 'owner-supplied typed relation assertion',
+      groupingRule: 'connected terms joined only by supplied typed relations',
+      searchRule: 'an anchor plus two unconnected neighbors may become a candidate search query',
+      relationLabelsPreserved: true,
+      externalSearchPerformed: false,
+      synonymInferenceAllowed: false,
+      automaticMeaningAssignmentAllowed: false,
+      graphMutationAllowed: false,
+    },
+    assertionCount: assertions.length,
+    distinctAssertionCount: edges.length,
+    networkCount: networks.length,
+    networks,
+    seedAssertionCount: seedAssertions.length,
+    seedAssertions,
+  };
+}
+
 function requiredText(value, message, maxLength) {
   const text = String(value || '').normalize('NFC').trim();
   if (!text) throw httpError(400, message);
@@ -271,6 +392,38 @@ function boundedThreshold(value, field) {
   const number = Number(value);
   if (!Number.isInteger(number) || number < 2 || number > 100) throw httpError(400, `${field} must be an integer from 2 through 100.`);
   return number;
+}
+
+function addNeighbor(adjacency, source, target) {
+  const neighbors = adjacency.get(source) || new Set();
+  neighbors.add(target);
+  adjacency.set(source, neighbors);
+}
+
+function connectedComponents(adjacency) {
+  const components = [];
+  const visited = new Set();
+  for (const start of [...adjacency.keys()].sort()) {
+    if (visited.has(start)) continue;
+    const pending = [start];
+    const component = [];
+    visited.add(start);
+    while (pending.length) {
+      const current = pending.shift();
+      component.push(current);
+      for (const neighbor of [...(adjacency.get(current) || [])].sort()) {
+        if (visited.has(neighbor)) continue;
+        visited.add(neighbor);
+        pending.push(neighbor);
+      }
+    }
+    components.push(component);
+  }
+  return components;
+}
+
+function undirectedPairKey(left, right) {
+  return left < right ? `${left}\u0000${right}` : `${right}\u0000${left}`;
 }
 
 function naturalList(values) {

@@ -163,6 +163,59 @@ test('Attempt 68 rolls back the observation when receipt storage fails', async (
   assert.equal(count.rows[0].count, 0);
 });
 
+test('Attempt 73 builds typed source-bridge search packets without collapsing terms or mutating the graph', async () => {
+  const before = await persistedCounts();
+  const response = await request(`/api/v1/users/${ownerId}/graph/source-bridge-search`, ownerToken, {
+    method: 'POST',
+    body: {
+      assertions: [
+        { source: 'grass', relation: 'color', target: 'Green', exactStatement: 'grass is green.' },
+        { source: 'grass', relation: 'process', target: 'grows', exactStatement: 'grass grows.' },
+        { source: 'blood', relation: 'color', target: 'Red', exactStatement: 'red and blood match in color.' },
+        { source: 'Red', relation: 'personal association', target: 'pain', exactStatement: 'when i think of red i associate it with pain' },
+      ],
+    },
+  });
+  assert.equal(response.status, 200);
+  assert.equal(response.body.sourceLayer, 'user_graph_source_bridge_search');
+  assert.equal(response.body.search.assertionCount, 4);
+  assert.equal(response.body.search.distinctAssertionCount, 4);
+  assert.equal(response.body.search.networkCount, 2);
+  assert.equal(response.body.search.seedAssertionCount, 0);
+
+  const grass = response.body.search.networks.find(network => network.terms.includes('grass'));
+  assert.ok(grass);
+  assert.deepEqual(grass.anchorTerms, ['grass']);
+  assert.deepEqual(grass.assertions.map(assertion => [assertion.source, assertion.relation, assertion.target]), [
+    ['grass', 'color', 'Green'],
+    ['grass', 'process', 'grows'],
+  ]);
+  assert.deepEqual(grass.lateralSearches[0].terms, ['grass', 'Green', 'grows']);
+  assert.equal(grass.lateralSearches[0].relationship, null);
+  assert.equal(grass.lateralSearches[0].status, 'CANDIDATE_SEARCH_ONLY');
+  assert.equal(grass.proposedMeaning, null);
+
+  const blood = response.body.search.networks.find(network => network.terms.includes('blood'));
+  assert.ok(blood);
+  assert.deepEqual(blood.anchorTerms, ['Red']);
+  assert.deepEqual(blood.lateralSearches[0].terms, ['Red', 'blood', 'pain']);
+  assert.equal(response.body.search.policy.synonymInferenceAllowed, false);
+  assert.equal(response.body.search.policy.externalSearchPerformed, false);
+  assert.equal(response.body.boundary.previewOnly, true);
+  assert.equal(response.body.boundary.personalObservationMutationAllowed, false);
+  assert.equal(response.body.boundary.personalRelationshipMutationAllowed, false);
+  assert.equal(response.body.boundary.sharedGraphMutationAllowed, false);
+  assert.deepEqual(await persistedCounts(), before);
+
+  const seedOnly = await request(`/api/v1/users/${ownerId}/graph/source-bridge-search`, ownerToken, {
+    method: 'POST',
+    body: { assertions: [{ source: 'blood', relation: 'color', target: 'Red', exactStatement: 'red and blood match in color.' }] },
+  });
+  assert.equal(seedOnly.status, 200);
+  assert.equal(seedOnly.body.search.networkCount, 0);
+  assert.equal(seedOnly.body.search.seedAssertionCount, 1);
+});
+
 test('Attempt 68 serializes concurrent exact retries into one observation and one receipt', async () => {
   const body = observationBody('A68-CONCURRENT', 'caution', 'Yellow', 'Yellow is caution');
   const responses = await Promise.all([
@@ -201,6 +254,14 @@ function observationBody(idempotencyKey, subject, color, exactStatement, context
     context,
     idempotencyKey,
   };
+}
+
+async function persistedCounts() {
+  const [observations, relationships] = await Promise.all([
+    query('SELECT COUNT(*)::int AS count FROM user_graph_observations WHERE user_id=$1', [ownerId]),
+    query("SELECT COUNT(*)::int AS count FROM user_graph_relationships WHERE user_id=$1 AND record_status='active'", [ownerId]),
+  ]);
+  return { observations: observations.rows[0].count, relationships: relationships.rows[0].count };
 }
 
 async function request(pathname, token, options = {}) {
