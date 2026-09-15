@@ -1,0 +1,12 @@
+Attempt 71 applies the consumed Attempt 70 review by storing the current direct color associations as new personal observations with sealed receipts.
+Controlling review SHA-256: f2e8832a07fd4b38949da08c6446217d13f7b24565b7833a88133edd12a073a6.
+Elijah: "how about you use words that are associated with colors. for example stop and momentum is Red, slow and caution are yellow. green is grow or plants."
+Personal mapping: momentum to Red.
+Personal mapping: stop to Red.
+Personal mapping: slow to Yellow.
+Personal mapping: caution to Yellow.
+Personal mapping: grow to Green.
+Personal mapping: plants to Green.
+Comparison rule: an exact subject-color pair becomes a stable personal pattern only with at least two observations, two distinct receipts, and two distinct evidence fingerprints.
+Expected result: the four repeated Red and Yellow pairs stabilize; the two Green pairs remain first occurrences.
+Boundary: store personal observations and compare them; do not mutate a personal relationship, the shared graph, the Color Atlas, or any shade.
