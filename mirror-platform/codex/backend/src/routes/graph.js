@@ -4,6 +4,12 @@ import crypto from 'crypto';
 import { pool, query } from '../db/pool.js';
 import { requireAuth, requireAdmin, requirePasswordCurrent } from '../middleware/auth.js';
 import { normalizeNodeMetadataWithFaces, VERIFICATION_FACE_KEYS } from '../lib/node-faces.js';
+import {
+  findPersistedCreation,
+  persistEdgeCreation,
+  sealCreationReceipt,
+  validateCreationReceiptForEdge
+} from '../lib/edge-creation-receipts.js';
 
 
 const router = express.Router();
@@ -87,15 +93,26 @@ router.post('/graph/proposals/:id/approve', requireAuth, requireAdmin, async (re
   try {
     client = await pool.connect();
     await client.query('BEGIN');
-    const proposalResult = await client.query("SELECT * FROM graph_proposals WHERE id = $1 AND status = 'reviewed' FOR UPDATE", [req.params.id]);
-    if (!proposalResult.rows.length) throw httpError(409, 'A proposal must be reviewed before approval.');
+    const proposalResult = await client.query('SELECT * FROM graph_proposals WHERE id = $1 FOR UPDATE', [req.params.id]);
+    if (!proposalResult.rows.length) throw httpError(404, 'Graph proposal not found.');
     const proposal = proposalResult.rows[0];
+    if (proposal.status !== 'reviewed') {
+      const replay = proposal.operation === 'create_relationship'
+        ? await findPersistedCreation(client, proposal.id)
+        : null;
+      if (!replay) throw httpError(409, 'A proposal must be reviewed before approval.');
+      await client.query('COMMIT');
+      return res.json({ proposalId: proposal.id, status: replay.proposalStatus, ...replay });
+    }
     const reviewer = req.user.username;
     const outcome = await applyProposal(client, proposal, reviewer);
-    await client.query("UPDATE graph_proposals SET status = 'approved', reviewer = $2, decided_at = NOW() WHERE id = $1", [proposal.id, reviewer]);
+    await client.query(
+      'UPDATE graph_proposals SET status = $2, reviewer = $3, decided_at = NOW() WHERE id = $1',
+      [proposal.id, outcome.proposalStatus ?? 'approved', reviewer]
+    );
     await client.query('COMMIT');
     clearGraphCache();
-    res.json({ proposalId: proposal.id, status: 'approved', ...outcome });
+    res.json({ proposalId: proposal.id, status: outcome.proposalStatus ?? 'approved', ...outcome });
   } catch (error) {
     if (client) await client.query('ROLLBACK');
     next(error);
@@ -161,6 +178,8 @@ function normalizeProposal(value = {}) {
   if (payload.relationships) payload.relationships = normalizeRelationships(payload.relationships, payload.node?.id || value.targetId);
   if (operation === 'create_relationship' && payload.relationship) {
     payload.relationship = normalizeStoredRelationship(payload.relationship);
+    const receiptValidation = validateCreationReceiptForEdge(payload.creationReceipt, payload.relationship);
+    if (receiptValidation.valid) payload.creationReceipt = sealCreationReceipt(payload.creationReceipt);
   }
   return {
     id: crypto.randomUUID(),
@@ -176,9 +195,16 @@ function validateProposal(proposal) {
   if (!['create', 'create_relationship', 'edit', 'delete'].includes(proposal.operation)) throw httpError(400, 'Operation must be create, create_relationship, edit, or delete.');
   if (proposal.operation === 'create') {
     validateNodeInput(proposal.payload.node);
-    for (const relationship of proposal.payload.relationships || []) validateRelationship(relationship);
+    if ((proposal.payload.relationships || []).length) {
+      throw httpError(400, 'New relationships require separate create_relationship proposals with sealed creation receipts.');
+    }
   } else if (proposal.operation === 'create_relationship') {
     validateRelationship(proposal.payload.relationship);
+    const validation = validateCreationReceiptForEdge(proposal.payload.creationReceipt, proposal.payload.relationship);
+    if (!validation.valid) throw httpError(400, `Invalid edge creation receipt: ${validation.errors.join('; ')}`);
+    if (proposal.payload.creationReceipt.creationContext.actorId !== proposal.author) {
+      throw httpError(400, 'Receipt actor must match the proposal author.');
+    }
   } else if (!proposal.targetId) throw httpError(400, 'Edit and delete proposals require a target id.');
   if (proposal.operation === 'edit' && proposal.payload.node) validateNodeInput(proposal.payload.node);
 }
@@ -193,16 +219,15 @@ async function applyProposal(client, proposal, author) {
 async function applyCreateRelationship(client, proposal, author) {
   const edge = normalizeStoredRelationship(proposal.payload.relationship);
   validateRelationship(edge);
-  const endpoints = await client.query("SELECT id FROM nodes WHERE id IN ($1,$2) AND record_status='active'", [edge.source, edge.target]);
-  if (endpoints.rows.length !== 2) throw httpError(400, 'Both relationship endpoints must exist and be active.');
-  const duplicate = await client.query("SELECT id FROM edges WHERE id=$1 AND record_status='active'", [edge.id]);
-  if (duplicate.rows.length) throw httpError(409, `Relationship id already exists: ${edge.id}`);
-  const result = await client.query(
-    `INSERT INTO edges (id,source,target,type,evidence,confidence,evidence_data) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-    [edge.id, edge.source, edge.target, edge.type, edge.evidence, edge.confidence, edge.evidenceData]
-  );
-  await addHistory(client, 'edge', edge.id, 'create', null, result.rows[0], author, proposal.rationale, proposal.id);
-  return { node: null, relationships: [result.rows[0]] };
+  const committed = await persistEdgeCreation(client, { proposal, edge, author });
+  return {
+    node: null,
+    relationships: committed.relationship ? [committed.relationship] : [],
+    creationReceipt: committed.receipt,
+    disposition: committed.disposition,
+    idempotent: committed.idempotent,
+    proposalStatus: committed.proposalStatus
+  };
 }
 
 async function applyCreate(client, proposal, author) {
@@ -214,18 +239,7 @@ async function applyCreate(client, proposal, author) {
     [node.id, node.label, node.type, node.family, node.hexColor, node.metadata]
   );
   await addHistory(client, 'node', node.id, 'create', null, inserted.rows[0], author, proposal.rationale, proposal.id);
-  const edges = [];
-  for (const edge of proposal.payload.relationships || []) {
-    const target = await client.query("SELECT id FROM nodes WHERE id = $1 AND record_status = 'active'", [edge.target]);
-    if (!target.rows.length) throw httpError(400, `Relationship target does not exist: ${edge.target}`);
-    const result = await client.query(
-      `INSERT INTO edges (id, source, target, type, evidence, confidence, evidence_data) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-      [edge.id, edge.source, edge.target, edge.type, edge.evidence, edge.confidence, edge.evidenceData]
-    );
-    edges.push(result.rows[0]);
-    await addHistory(client, 'edge', edge.id, 'create', null, result.rows[0], author, proposal.rationale, proposal.id);
-  }
-  return { node: inserted.rows[0], relationships: edges };
+  return { node: inserted.rows[0], relationships: [], proposalStatus: 'approved' };
 }
 
 async function applyEdit(client, proposal, author) {

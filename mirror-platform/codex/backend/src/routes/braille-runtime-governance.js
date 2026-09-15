@@ -3,6 +3,7 @@ import express from 'express';
 import { pool, query } from '../db/pool.js';
 import { requireAdmin, requireAuth, requirePasswordCurrent } from '../middleware/auth.js';
 import { assembleBrailleRuntimeModule } from '../lib/braille-runtime-module.js';
+import { sealCreationReceipt, sha256 } from '../lib/edge-creation-receipts.js';
 
 const router = express.Router();
 const TOKEN_TTL_MINUTES = 15;
@@ -162,7 +163,10 @@ async function createRelationshipProposal(client, module, actor, value = {}) {
   if (!CONFIDENCE.has(confidence)) throw httpError(400, 'Confidence must be high, medium, or low.');
   const evidence = requiredText(value?.evidence, 'Relationship evidence is required.');
   const counterexample = requiredText(value?.counterexample, 'Counterexample or falsification condition is required.');
-  const existing = await client.query("SELECT id FROM nodes WHERE id IN ($1,$2) AND record_status='active'", [source, target]);
+  const existing = await client.query(
+    "SELECT id,label,type,revision,updated_at FROM nodes WHERE id IN ($1,$2) AND record_status='active'",
+    [source, target]
+  );
   if (existing.rows.length !== 2) throw httpError(400, 'Both route endpoints must be active approved graph nodes.');
   const proposalId = crypto.randomUUID();
   const edgeId = `${source}->${target}:${type}`;
@@ -183,10 +187,96 @@ async function createRelationshipProposal(client, module, actor, value = {}) {
       counterexample
     }
   };
+  const sourceNode = existing.rows.find(node => node.id === source);
+  const targetNode = existing.rows.find(node => node.id === target);
+  const createdAt = new Date().toISOString();
+  const sourceLocator = `postgres:braille_runtime_modules/${module.id}/compiled_instruction`;
+  const frozenSource = JSON.stringify({
+    moduleId: module.id,
+    compiledInstruction: module.compiled_instruction,
+    source,
+    target,
+    type,
+    evidence,
+    counterexample
+  });
+  const frozenSha = sha256(Buffer.from(frozenSource, 'utf8'));
+  const creationReceipt = sealCreationReceipt({
+    receiptVersion: 'chromabridge-edge-receipt.v2',
+    receiptId: `CBER-${crypto.randomUUID()}`,
+    receiptClass: 'CREATION',
+    creationContext: {
+      requestId: `braille-runtime:${module.id}:${proposalId}`,
+      idempotencyKey: `graph-edge:${proposalId}`,
+      createdAt,
+      actorId: actor,
+      profileScope: 'shared-governed'
+    },
+    edge: {
+      edgeId,
+      relationship: type,
+      wordNode: { recordId: source, name: sourceNode.label, tier: sourceNode.type },
+      baseNode: { recordId: target, name: targetNode.label, tier: targetNode.type }
+    },
+    source: {
+      system: 'ChromaBridge Braille Runtime governance',
+      version: `module:${module.id}`,
+      frozenFiles: [{ file: sourceLocator, sha256: frozenSha, bytes: Buffer.byteLength(frozenSource) }]
+    },
+    endpointEvidence: {
+      wordSenseKeys: [{
+        senseKey: `chroma-node:${source}@${sourceNode.revision}`,
+        synsetId: source,
+        locator: {
+          file: `postgres:nodes/${source}`,
+          line: 1,
+          lineSha256: sha256(Buffer.from(JSON.stringify(sourceNode), 'utf8'))
+        }
+      }],
+      baseSenseKeys: [{
+        senseKey: `chroma-node:${target}@${targetNode.revision}`,
+        synsetId: target,
+        locator: {
+          file: `postgres:nodes/${target}`,
+          line: 1,
+          lineSha256: sha256(Buffer.from(JSON.stringify(targetNode), 'utf8'))
+        }
+      }]
+    },
+    relation: {
+      pathDisposition: 'SUPPORTS',
+      selectedPath: {
+        length: 1,
+        nodes: [source, target],
+        symbols: [type],
+        directions: ['forward'],
+        transitionLocators: [{
+          file: sourceLocator,
+          line: 1,
+          lineSha256: frozenSha,
+          synsetId: source,
+          pointerSymbol: type,
+          pointerDirection: 'forward',
+          pointerTarget: target
+        }]
+      },
+      candidatePaths: [],
+      maxPointerHops: 1
+    },
+    decision: {
+      status: 'VERIFY',
+      ruleId: 'BRAILLE_RUNTIME_REVIEWED_MODULE_v1',
+      explanation: 'A reviewed governed module produced this direct system-rule relationship proposal.',
+      evidenceSha256: null
+    },
+    provenance: { capturedAtCreation: true, sourceReceipt: null, gaps: [] },
+    requestedAction: 'COMMIT_EDGE',
+    integrity: { receiptSha256: null }
+  });
   await client.query(
     `INSERT INTO graph_proposals (id,operation,target_id,payload,status,author,rationale)
      VALUES ($1,'create_relationship',NULL,$2,'proposed',$3,$4)`,
-    [proposalId, { relationship }, actor, `Governed Braille Runtime module ${module.id}: ${module.compiled_instruction.originalEnglish}`]
+    [proposalId, { relationship, creationReceipt }, actor, `Governed Braille Runtime module ${module.id}: ${module.compiled_instruction.originalEnglish}`]
   );
   return { type: 'graph_relationship_proposal', status: 'proposed', graphProposalId: proposalId, relationshipId: edgeId };
 }

@@ -79,6 +79,25 @@ export async function createSchema() {
       );
       ALTER TABLE graph_history ADD COLUMN IF NOT EXISTS undone_at TIMESTAMP;
       CREATE INDEX IF NOT EXISTS idx_graph_history_entity ON graph_history(entity_type, entity_id, created_at DESC);
+
+      CREATE TABLE IF NOT EXISTS edge_creation_receipts (
+        receipt_id TEXT PRIMARY KEY,
+        proposal_id TEXT NOT NULL REFERENCES graph_proposals(id) ON DELETE RESTRICT,
+        edge_id TEXT,
+        decision TEXT NOT NULL CHECK (decision IN ('VERIFY','REJECT','UNRESOLVED')),
+        requested_action TEXT NOT NULL CHECK (requested_action IN ('COMMIT_EDGE','RECEIPT_ONLY')),
+        idempotency_key TEXT NOT NULL UNIQUE,
+        request_sha256 TEXT NOT NULL,
+        receipt_sha256 TEXT NOT NULL,
+        receipt JSONB NOT NULL,
+        outcome TEXT NOT NULL CHECK (outcome IN ('EDGE_AND_RECEIPT_COMMITTED','RECEIPT_ONLY_COMMITTED')),
+        created_by TEXT NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_edge_creation_receipts_proposal
+        ON edge_creation_receipts(proposal_id,created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_edge_creation_receipts_edge
+        ON edge_creation_receipts(edge_id) WHERE edge_id IS NOT NULL;
     `);
 
     // Braille Runtime modules are governed drafts. Activation may create a graph

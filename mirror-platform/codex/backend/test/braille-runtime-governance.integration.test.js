@@ -127,7 +127,10 @@ test('module lifecycle persists, reviews, activates once, and creates only a gra
     if (moduleId) await query('DELETE FROM braille_runtime_modules WHERE id=$1', [moduleId]);
     await query("DELETE FROM graph_history WHERE entity_id=$1", [`${source}->${target}:supports`]);
     await query('DELETE FROM edges WHERE id=$1', [`${source}->${target}:supports`]);
-    if (graphProposalId) await query('DELETE FROM graph_proposals WHERE id=$1', [graphProposalId]);
+    if (graphProposalId) {
+      await query('DELETE FROM edge_creation_receipts WHERE proposal_id=$1', [graphProposalId]);
+      await query('DELETE FROM graph_proposals WHERE id=$1', [graphProposalId]);
+    }
     await query('DELETE FROM nodes WHERE id=$1 OR id=$2', [source, target]);
     await query('DELETE FROM users WHERE id=$1 OR id=$2', [admin.id, author.id]);
   }
