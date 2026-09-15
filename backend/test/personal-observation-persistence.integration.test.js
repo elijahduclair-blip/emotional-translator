@@ -216,6 +216,68 @@ test('Attempt 73 builds typed source-bridge search packets without collapsing te
   assert.equal(seedOnly.body.search.seedAssertionCount, 1);
 });
 
+test('Attempt 74 traces existing personal paths inside-out, including backward traversal, without creating a direct edge', async () => {
+  const before = await persistedCounts();
+  const response = await request(`/api/v1/users/${ownerId}/graph/inside-out-paths`, ownerToken, {
+    method: 'POST',
+    body: {
+      assertions: [
+        { source: 'grass', relation: 'color', target: 'Green', exactStatement: 'grass is green.' },
+        { source: 'grass', relation: 'process', target: 'grows', exactStatement: 'grass grows.' },
+        { source: 'blood', relation: 'color', target: 'Red', exactStatement: 'red and blood match in color.' },
+        { source: 'Red', relation: 'personal association', target: 'pain', exactStatement: 'when i think of red i associate it with pain' },
+      ],
+    },
+  });
+  assert.equal(response.status, 200);
+  assert.equal(response.body.sourceLayer, 'user_graph_inside_out_path');
+  assert.equal(response.body.pathSet.assertionCount, 4);
+  assert.equal(response.body.pathSet.distinctAssertionCount, 4);
+  assert.equal(response.body.pathSet.networkCount, 2);
+  assert.equal(response.body.pathSet.pathCount, 2);
+  assert.equal(response.body.pathSet.seedAssertionCount, 0);
+
+  const grassPath = response.body.pathSet.paths.find(path => path.terms.includes('grass'));
+  assert.ok(grassPath);
+  assert.deepEqual(grassPath.terms, ['Green', 'grass', 'grows']);
+  assert.deepEqual(grassPath.steps.map(step => step.traversal), ['reverse', 'forward']);
+  assert.deepEqual(grassPath.steps.map(step => step.relation), ['color', 'process']);
+  assert.equal(grassPath.pathExpression, 'Green --reverse(color)--> grass --forward(process)--> grows');
+
+  const bloodPath = response.body.pathSet.paths.find(path => path.terms.includes('blood'));
+  assert.ok(bloodPath);
+  assert.deepEqual(bloodPath.terms, ['blood', 'Red', 'pain']);
+  assert.deepEqual(bloodPath.steps.map(step => step.traversal), ['forward', 'forward']);
+  assert.deepEqual(bloodPath.steps.map(step => step.relation), ['color', 'personal association']);
+  for (const path of response.body.pathSet.paths) {
+    assert.equal(path.relationship.type, 'existing_indirect_typed_path');
+    assert.equal(path.relationship.direct, false);
+    assert.equal(path.personalPathExists, true);
+    assert.equal(path.directRelationshipCreated, false);
+    assert.equal(path.status, 'EXISTING_PERSONAL_PATH');
+    assert.equal(path.exteriorComparison.direction, 'inside_out');
+    assert.equal(path.exteriorComparison.status, 'READY_FOR_EXTERIOR_COMPARISON');
+  }
+  assert.equal(response.body.pathSet.policy.personalAuthority, 'owner-supplied typed relations are accepted as existing personal facts');
+  assert.equal(response.body.pathSet.policy.reverseTraversalAllowed, true);
+  assert.equal(response.body.pathSet.policy.directEdgeInferenceAllowed, false);
+  assert.equal(response.body.pathSet.policy.synonymInferenceAllowed, false);
+  assert.equal(response.body.pathSet.policy.graphMutationAllowed, false);
+  assert.equal(response.body.boundary.existingPersonalPathRecognized, true);
+  assert.equal(response.body.boundary.directRelationshipCreated, false);
+  assert.equal(response.body.boundary.personalRelationshipMutationAllowed, false);
+  assert.equal(response.body.boundary.sharedGraphMutationAllowed, false);
+  assert.deepEqual(await persistedCounts(), before);
+
+  const seedOnly = await request(`/api/v1/users/${ownerId}/graph/inside-out-paths`, ownerToken, {
+    method: 'POST',
+    body: { assertions: [{ source: 'blood', relation: 'color', target: 'Red', exactStatement: 'red and blood match in color.' }] },
+  });
+  assert.equal(seedOnly.status, 200);
+  assert.equal(seedOnly.body.pathSet.pathCount, 0);
+  assert.equal(seedOnly.body.pathSet.seedAssertionCount, 1);
+});
+
 test('Attempt 68 serializes concurrent exact retries into one observation and one receipt', async () => {
   const body = observationBody('A68-CONCURRENT', 'caution', 'Yellow', 'Yellow is caution');
   const responses = await Promise.all([

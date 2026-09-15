@@ -3,7 +3,7 @@ import { pool, query } from '../db/pool.js';
 import crypto from 'crypto';
 import { requireAuth, requirePasswordCurrent, requireSelfOrAdmin } from '../middleware/auth.js';
 import { formatPersonalGraphRelationship, normalizePersonalGraphKey, persistPersonalGraphPlacement } from '../lib/personal-graph.js';
-import { buildPersonalPatternInquiries, buildSourceAnchoredRelationalSearch, comparePersonalMappingPatterns, formatPersonalMappingObservation, persistPersonalMappingObservation, summarizePersonalMappingObservations } from '../lib/personal-observations.js';
+import { buildInsideOutPersonalPaths, buildPersonalPatternInquiries, buildSourceAnchoredRelationalSearch, comparePersonalMappingPatterns, formatPersonalMappingObservation, persistPersonalMappingObservation, summarizePersonalMappingObservations } from '../lib/personal-observations.js';
 
 const router = express.Router();
 
@@ -265,6 +265,19 @@ router.post('/users/:id/graph/source-bridge-search', requireAuth, requirePasswor
   }
 });
 
+router.post('/users/:id/graph/inside-out-paths', requireAuth, requirePasswordCurrent, requireSelfOrAdmin, async (req, res, next) => {
+  try {
+    const pathSet = buildInsideOutPersonalPaths(req.body?.assertions);
+    res.json({
+      sourceLayer: 'user_graph_inside_out_path',
+      pathSet,
+      boundary: insideOutPathBoundary(pathSet),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 function graphTerms(value) {
   const words = String(value || '').normalize('NFC').match(/[\p{L}\p{N}]+(?:['\u2019_-][\p{L}\p{N}]+)*/gu) || [];
   const terms = new Set();
@@ -341,6 +354,25 @@ function sourceBridgeSearchBoundary(search) {
     synonymInferenceAllowed: false,
     automaticMeaningAssignmentAllowed: false,
     reason: 'ARI may combine an anchor with its supplied typed neighbors to form candidate search queries. A search combination is not a synonym claim, meaning assignment, or graph relationship.',
+  };
+}
+
+function insideOutPathBoundary(pathSet) {
+  return {
+    mode: 'existing_personal_path_then_exterior_comparison',
+    traversalOnly: true,
+    personalPathsTraced: pathSet.pathCount,
+    existingPersonalPathRecognized: true,
+    suppliedRelationTypesPreserved: true,
+    reverseTraversalAllowed: true,
+    directRelationshipCreated: false,
+    personalObservationMutationAllowed: false,
+    personalRelationshipMutationAllowed: false,
+    sharedGraphMutationAllowed: false,
+    colorAtlasMutationAllowed: false,
+    synonymInferenceAllowed: false,
+    automaticMeaningAssignmentAllowed: false,
+    reason: 'ARI starts with the owner-supplied personal relations, traverses their existing typed path in either direction, and only then carries the path outward for comparison. Exterior evidence does not create or erase the personal path.',
   };
 }
 

@@ -369,6 +369,87 @@ export function buildSourceAnchoredRelationalSearch(assertions) {
   };
 }
 
+export function buildInsideOutPersonalPaths(assertions) {
+  const sourceSearch = buildSourceAnchoredRelationalSearch(assertions);
+  const paths = [];
+
+  for (const network of sourceSearch.networks) {
+    for (const candidate of network.lateralSearches) {
+      const anchorKey = normalizePersonalGraphKey(candidate.anchor);
+      const leftKey = normalizePersonalGraphKey(candidate.left);
+      const rightKey = normalizePersonalGraphKey(candidate.right);
+      const leftEdges = network.assertions.filter(edge => edgeTouches(edge, leftKey, anchorKey));
+      const rightEdges = network.assertions.filter(edge => edgeTouches(edge, anchorKey, rightKey));
+
+      for (const leftEdge of leftEdges) {
+        for (const rightEdge of rightEdges) {
+          const steps = [
+            traversalStep(leftEdge, leftKey, anchorKey, candidate.left, candidate.anchor),
+            traversalStep(rightEdge, anchorKey, rightKey, candidate.anchor, candidate.right),
+          ];
+          const signature = {
+            networkId: network.networkId,
+            startKey: leftKey,
+            viaKey: anchorKey,
+            endKey: rightKey,
+            steps: steps.map(step => ({ relationKey: step.relationKey, traversal: step.traversal })),
+          };
+          const terms = [candidate.left, candidate.anchor, candidate.right];
+          paths.push({
+            personalPathId: `CBIPP-${sha256Json(signature).slice(0, 16).toUpperCase()}`,
+            networkId: network.networkId,
+            start: candidate.left,
+            via: candidate.anchor,
+            end: candidate.right,
+            terms,
+            pathExpression: steps.map((step, index) => `${index ? '' : `${step.from} `}--${step.traversal}(${step.relation})--> ${step.to}`).join(' '),
+            steps,
+            relationship: {
+              type: 'existing_indirect_typed_path',
+              via: candidate.anchor,
+              stepCount: steps.length,
+              direct: false,
+            },
+            personalPathExists: true,
+            directRelationshipCreated: false,
+            status: 'EXISTING_PERSONAL_PATH',
+            exteriorComparison: {
+              status: 'READY_FOR_EXTERIOR_COMPARISON',
+              direction: 'inside_out',
+              terms,
+              query: terms.join(' '),
+            },
+          });
+        }
+      }
+    }
+  }
+
+  paths.sort((a, b) => a.personalPathId.localeCompare(b.personalPathId));
+  return {
+    policy: {
+      inputUnit: 'owner-supplied typed relation assertion',
+      personalAuthority: 'owner-supplied typed relations are accepted as existing personal facts',
+      traversalRule: 'ARI may follow supplied edges forward or backward while preserving their original direction and relation label',
+      searchDirection: 'inside_out',
+      exteriorEvidenceRole: 'compare how far an existing personal path travels outside the profile; do not authorize the personal path',
+      relationLabelsPreserved: true,
+      reverseTraversalAllowed: true,
+      directEdgeInferenceAllowed: false,
+      synonymInferenceAllowed: false,
+      automaticMeaningAssignmentAllowed: false,
+      graphMutationAllowed: false,
+    },
+    assertionCount: sourceSearch.assertionCount,
+    distinctAssertionCount: sourceSearch.distinctAssertionCount,
+    networkCount: sourceSearch.networkCount,
+    pathCount: paths.length,
+    paths,
+    seedAssertionCount: sourceSearch.seedAssertionCount,
+    seedAssertions: sourceSearch.seedAssertions,
+  };
+}
+
 function requiredText(value, message, maxLength) {
   const text = String(value || '').normalize('NFC').trim();
   if (!text) throw httpError(400, message);
@@ -424,6 +505,24 @@ function connectedComponents(adjacency) {
 
 function undirectedPairKey(left, right) {
   return left < right ? `${left}\u0000${right}` : `${right}\u0000${left}`;
+}
+
+function edgeTouches(edge, leftKey, rightKey) {
+  return (edge.sourceKey === leftKey && edge.targetKey === rightKey)
+    || (edge.sourceKey === rightKey && edge.targetKey === leftKey);
+}
+
+function traversalStep(edge, fromKey, toKey, from, to) {
+  const traversal = edge.sourceKey === fromKey && edge.targetKey === toKey ? 'forward' : 'reverse';
+  return {
+    from,
+    to,
+    relation: edge.relation,
+    relationKey: edge.relationKey,
+    traversal,
+    suppliedAssertionId: edge.assertionId,
+    originalDirection: { source: edge.source, relation: edge.relation, target: edge.target },
+  };
 }
 
 function naturalList(values) {

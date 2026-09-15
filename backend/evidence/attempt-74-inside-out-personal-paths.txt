@@ -1,0 +1,10 @@
+Attempt 74: Existing personal paths travel inside-out before exterior comparison.
+Controlling Attempt 73 review SHA-256: 173f4c7e50f156d8b2bf05868452bc593945cde3abef9155ea31582b588344ee
+Owner correction: "ari does have to invent anything its already there the path is."
+Owner direction: "we are going backwards remember."
+Owner scope order: "its personal first then after its exterior. in then out."
+Grass path: Green --reverse(color)--> grass --forward(process)--> grows.
+Blood path: blood --forward(color)--> Red --forward(personal association)--> pain.
+The neighboring terms have an existing indirect typed path; their direct relationship is not invented.
+Exterior evidence may compare how far the personal path travels, but it does not authorize or erase the personal path.
+No observation, relationship, shared graph, Color Atlas, synonym, direct edge, or assigned meaning mutation is authorized.
