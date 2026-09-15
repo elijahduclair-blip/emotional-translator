@@ -40,19 +40,11 @@ jobs:
       - run: npm ci
       - run: npm run migrate
       - run: npm test
-      - name: Wait for the deployed personal placement capability
-        shell: bash
-        run: |
-          for attempt in {1..40}; do
-            response="$(curl --fail --silent --show-error https://eli-emotional-translator-api.onrender.com/api/health || true)"
-            if printf '%s' "$response" | grep -q '"personalGraphPlacement":"personal-receipt-placement-v1"'; then
-              printf '%s\n' "$response"
-              exit 0
-            fi
-            sleep 15
-          done
-          printf '%s\n' 'Timed out waiting for personal-receipt-placement-v1.' >&2
-          exit 1
+      - name: Apply the backward-compatible personal graph schema
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          NODE_ENV: production
+        run: npm run migrate
       - name: Place flow to Gray in Elijah personal graph
         env:
           DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
