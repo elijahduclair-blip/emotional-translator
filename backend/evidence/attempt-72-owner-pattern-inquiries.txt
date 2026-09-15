@@ -1,0 +1,10 @@
+Attempt 72 applies the consumed Attempt 71 review by opening owner interpretation questions for same-color stable personal patterns.
+Controlling review SHA-256: cbe894b38c65f0272dc5b0d2cd63776611ce6755a1ccdd6f95588e01096c9747.
+Review finding: momentum to Red, stop to Red, slow to Yellow, and caution to Yellow independently recurred.
+Review tension: momentum and stop appear opposite at first glance, and more data is useful.
+Method: group stable exact word-color pairs by color without assigning a common meaning.
+ARI question: ask what relationship, if any, connects the stable words for that color.
+ARI counterexample prompt: ask for a same-color word that would not fit the proposed relationship.
+Expected inquiries: Red for momentum and stop; Yellow for caution and slow.
+Expected exclusion: Green remains below the two-stable-pair inquiry gate.
+Boundary: inquiry only; do not store an answer, assign higher-order meaning, or mutate personal observations, relationships, the shared graph, the Color Atlas, or any shade.

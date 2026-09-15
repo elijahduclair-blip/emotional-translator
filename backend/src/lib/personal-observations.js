@@ -197,6 +197,57 @@ export function comparePersonalMappingPatterns(rows, { minimumObservations = 2, 
   };
 }
 
+export function buildPersonalPatternInquiries(rows, { minimumStablePatternsPerColor = 2 } = {}) {
+  const colorThreshold = boundedThreshold(minimumStablePatternsPerColor, 'minimumStablePatternsPerColor');
+  const comparison = comparePersonalMappingPatterns(rows);
+  const groups = new Map();
+  for (const pair of comparison.patterns) {
+    const colorKey = normalizePersonalGraphKey(pair.color);
+    const current = groups.get(colorKey) || { color: pair.color, colorKey, pairs: [] };
+    current.pairs.push(pair);
+    groups.set(colorKey, current);
+  }
+
+  const inquiries = [...groups.values()]
+    .filter(group => group.pairs.length >= colorThreshold)
+    .map(group => {
+      const pairs = [...group.pairs].sort((a, b) => a.subject.localeCompare(b.subject));
+      const subjects = pairs.map(pair => pair.subject);
+      const subjectList = naturalList(subjects);
+      return {
+        inquiryId: `CBPI-${sha256Json({ colorKey: group.colorKey, subjects: subjects.map(normalizePersonalGraphKey) }).slice(0, 16).toUpperCase()}`,
+        color: group.color,
+        subjects,
+        stablePairCount: pairs.length,
+        evidence: pairs.map(pair => ({
+          subject: pair.subject,
+          color: pair.color,
+          observationCount: pair.observationCount,
+          distinctReceiptCount: pair.distinctReceiptCount,
+          distinctEvidenceCount: pair.distinctEvidenceCount,
+          status: pair.status,
+        })),
+        status: 'OWNER_INTERPRETATION_REQUESTED',
+        question: `${group.color} has stable personal associations with ${subjectList}. What relationship, if any, connects these words for you?`,
+        counterexamplePrompt: `What ${group.color}-associated word would not fit that relationship?`,
+        proposedMeaning: null,
+      };
+    })
+    .sort((a, b) => a.color.localeCompare(b.color));
+
+  return {
+    policy: {
+      minimumStablePatternsPerColor: colorThreshold,
+      inputUnit: 'stable exact normalized subject-color pair',
+      outputMode: 'owner relation and counterexample inquiry',
+      automaticMeaningAssignmentAllowed: false,
+    },
+    stablePersonalPatternCount: comparison.stablePersonalPatternCount,
+    inquiryCount: inquiries.length,
+    inquiries,
+  };
+}
+
 function requiredText(value, message, maxLength) {
   const text = String(value || '').normalize('NFC').trim();
   if (!text) throw httpError(400, message);
@@ -220,6 +271,12 @@ function boundedThreshold(value, field) {
   const number = Number(value);
   if (!Number.isInteger(number) || number < 2 || number > 100) throw httpError(400, `${field} must be an integer from 2 through 100.`);
   return number;
+}
+
+function naturalList(values) {
+  if (values.length < 2) return values[0] || '';
+  if (values.length === 2) return `${values[0]} and ${values[1]}`;
+  return `${values.slice(0, -1).join(', ')}, and ${values.at(-1)}`;
 }
 
 function stable(value) {

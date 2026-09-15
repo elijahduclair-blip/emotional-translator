@@ -108,6 +108,33 @@ test('Attempt 68 stores owner-confirmed mapping observations with sealed receipt
   assert.equal(stablePattern.body.comparison.patterns[0].distinctEvidenceCount, 2);
   assert.equal(stablePattern.body.boundary.personalRelationshipMutationAllowed, false);
   assert.equal(stablePattern.body.boundary.automaticGeneralizationAllowed, false);
+
+  for (const [idempotencyKey, exactStatement, occurrenceId] of [
+    ['A72-STOP-1', 'Red is stop here', 'a72-stop-1'],
+    ['A72-STOP-2', 'Stopping also feels Red', 'a72-stop-2'],
+  ]) {
+    const response = await request(`/api/v1/users/${ownerId}/graph/observations`, ownerToken, {
+      method: 'POST',
+      body: {
+        ...observationBody(idempotencyKey, 'stop', 'Red', exactStatement),
+        sourceName: `Attempt 72 ${occurrenceId}`,
+        evidence: { type: 'owner_direct_statement', occurrenceId },
+      },
+    });
+    assert.equal(response.status, 201);
+  }
+
+  const inquiries = await request(`/api/v1/users/${ownerId}/graph/pattern-inquiries`, ownerToken);
+  assert.equal(inquiries.status, 200);
+  assert.equal(inquiries.body.sourceLayer, 'user_graph_pattern_inquiry');
+  assert.equal(inquiries.body.inquirySet.inquiryCount, 1);
+  assert.equal(inquiries.body.inquirySet.inquiries[0].color, 'Red');
+  assert.deepEqual(inquiries.body.inquirySet.inquiries[0].subjects, ['momentum', 'stop']);
+  assert.equal(inquiries.body.inquirySet.inquiries[0].question, 'Red has stable personal associations with momentum and stop. What relationship, if any, connects these words for you?');
+  assert.equal(inquiries.body.inquirySet.inquiries[0].counterexamplePrompt, 'What Red-associated word would not fit that relationship?');
+  assert.equal(inquiries.body.inquirySet.inquiries[0].proposedMeaning, null);
+  assert.equal(inquiries.body.boundary.inquiryOnly, true);
+  assert.equal(inquiries.body.boundary.automaticMeaningAssignmentAllowed, false);
 });
 
 test('Attempt 68 rolls back the observation when receipt storage fails', async () => {

@@ -3,7 +3,7 @@ import { pool, query } from '../db/pool.js';
 import crypto from 'crypto';
 import { requireAuth, requirePasswordCurrent, requireSelfOrAdmin } from '../middleware/auth.js';
 import { formatPersonalGraphRelationship, normalizePersonalGraphKey, persistPersonalGraphPlacement } from '../lib/personal-graph.js';
-import { comparePersonalMappingPatterns, formatPersonalMappingObservation, persistPersonalMappingObservation, summarizePersonalMappingObservations } from '../lib/personal-observations.js';
+import { buildPersonalPatternInquiries, comparePersonalMappingPatterns, formatPersonalMappingObservation, persistPersonalMappingObservation, summarizePersonalMappingObservations } from '../lib/personal-observations.js';
 
 const router = express.Router();
 
@@ -230,6 +230,28 @@ router.get('/users/:id/graph/patterns', requireAuth, requirePasswordCurrent, req
   }
 });
 
+router.get('/users/:id/graph/pattern-inquiries', requireAuth, requirePasswordCurrent, requireSelfOrAdmin, async (req, res, next) => {
+  try {
+    const result = await query(
+      `SELECT observation.*,receipt.receipt_id,receipt.receipt_sha256
+       FROM user_graph_observations AS observation
+       INNER JOIN user_graph_observation_receipts AS receipt ON receipt.observation_id=observation.id
+       WHERE observation.user_id=$1
+       ORDER BY observation.observed_at,observation.created_at,observation.id
+       LIMIT 2000`,
+      [req.params.id]
+    );
+    const inquirySet = buildPersonalPatternInquiries(result.rows);
+    res.json({
+      sourceLayer: 'user_graph_pattern_inquiry',
+      inquirySet,
+      boundary: personalPatternInquiryBoundary(inquirySet),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
 function graphTerms(value) {
   const words = String(value || '').normalize('NFC').match(/[\p{L}\p{N}]+(?:['\u2019_-][\p{L}\p{N}]+)*/gu) || [];
   const terms = new Set();
@@ -276,6 +298,20 @@ function personalPatternBoundary(comparison) {
     colorAtlasMutationAllowed: false,
     automaticGeneralizationAllowed: false,
     reason: 'Only repeated exact subject-color pairs with distinct receipts and distinct evidence can qualify as stable personal patterns. Color-family recurrence across different subjects is not shared meaning.',
+  };
+}
+
+function personalPatternInquiryBoundary(inquirySet) {
+  return {
+    mode: 'owner_interpretation_before_higher_order_meaning',
+    inquiryOnly: true,
+    inquiriesOpened: inquirySet.inquiryCount,
+    personalObservationMutationAllowed: false,
+    personalRelationshipMutationAllowed: false,
+    sharedGraphMutationAllowed: false,
+    colorAtlasMutationAllowed: false,
+    automaticMeaningAssignmentAllowed: false,
+    reason: 'ARI may surface stable same-color associations and ask the owner for a relationship and counterexample. ARI does not supply the higher-order meaning or treat the inquiry as evidence.',
   };
 }
 
