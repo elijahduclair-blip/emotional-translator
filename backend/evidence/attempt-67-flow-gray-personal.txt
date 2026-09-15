@@ -1,0 +1,8 @@
+Attempt 67 resolves the placement-scope gap preserved by Attempt 66.
+Elijah: "I don't think so. I think making flow grey is the first step."
+Elijah: "Give these to Ari for my profile. Then tell them to mutate my personal graph after placing the words with their color associations."
+Retained evidence receipt: CBER66-FLOW-GRAY (UNRESOLVED, RECEIPT_ONLY_COMMITTED).
+Source endpoint: condition-word-flow, label flow.
+Target endpoint: family-gray, label Gray.
+The retained receipt marks the user_graph lane supported and the shared_graph lane unresolved.
+Elijah selected the personal lane; flow to Gray belongs in Elijah's personal graph, not the shared graph.

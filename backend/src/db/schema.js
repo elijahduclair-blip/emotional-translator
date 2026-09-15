@@ -160,6 +160,83 @@ export async function createSchema() {
       CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email ON users(email) WHERE email IS NOT NULL;
     `);
 
+    // Receipt-backed personal graph overlays. These records remain user-scoped and never enter shared edges.
+    await query(`
+      CREATE TABLE IF NOT EXISTS user_graph_relationships (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        source_label TEXT NOT NULL,
+        source_key TEXT NOT NULL,
+        target_label TEXT NOT NULL,
+        target_key TEXT NOT NULL,
+        relationship_type TEXT NOT NULL,
+        confidence TEXT NOT NULL CHECK (confidence IN ('high','medium','low')),
+        evidence TEXT NOT NULL,
+        counterexample TEXT NOT NULL,
+        source_feedback_id TEXT,
+        learning_candidate_id TEXT,
+        mutation_source TEXT NOT NULL DEFAULT 'user_directed',
+        approved_by_user TEXT REFERENCES users(id),
+        review_note TEXT,
+        source_node_id TEXT REFERENCES nodes(id) ON DELETE RESTRICT,
+        target_node_id TEXT REFERENCES nodes(id) ON DELETE RESTRICT,
+        source_receipt_id TEXT REFERENCES edge_creation_receipts(receipt_id) ON DELETE RESTRICT,
+        placement_idempotency_key TEXT,
+        placement_request_sha256 TEXT,
+        placed_by_user TEXT REFERENCES users(id),
+        record_status TEXT NOT NULL DEFAULT 'active' CHECK (record_status IN ('active','retired')),
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      ALTER TABLE user_graph_relationships ADD COLUMN IF NOT EXISTS source_feedback_id TEXT;
+      ALTER TABLE user_graph_relationships ADD COLUMN IF NOT EXISTS learning_candidate_id TEXT;
+      ALTER TABLE user_graph_relationships ALTER COLUMN source_feedback_id DROP NOT NULL;
+      ALTER TABLE user_graph_relationships ALTER COLUMN learning_candidate_id DROP NOT NULL;
+      ALTER TABLE user_graph_relationships ADD COLUMN IF NOT EXISTS mutation_source TEXT NOT NULL DEFAULT 'user_directed';
+      ALTER TABLE user_graph_relationships ADD COLUMN IF NOT EXISTS approved_by_user TEXT REFERENCES users(id);
+      ALTER TABLE user_graph_relationships ADD COLUMN IF NOT EXISTS review_note TEXT;
+      ALTER TABLE user_graph_relationships ADD COLUMN IF NOT EXISTS source_node_id TEXT REFERENCES nodes(id) ON DELETE RESTRICT;
+      ALTER TABLE user_graph_relationships ADD COLUMN IF NOT EXISTS target_node_id TEXT REFERENCES nodes(id) ON DELETE RESTRICT;
+      ALTER TABLE user_graph_relationships ADD COLUMN IF NOT EXISTS source_receipt_id TEXT REFERENCES edge_creation_receipts(receipt_id) ON DELETE RESTRICT;
+      ALTER TABLE user_graph_relationships ADD COLUMN IF NOT EXISTS placement_idempotency_key TEXT;
+      ALTER TABLE user_graph_relationships ADD COLUMN IF NOT EXISTS placement_request_sha256 TEXT;
+      ALTER TABLE user_graph_relationships ADD COLUMN IF NOT EXISTS placed_by_user TEXT REFERENCES users(id);
+      DO $$
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM pg_constraint WHERE conname = 'user_graph_relationships_provenance_check'
+        ) THEN
+          ALTER TABLE user_graph_relationships
+            ADD CONSTRAINT user_graph_relationships_provenance_check CHECK (
+              (mutation_source = 'reviewed_feedback' AND source_feedback_id IS NOT NULL AND learning_candidate_id IS NOT NULL)
+              OR
+              (mutation_source = 'user_directed' AND approved_by_user IS NOT NULL AND review_note IS NOT NULL)
+            );
+        END IF;
+      END $$;
+      CREATE INDEX IF NOT EXISTS idx_user_graph_relationships_user
+        ON user_graph_relationships(user_id,record_status,created_at DESC);
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_user_graph_relationships_placement_idempotency
+        ON user_graph_relationships(placement_idempotency_key) WHERE placement_idempotency_key IS NOT NULL;
+
+      CREATE TABLE IF NOT EXISTS user_graph_history (
+        id TEXT PRIMARY KEY,
+        relationship_id TEXT NOT NULL REFERENCES user_graph_relationships(id) ON DELETE RESTRICT,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        action TEXT NOT NULL CHECK (action IN ('create','update','retire')),
+        before_data JSONB,
+        after_data JSONB NOT NULL,
+        source_receipt_id TEXT NOT NULL REFERENCES edge_creation_receipts(receipt_id) ON DELETE RESTRICT,
+        actor_user_id TEXT NOT NULL REFERENCES users(id),
+        reason TEXT NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_user_graph_history_relationship
+        ON user_graph_history(relationship_id,created_at DESC);
+      CREATE INDEX IF NOT EXISTS idx_user_graph_history_user
+        ON user_graph_history(user_id,created_at DESC);
+    `);
+
     // User Profiles
     await query(`
       CREATE TABLE IF NOT EXISTS user_profiles (
