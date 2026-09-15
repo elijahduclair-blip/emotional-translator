@@ -65,7 +65,8 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     capabilities: {
       edgeCreationGate: 'persistent-receipt-v2',
-      personalGraphPlacement: 'personal-receipt-placement-v1'
+      personalGraphPlacement: 'personal-receipt-placement-v1',
+      personalMappingObservations: 'personal-mapping-observation-v1'
     }
   });
 });

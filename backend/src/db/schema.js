@@ -235,6 +235,41 @@ export async function createSchema() {
         ON user_graph_history(relationship_id,created_at DESC);
       CREATE INDEX IF NOT EXISTS idx_user_graph_history_user
         ON user_graph_history(user_id,created_at DESC);
+
+      CREATE TABLE IF NOT EXISTS user_graph_observations (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        subject_label TEXT NOT NULL,
+        subject_key TEXT NOT NULL,
+        color_label TEXT NOT NULL,
+        color_key TEXT NOT NULL,
+        relationship_type TEXT NOT NULL DEFAULT 'associates_color_climate',
+        exact_statement TEXT NOT NULL,
+        source_name TEXT NOT NULL,
+        evidence JSONB NOT NULL DEFAULT '{}'::jsonb,
+        context JSONB NOT NULL DEFAULT '{}'::jsonb,
+        scope TEXT NOT NULL DEFAULT 'personal' CHECK (scope = 'personal'),
+        idempotency_key TEXT NOT NULL,
+        request_sha256 TEXT NOT NULL,
+        observed_by_user TEXT NOT NULL REFERENCES users(id),
+        observed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_user_graph_observations_idempotency
+        ON user_graph_observations(idempotency_key);
+      CREATE INDEX IF NOT EXISTS idx_user_graph_observations_user_pair
+        ON user_graph_observations(user_id,subject_key,color_key,observed_at DESC);
+
+      CREATE TABLE IF NOT EXISTS user_graph_observation_receipts (
+        receipt_id TEXT PRIMARY KEY,
+        observation_id TEXT NOT NULL UNIQUE REFERENCES user_graph_observations(id) ON DELETE RESTRICT,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        receipt JSONB NOT NULL,
+        receipt_sha256 TEXT NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+      CREATE INDEX IF NOT EXISTS idx_user_graph_observation_receipts_user
+        ON user_graph_observation_receipts(user_id,created_at DESC);
     `);
 
     // User Profiles

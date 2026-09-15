@@ -3,6 +3,7 @@ import { pool, query } from '../db/pool.js';
 import crypto from 'crypto';
 import { requireAuth, requirePasswordCurrent, requireSelfOrAdmin } from '../middleware/auth.js';
 import { formatPersonalGraphRelationship, normalizePersonalGraphKey, persistPersonalGraphPlacement } from '../lib/personal-graph.js';
+import { formatPersonalMappingObservation, persistPersonalMappingObservation, summarizePersonalMappingObservations } from '../lib/personal-observations.js';
 
 const router = express.Router();
 
@@ -141,6 +142,72 @@ router.post('/users/:id/graph/relationships/from-receipt', requireAuth, requireP
   }
 });
 
+router.get('/users/:id/graph/observations', requireAuth, requirePasswordCurrent, requireSelfOrAdmin, async (req, res, next) => {
+  try {
+    const values = [req.params.id];
+    const clauses = ['observation.user_id=$1'];
+    for (const [field, column] of [['subject', 'subject_key'], ['color', 'color_key']]) {
+      if (req.query?.[field]) {
+        values.push(normalizePersonalGraphKey(req.query[field]));
+        clauses.push(`observation.${column}=$${values.length}`);
+      }
+    }
+    const result = await query(
+      `SELECT observation.*,receipt.receipt_id,receipt.receipt_sha256
+       FROM user_graph_observations AS observation
+       INNER JOIN user_graph_observation_receipts AS receipt ON receipt.observation_id=observation.id
+       WHERE ${clauses.join(' AND ')}
+       ORDER BY observation.observed_at,observation.created_at,observation.id
+       LIMIT 500`,
+      values
+    );
+    res.json({
+      sourceLayer: 'user_graph_observation',
+      observations: result.rows.map(formatPersonalMappingObservation),
+      summary: summarizePersonalMappingObservations(result.rows),
+      boundary: personalObservationBoundary('These are owner-scoped observations. Recurrence is counted, but no observation automatically changes a relationship, shared graph, or color family.'),
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/users/:id/graph/observations', requireAuth, requirePasswordCurrent, requireSelfOrAdmin, async (req, res, next) => {
+  let client;
+  try {
+    if (req.body?.confirmed !== true) throw httpError(400, 'confirmed must be true for a personal mapping observation.');
+    client = await pool.connect();
+    await client.query('BEGIN');
+    const result = await persistPersonalMappingObservation(client, {
+      userId: req.params.id,
+      observedByUser: req.user.sub,
+      subject: req.body?.subject,
+      color: req.body?.color,
+      relationshipType: req.body?.relationshipType,
+      exactStatement: req.body?.exactStatement,
+      sourceName: req.body?.sourceName,
+      evidence: req.body?.evidence,
+      context: req.body?.context,
+      observedAt: req.body?.observedAt,
+      idempotencyKey: req.body?.idempotencyKey,
+    });
+    await client.query('COMMIT');
+    res.status(result.idempotent ? 200 : 201).json({
+      sourceLayer: 'user_graph_observation',
+      disposition: result.disposition,
+      idempotent: result.idempotent,
+      observation: formatPersonalMappingObservation(result.observation),
+      receipt: { receiptId: result.receipt.receiptId, status: result.receipt.decision.status, receiptSha256: result.receipt.integrity.receiptSha256 },
+      boundary: personalObservationBoundary('The profile owner confirmed this statement as a personal mapping observation. ARI may count later recurrence without treating this observation as universal meaning.', { observed: !result.idempotent, confirmed: true }),
+    });
+  } catch (error) {
+    if (client) await client.query('ROLLBACK');
+    next(error);
+  } finally {
+    client?.release();
+  }
+});
+
 function graphTerms(value) {
   const words = String(value || '').normalize('NFC').match(/[\p{L}\p{N}]+(?:['\u2019_-][\p{L}\p{N}]+)*/gu) || [];
   const terms = new Set();
@@ -157,6 +224,19 @@ function personalGraphBoundary(reason, { mutated = false, confirmed = false } = 
     mode: 'receipt_backed_personal_graph',
     personalGraphMutated: mutated,
     profileOwnerConfirmed: confirmed,
+    sharedGraphMutationAllowed: false,
+    colorAtlasMutationAllowed: false,
+    automaticLearningAllowed: false,
+    reason,
+  };
+}
+
+function personalObservationBoundary(reason, { observed = false, confirmed = false } = {}) {
+  return {
+    mode: 'receipt_backed_personal_observation',
+    personalObservationStored: observed,
+    profileOwnerConfirmed: confirmed,
+    relationshipMutationAllowed: false,
     sharedGraphMutationAllowed: false,
     colorAtlasMutationAllowed: false,
     automaticLearningAllowed: false,

@@ -1,0 +1,10 @@
+Attempt 68 applies the consumed Attempt 67 review by collecting additional personal mappings as observations.
+Controlling review SHA-256: 7b8bd64ebf9d58daea78525d82d922535c551d84ad076f0b66352ceff8ec87a4.
+Elijah: "Red is momentum"
+Elijah: "Red is also stop and yellow is slow and caution"
+Elijah: "Give these to Ari for my profile. Then tell them to mutate my personal graph after placing the words with their color associations."
+Personal mapping: momentum to Red.
+Personal mapping: stop to Red.
+Personal mapping: slow to Yellow.
+Personal mapping: caution to Yellow.
+Boundary: each item is a personal observation with provenance; recurrence is measured, not assumed, and no shared graph or Color Atlas mutation is authorized.
