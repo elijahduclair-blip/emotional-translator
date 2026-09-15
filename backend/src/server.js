@@ -60,7 +60,11 @@ app.get('/api', (req, res) => {
 });
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    capabilities: { edgeCreationGate: 'persistent-receipt-v2' }
+  });
 });
 
 // Routes

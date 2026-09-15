@@ -15,6 +15,7 @@
                     "dev":  "node --watch src/server.js",
                     "start":  "node src/server.js",
                     "deploy:start":  "npm run migrate && npm run seed && npm start",
+                    "smoke:edge-gate:production":  "node scripts/verify-production-edge-creation-gate.js",
                     "backup":  "node src/db/backup.js backup",
                     "backup:list":  "node src/db/backup.js list",
                     "backup:restore":  "node src/db/backup.js restore"

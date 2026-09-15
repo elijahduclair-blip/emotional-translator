@@ -1,0 +1,52 @@
+name: Production Edge Gate Smoke
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - name: Wait for the persistent receipt release
+        shell: bash
+        run: |
+          for attempt in $(seq 1 60); do
+            response="$(curl --fail --silent --show-error https://eli-emotional-translator-api.onrender.com/api/health || true)"
+            if printf '%s' "$response" | grep -q '"edgeCreationGate":"persistent-receipt-v2"'; then
+              printf '%s\n' "$response"
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "The deployed health endpoint did not expose persistent-receipt-v2." >&2
+          exit 1
+      - name: Run the bounded production persistence transaction
+        env:
+          DATABASE_URL: ${{ secrets.PRODUCTION_DATABASE_URL }}
+          NODE_ENV: production
+          ALLOW_PRODUCTION_EDGE_GATE_SMOKE: 1
+          EDGE_GATE_SMOKE_REPORT: attempt-65-production-edge-gate-smoke.json
+        run: AUTH_SECRET="$(openssl rand -hex 32)" npm run smoke:edge-gate:production
+      - name: Publish the evidence receipt
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: attempt-65-production-edge-gate-smoke
+          path: backend/attempt-65-production-edge-gate-smoke.json
+          if-no-files-found: warn
+
+
